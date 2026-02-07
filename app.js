@@ -9,7 +9,9 @@ const session = require('express-session');
 const helmet = require('helmet');
 const path = require('path');
 const { Pool } = require('pg');
+const { loadPermissions, getSidebarModules } = require('./middleware/permissions');
 const { SESClient, SendEmailCommand, SendBulkTemplatedEmailCommand } = require('@aws-sdk/client-ses');
+const adminRoutes = require('./routes/admin');
 const danimalApi = require('./routes/danimal-api');
 const huddleApi = require('./routes/huddle-api');
 const huddlePortalApi = require('./routes/huddle-portal-api');
@@ -261,6 +263,18 @@ app.use(session({
     }
 }));
 
+// Load user permissions
+app.use(loadPermissions(pool));
+
+// Make permissions available to all views
+app.use((req, res, next) => {
+    res.locals.permissions = req.permissions || null;
+    res.locals.sidebarModules = req.permissions ? getSidebarModules(req.permissions) : [];
+    res.locals.hasModuleAccess = req.hasModuleAccess || (() => false);
+    next();
+    });
+
+
 // Make session data available to views
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
@@ -269,6 +283,7 @@ app.use((req, res, next) => {
 });
 
 // API Routes (must be after session middleware)
+app.use('/admin', adminRoutes(pool));
 app.use('/api/danimal', danimalApi);
 app.use('/api/intel', intelApi(pool));
 
@@ -277,7 +292,7 @@ app.use('/api/intel', intelApi(pool));
 // ============================================
 async function checkLicense(req, res, next) {
     // Skip license check for public routes
-    const publicRoutes = ['/auth/login', '/auth/logout', '/lockout', '/health', '/api/leads/capture'];
+    const publicRoutes = ['/auth/login', '/auth/logout', '/auth/under-review', '/lockout', '/health', '/api/leads/capture'];
     if (publicRoutes.some(route => req.path.startsWith(route))) {
         return next();
     }
@@ -406,7 +421,7 @@ app.post('/auth/login', async (req, res) => {
             };
         }
         
-        // Check license status
+       // Check license status
         if (org.license_status === 'suspended') {
             return res.redirect('/lockout?reason=suspended');
         }
@@ -415,12 +430,31 @@ app.post('/auth/login', async (req, res) => {
             return res.redirect('/lockout?reason=terminated');
         }
         
+        // Check user status
+        if (user.status === 'terminated') {
+            return res.render('login', { error: 'Your account has been terminated. Contact your administrator.' });
+        }
+        if (user.status === 'under_review') {
+            // Create limited session for under_review users
+            req.session.user = {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role: user.role,
+                status: user.status,
+                status_changed_at: user.status_changed_at
+            };
+            req.session.org = org;
+            return res.redirect('/auth/under-review');
+        }
+        
         // Create session
         req.session.user = {
             id: user.id,
             email: user.email,
             name: user.name,
-            role: user.role
+            role: user.role,
+            status: user.status || 'active'
         };
         req.session.org = org;
         
@@ -443,6 +477,44 @@ app.get('/auth/logout', (req, res) => {
 // Lockout page
 app.get('/lockout', (req, res) => {
     res.render('lockout', { reason: req.query.reason || 'suspended' });
+});
+
+// Under Review page (frozen accounts)
+app.get('/auth/under-review', (req, res) => {
+    // If user is not frozen, redirect to dashboard
+    if (req.session.user && req.session.user.status !== 'under_review') {
+        return res.redirect('/dashboard');
+    }
+    res.render('auth/under-review', {
+        userEmail: req.session.user?.email || '',
+        reviewDate: req.session.user?.status_changed_at ? new Date(req.session.user.status_changed_at).toLocaleString() : 'Recently'
+    });
+});
+
+// Clarification request submission
+app.post('/auth/clarification-request', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ success: false, error: 'Not authenticated' });
+    }
+    
+    try {
+        const { message } = req.body;
+        await pool.query(`
+            INSERT INTO user_freeze_requests (user_id, message)
+            VALUES ($1, $2)
+        `, [req.session.user.id, message]);
+        
+        // Audit log
+        await pool.query(`
+            INSERT INTO audit_log (tenant_id, user_id, action, entity_type, entity_id, new_value)
+            VALUES ($1, $2, 'user.clarification_request', 'user', $2, $3)
+        `, [req.session.org?.id || 1, req.session.user.id, JSON.stringify({ message })]);
+        
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Clarification request error:', error);
+        res.status(500).json({ success: false, error: 'Failed to submit request' });
+    }
 });
 
 // Dashboard (AXIS Home)

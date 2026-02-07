@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Zenith OS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1724; color: #e2e8f0; min-height: 100vh; display: flex; }
+
+        .sidebar { width: 240px; background: #1a2332; display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.06); position: fixed; top: 0; bottom: 0; left: 0; z-index: 100; }
+        .sidebar-header { padding: 20px 16px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .sidebar-header h2 { font-size: 1.1rem; font-weight: 700; }
+        .sidebar-header h2 span:first-child { color: #10b981; }
+        .sidebar-header h2 span:last-child { color: #e2e8f0; }
+        .sidebar-header p { color: #64748b; font-size: 0.75rem; margin-top: 2px; }
+        .nav-section { padding: 12px 0; }
+        .nav-section-label { color: #475569; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.2px; padding: 0 16px 8px; font-weight: 600; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; color: #94a3b8; text-decoration: none; font-size: 0.85rem; transition: all 0.15s; border-left: 3px solid transparent; }
+        .nav-item:hover { background: rgba(255,255,255,0.04); color: #e2e8f0; }
+        .nav-item.active { background: rgba(16, 185, 129, 0.08); color: #10b981; border-left-color: #10b981; }
+        .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+        .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid rgba(255,255,255,0.06); }
+        .sidebar-footer .user-info { display: flex; align-items: center; gap: 10px; }
+        .sidebar-footer .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #10b981; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; color: #fff; }
+        .sidebar-footer .user-name { font-size: 0.8rem; color: #e2e8f0; }
+        .sidebar-footer .user-role { font-size: 0.65rem; color: #64748b; }
+        .sidebar-footer a { color: #64748b; font-size: 0.75rem; text-decoration: none; display: block; margin-top: 8px; }
+        .sidebar-footer a:hover { color: #ef4444; }
+
+        .main-content { flex: 1; margin-left: 240px; min-height: 100vh; }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 16px 32px; border-bottom: 1px solid rgba(255,255,255,0.06); background: #1a2332; }
+        .top-bar h1 { font-size: 1.35rem; font-weight: 700; }
+        .top-bar h1 .accent { color: #f59e0b; }
+
+        .admin-tabs { display: flex; gap: 4px; padding: 12px 32px 0; background: #1a2332; }
+        .admin-tab { padding: 10px 20px; border-radius: 8px 8px 0 0; font-size: 0.85rem; font-weight: 500; color: #64748b; text-decoration: none; display: flex; align-items: center; gap: 8px; transition: all 0.15s; border: 1px solid transparent; border-bottom: none; }
+        .admin-tab:hover { color: #e2e8f0; background: rgba(255,255,255,0.03); }
+        .admin-tab.active { color: #f59e0b; background: #0f1724; border-color: rgba(255,255,255,0.06); }
+
+        .content { padding: 24px 32px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: #1a2332; border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.06); }
+        .stat-card .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 12px; }
+        .stat-card .stat-icon.green { background: rgba(16,185,129,0.12); color: #10b981; }
+        .stat-card .stat-icon.yellow { background: rgba(245,158,11,0.12); color: #f59e0b; }
+        .stat-card .stat-icon.orange { background: rgba(249,115,22,0.12); color: #f97316; }
+        .stat-card .stat-icon.red { background: rgba(239,68,68,0.12); color: #ef4444; }
+        .stat-card .stat-value { font-size: 2rem; font-weight: 700; color: #e2e8f0; }
+        .stat-card .stat-label { font-size: 0.8rem; color: #64748b; margin-top: 4px; }
+
+        .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+
+        .card { background: #1a2332; border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.06); }
+        .card-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .card-title i { color: #64748b; }
+
+        .audit-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .audit-item:last-child { border-bottom: none; }
+        .audit-time { font-size: 0.75rem; color: #64748b; min-width: 70px; }
+        .audit-text { font-size: 0.85rem; color: #94a3b8; }
+        .audit-user { color: #10b981; font-weight: 500; }
+        .audit-action { color: #f59e0b; }
+
+        .role-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .role-item:last-child { border-bottom: none; }
+        .role-name { font-size: 0.9rem; color: #e2e8f0; }
+        .role-count { font-size: 0.85rem; color: #64748b; background: rgba(255,255,255,0.05); padding: 2px 10px; border-radius: 10px; }
+
+        .btn { padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; border: none; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; }
+        .btn-primary { background: #f59e0b; color: #000; }
+        .btn-primary:hover { background: #d97706; }
+
+        .empty-state { text-align: center; padding: 30px; color: #64748b; }
+        .empty-state i { font-size: 2rem; margin-bottom: 10px; opacity: 0.5; }
+
+        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .grid-2 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <%- include('../partials/sidebar') %>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <h1><span class="accent">⚙️ Admin</span> Dashboard</h1>
+            <a href="/admin/users" class="btn btn-primary"><i class="bi bi-people"></i> Manage Users</a>
+        </div>
+
+        <div class="admin-tabs">
+            <a href="/admin" class="admin-tab active"><i class="bi bi-speedometer2"></i> Overview</a>
+            <a href="/admin/users" class="admin-tab"><i class="bi bi-people"></i> Users</a>
+            <a href="/admin/roles" class="admin-tab"><i class="bi bi-shield"></i> Roles</a>
+            <a href="/admin/audit" class="admin-tab"><i class="bi bi-clock-history"></i> Audit Log</a>
+        </div>
+
+        <div class="content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="bi bi-person-check"></i></div>
+                    <div class="stat-value"><%= stats.active_count || 0 %></div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon yellow"><i class="bi bi-person-plus"></i></div>
+                    <div class="stat-value"><%= stats.pending_count || 0 %></div>
+                    <div class="stat-label">Pending Setup</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange"><i class="bi bi-person-exclamation"></i></div>
+                    <div class="stat-value"><%= stats.review_count || 0 %></div>
+                    <div class="stat-label">Under Review</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red"><i class="bi bi-person-x"></i></div>
+                    <div class="stat-value"><%= stats.terminated_count || 0 %></div>
+                    <div class="stat-label">Terminated</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title"><i class="bi bi-clock-history"></i> Recent Activity</div>
+                    <% if (recentAudit && recentAudit.length > 0) { %>
+                        <% recentAudit.forEach(function(audit) { %>
+                        <div class="audit-item">
+                            <div class="audit-time"><%= new Date(audit.created_at).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'}) %></div>
+                            <div class="audit-text">
+                                <span class="audit-user"><%= audit.user_name || 'System' %></span>
+                                <span class="audit-action"><%= audit.action.replace('.', ' → ') %></span>
+                            </div>
+                        </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="empty-state">
+                            <i class="bi bi-inbox"></i>
+                            <p>No recent activity</p>
+                        </div>
+                    <% } %>
+                </div>
+
+                <div class="card">
+                    <div class="card-title"><i class="bi bi-shield"></i> Users by Role</div>
+                    <% if (roleCounts && roleCounts.length > 0) { %>
+                        <% roleCounts.forEach(function(role) { %>
+                        <div class="role-item">
+                            <span class="role-name"><%= role.name %></span>
+                            <span class="role-count"><%= role.user_count %></span>
+                        </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="empty-state">
+                            <i class="bi bi-people"></i>
+                            <p>No roles configured</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

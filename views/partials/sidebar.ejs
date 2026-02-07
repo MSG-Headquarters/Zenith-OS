@@ -1,0 +1,47 @@
+<!-- Dynamic Sidebar based on user permissions -->
+<nav class="sidebar">
+    <div class="sidebar-header">
+        <h2><span>ZENITH</span> <span>OS</span></h2>
+        <p><%= typeof org !== 'undefined' && org ? org.name : 'Main Street Group' %></p>
+    </div>
+    
+    <div class="nav-section">
+        <div class="nav-section-label">Navigation</div>
+        
+        <% if (typeof sidebarModules !== 'undefined' && sidebarModules.length > 0) { %>
+            <% sidebarModules.forEach(function(mod) { %>
+                <% if (mod.slug !== 'admin') { %>
+                <a href="<%= mod.route %>" class="nav-item <%= typeof currentModule !== 'undefined' && currentModule === mod.slug ? 'active' : '' %>">
+                    <span class="nav-icon"><i class="bi <%= mod.icon %>"></i></span> 
+                    <%= mod.name %>
+                </a>
+                <% } %>
+            <% }); %>
+        <% } else { %>
+            <!-- Fallback for when permissions not loaded -->
+            <a href="/dashboard" class="nav-item"><span class="nav-icon"><i class="bi bi-house"></i></span> Dashboard</a>
+        <% } %>
+    </div>
+    
+    <% if (typeof sidebarModules !== 'undefined' && sidebarModules.some(m => m.slug === 'admin')) { %>
+    <div class="nav-section">
+        <div class="nav-section-label">Administration</div>
+        <a href="/admin" class="nav-item <%= typeof currentModule !== 'undefined' && currentModule === 'admin' ? 'active' : '' %>">
+            <span class="nav-icon"><i class="bi bi-gear"></i></span> Admin
+        </a>
+    </div>
+    <% } %>
+    
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <div class="user-avatar">
+                <%= typeof user !== 'undefined' && user && user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
+            </div>
+            <div>
+                <div class="user-name"><%= typeof user !== 'undefined' && user ? user.name : 'User' %></div>
+                <div class="user-role"><%= typeof permissions !== 'undefined' && permissions && permissions.roles && permissions.roles[0] ? permissions.roles[0].name : '' %></div>
+            </div>
+        </div>
+        <a href="/auth/logout"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
+    </div>
+</nav>

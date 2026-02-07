@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Under Review - Zenith OS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f1724 0%, #1a2332 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .card {
+            background: #1a2332;
+            border-radius: 16px;
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        .icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(249, 115, 22, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+        }
+
+        .icon i {
+            font-size: 2.5rem;
+            color: #f97316;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #f97316;
+            margin-bottom: 16px;
+        }
+
+        .message {
+            font-size: 0.95rem;
+            color: #94a3b8;
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+
+        .info-box {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .info-box p {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .info-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-box strong {
+            color: #94a3b8;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: #0f1724;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #f97316;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #f97316;
+            color: #fff;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-primary:hover {
+            background: #ea580c;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.06);
+            color: #94a3b8;
+            width: 100%;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+            color: #e2e8f0;
+        }
+
+        .success-message {
+            display: none;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            color: #10b981;
+            font-size: 0.9rem;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .contact-info {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .contact-info a {
+            color: #f97316;
+            text-decoration: none;
+        }
+
+        .logo {
+            margin-bottom: 30px;
+        }
+
+        .logo h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .logo h2 span:first-child {
+            color: #10b981;
+        }
+
+        .logo h2 span:last-child {
+            color: #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="logo">
+                <h2><span>ZENITH</span> <span>OS</span></h2>
+            </div>
+
+            <div class="icon">
+                <i class="bi bi-shield-exclamation"></i>
+            </div>
+
+            <h1>Account Under Review</h1>
+
+            <p class="message">
+                Your account is currently under review by management. We apologize for any inconvenience. 
+                A determination regarding your account status will be delivered after a full review has been completed.
+            </p>
+
+            <div class="info-box">
+                <p><strong>Review initiated:</strong> <%= typeof reviewDate !== 'undefined' ? reviewDate : 'Recently' %></p>
+                <p><strong>Account:</strong> <%= typeof userEmail !== 'undefined' ? userEmail : 'Your account' %></p>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                <i class="bi bi-check-circle"></i> Your clarification request has been submitted successfully.
+            </div>
+
+            <form id="clarificationForm">
+                <div class="form-group">
+                    <label>Submit a Clarification Request</label>
+                    <textarea id="clarificationMessage" placeholder="If there is anything you may need to clarify or provide that may help management during their review process, please describe it here..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-send"></i> Submit Request
+                </button>
+            </form>
+
+            <a href="/auth/logout" class="btn btn-secondary">
+                <i class="bi bi-box-arrow-left"></i> Sign Out
+            </a>
+
+            <div class="contact-info">
+                Questions? Contact <a href="mailto:hr@creconsultants.com">hr@creconsultants.com</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('clarificationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const message = document.getElementById('clarificationMessage').value;
+            if (!message.trim()) {
+                alert('Please enter a message');
+                return;
+            }
+
+            try {
+                const res = await fetch('/auth/clarification-request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const result = await res.json();
+                if (result.success) {
+                    document.getElementById('successMessage').classList.add('show');
+                    document.getElementById('clarificationMessage').value = '';
+                } else {
+                    alert(result.error || 'Failed to submit request');
+                }
+            } catch (err) {
+                alert('Failed to submit request');
+            }
+        });
+    </script>
+</body>
+</html>

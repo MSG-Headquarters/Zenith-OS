@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - Zenith OS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1724; color: #e2e8f0; min-height: 100vh; display: flex; }
+
+        .sidebar { width: 240px; background: #1a2332; display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.06); position: fixed; top: 0; bottom: 0; left: 0; z-index: 100; }
+        .sidebar-header { padding: 20px 16px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .sidebar-header h2 { font-size: 1.1rem; font-weight: 700; }
+        .sidebar-header h2 span:first-child { color: #10b981; }
+        .sidebar-header h2 span:last-child { color: #e2e8f0; }
+        .sidebar-header p { color: #64748b; font-size: 0.75rem; margin-top: 2px; }
+        .nav-section { padding: 12px 0; }
+        .nav-section-label { color: #475569; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.2px; padding: 0 16px 8px; font-weight: 600; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; color: #94a3b8; text-decoration: none; font-size: 0.85rem; transition: all 0.15s; border-left: 3px solid transparent; }
+        .nav-item:hover { background: rgba(255,255,255,0.04); color: #e2e8f0; }
+        .nav-item.active { background: rgba(16, 185, 129, 0.08); color: #10b981; border-left-color: #10b981; }
+        .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+        .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid rgba(255,255,255,0.06); }
+        .sidebar-footer .user-info { display: flex; align-items: center; gap: 10px; }
+        .sidebar-footer .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #10b981; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; color: #fff; }
+        .sidebar-footer .user-name { font-size: 0.8rem; color: #e2e8f0; }
+        .sidebar-footer .user-role { font-size: 0.65rem; color: #64748b; }
+        .sidebar-footer a { color: #64748b; font-size: 0.75rem; text-decoration: none; display: block; margin-top: 8px; }
+        .sidebar-footer a:hover { color: #ef4444; }
+
+        .main-content { flex: 1; margin-left: 240px; min-height: 100vh; }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 16px 32px; border-bottom: 1px solid rgba(255,255,255,0.06); background: #1a2332; }
+        .top-bar h1 { font-size: 1.35rem; font-weight: 700; }
+        .top-bar h1 .accent { color: #f59e0b; }
+
+        .admin-tabs { display: flex; gap: 4px; padding: 12px 32px 0; background: #1a2332; }
+        .admin-tab { padding: 10px 20px; border-radius: 8px 8px 0 0; font-size: 0.85rem; font-weight: 500; color: #64748b; text-decoration: none; display: flex; align-items: center; gap: 8px; transition: all 0.15s; border: 1px solid transparent; border-bottom: none; }
+        .admin-tab:hover { color: #e2e8f0; background: rgba(255,255,255,0.03); }
+        .admin-tab.active { color: #f59e0b; background: #0f1724; border-color: rgba(255,255,255,0.06); }
+
+        .content { padding: 24px 32px; }
+
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .search-box { display: flex; align-items: center; gap: 8px; background: #1a2332; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 14px; }
+        .search-box input { background: none; border: none; color: #e2e8f0; font-size: 0.9rem; outline: none; width: 250px; }
+        .search-box i { color: #64748b; }
+        .filter-select { background: #1a2332; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 14px; color: #e2e8f0; font-size: 0.85rem; }
+
+        .btn { padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; border: none; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; }
+        .btn-primary { background: #10b981; color: #fff; }
+        .btn-primary:hover { background: #059669; }
+        .btn-secondary { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+        .btn-warning { background: #f59e0b; color: #000; }
+        .btn-danger { background: #ef4444; color: #fff; }
+        .btn-sm { padding: 5px 10px; font-size: 0.75rem; }
+
+        .card { background: #1a2332; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); overflow: hidden; }
+
+        .users-table { width: 100%; border-collapse: collapse; }
+        .users-table th { text-align: left; padding: 14px 16px; font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(0,0,0,0.2); }
+        .users-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.9rem; }
+        .users-table tr:hover { background: rgba(255,255,255,0.02); }
+        .users-table tr:last-child td { border-bottom: none; }
+
+        .user-cell { display: flex; align-items: center; gap: 12px; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 600; color: #fff; }
+        .user-avatar.green { background: #10b981; }
+        .user-avatar.yellow { background: #f59e0b; }
+        .user-avatar.orange { background: #f97316; }
+        .user-avatar.red { background: #ef4444; }
+        .user-avatar.gray { background: #475569; }
+        .user-details .user-name { font-weight: 500; color: #e2e8f0; }
+        .user-details .user-email { font-size: 0.8rem; color: #64748b; }
+
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; }
+        .status-badge.active { background: rgba(16,185,129,0.15); color: #10b981; }
+        .status-badge.pending { background: rgba(245,158,11,0.15); color: #f59e0b; }
+        .status-badge.under_review { background: rgba(249,115,22,0.15); color: #f97316; }
+        .status-badge.terminated { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+        .role-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; background: rgba(255,255,255,0.06); color: #94a3b8; }
+
+        .actions-cell { display: flex; gap: 6px; }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: #1a2332; border-radius: 16px; width: 100%; max-width: 500px; border: 1px solid rgba(255,255,255,0.1); }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { font-size: 1.1rem; font-weight: 600; }
+        .modal-close { background: none; border: none; color: #64748b; font-size: 1.3rem; cursor: pointer; }
+        .modal-body { padding: 24px; }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: flex-end; gap: 10px; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 500; color: #94a3b8; margin-bottom: 6px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #0f1724; color: #e2e8f0; font-size: 0.9rem; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #10b981; }
+
+        .danger-zone { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 16px; margin-top: 16px; }
+        .danger-zone h4 { color: #ef4444; font-size: 0.85rem; margin-bottom: 10px; }
+        .danger-zone p { font-size: 0.8rem; color: #94a3b8; margin-bottom: 12px; }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: #64748b; }
+        .empty-state i { font-size: 3rem; margin-bottom: 16px; opacity: 0.3; }
+    </style>
+</head>
+<body>
+    <%- include('../partials/sidebar') %>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <h1><span class="accent">👥 User</span> Management</h1>
+            <button class="btn btn-primary" onclick="openCreateModal()"><i class="bi bi-plus-lg"></i> Add User</button>
+        </div>
+
+        <div class="admin-tabs">
+            <a href="/admin" class="admin-tab"><i class="bi bi-speedometer2"></i> Overview</a>
+            <a href="/admin/users" class="admin-tab active"><i class="bi bi-people"></i> Users</a>
+            <a href="/admin/roles" class="admin-tab"><i class="bi bi-shield"></i> Roles</a>
+            <a href="/admin/audit" class="admin-tab"><i class="bi bi-clock-history"></i> Audit Log</a>
+        </div>
+
+        <div class="content">
+            <div class="toolbar">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search users..." onkeyup="filterUsers()">
+                </div>
+                <select class="filter-select" id="statusFilter" onchange="filterUsers()">
+                    <option value="">All Statuses</option>
+                    <option value="active">Active</option>
+                    <option value="pending">Pending</option>
+                    <option value="under_review">Under Review</option>
+                    <option value="terminated">Terminated</option>
+                </select>
+            </div>
+
+            <div class="card">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Last Login</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <% if (users && users.length > 0) { %>
+                            <% users.forEach(function(u) { %>
+                            <tr data-user-id="<%= u.id %>" data-name="<%= u.name.toLowerCase() %>" data-email="<%= u.email.toLowerCase() %>" data-status="<%= u.status || 'active' %>">
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="user-avatar <%= u.status === 'active' ? 'green' : u.status === 'pending' ? 'yellow' : u.status === 'under_review' ? 'orange' : u.status === 'terminated' ? 'red' : 'gray' %>">
+                                            <%= u.name ? u.name.charAt(0).toUpperCase() : '?' %>
+                                        </div>
+                                        <div class="user-details">
+                                            <div class="user-name"><%= u.name %></div>
+                                            <div class="user-email"><%= u.email %></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="role-badge"><%= u.role_name || 'No Role' %></span></td>
+                                <td>
+                                    <span class="status-badge <%= u.status || 'active' %>">
+                                        <% if (u.status === 'active' || !u.status) { %>🟢 Active
+                                        <% } else if (u.status === 'pending') { %>🟡 Pending
+                                        <% } else if (u.status === 'under_review') { %>🟠 Under Review
+                                        <% } else if (u.status === 'terminated') { %>🔴 Terminated
+                                        <% } else { %><%= u.status %><% } %>
+                                    </span>
+                                </td>
+                                <td><%= u.last_login ? new Date(u.last_login).toLocaleDateString() : 'Never' %></td>
+                                <td>
+                                    <div class="actions-cell">
+                                        <button class="btn btn-secondary btn-sm" onclick="openEditModal(<%= u.id %>)"><i class="bi bi-pencil"></i></button>
+                                        <% if (u.id !== user.id) { %>
+                                            <% if (u.status !== 'under_review' && u.status !== 'terminated') { %>
+                                            <button class="btn btn-warning btn-sm" onclick="freezeUser(<%= u.id %>, '<%= u.name %>')" title="Freeze"><i class="bi bi-pause-circle"></i></button>
+                                            <% } %>
+                                            <% if (u.status !== 'terminated') { %>
+                                            <button class="btn btn-danger btn-sm" onclick="terminateUser(<%= u.id %>, '<%= u.name %>')" title="Terminate"><i class="bi bi-x-circle"></i></button>
+                                            <% } %>
+                                            <% if (u.status === 'under_review' || u.status === 'terminated') { %>
+                                            <button class="btn btn-primary btn-sm" onclick="activateUser(<%= u.id %>, '<%= u.name %>')" title="Activate"><i class="bi bi-check-circle"></i></button>
+                                            <% } %>
+                                        <% } %>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr><td colspan="5">
+                                <div class="empty-state">
+                                    <i class="bi bi-people"></i>
+                                    <p>No users found</p>
+                                </div>
+                            </td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create/Edit User Modal -->
+    <div class="modal-overlay" id="userModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add User</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <input type="hidden" id="userId" value="">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="userName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="userEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select id="userRole">
+                            <% roles.forEach(function(r) { %>
+                            <option value="<%= r.id %>"><%= r.name %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <div id="passwordField" class="form-group">
+                        <label>Temporary Password</label>
+                        <input type="password" id="userPassword" placeholder="Leave blank for default">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveUser()">Save User</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Freeze Modal -->
+    <div class="modal-overlay" id="freezeModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>🟠 Freeze Account</h3>
+                <button class="modal-close" onclick="closeFreezeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 16px;">You are about to place <strong id="freezeUserName"></strong>'s account under review.</p>
+                <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 16px;">This will immediately log out the user and block all login attempts. They will see an "Under Review" message.</p>
+                <div class="form-group">
+                    <label>Reason for freeze (required)</label>
+                    <textarea id="freezeReason" rows="3" placeholder="Enter the reason for this action..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeFreezeModal()">Cancel</button>
+                <button class="btn btn-warning" onclick="confirmFreeze()">Freeze Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terminate Modal -->
+    <div class="modal-overlay" id="terminateModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>🔴 Terminate User</h3>
+                <button class="modal-close" onclick="closeTerminateModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="danger-zone">
+                    <h4>⚠️ Warning: This is a serious action</h4>
+                    <p>You are about to terminate <strong id="terminateUserName"></strong>'s account. This will permanently revoke all system access.</p>
+                </div>
+                <div class="form-group" style="margin-top: 16px;">
+                    <label>Reason for termination (required)</label>
+                    <textarea id="terminateReason" rows="3" placeholder="Enter the reason for termination..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Type TERMINATE to confirm</label>
+                    <input type="text" id="terminateConfirm" placeholder="TERMINATE">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeTerminateModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="confirmTerminate()">Terminate Account</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUserId = null;
+
+        // Filter users
+        function filterUsers() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+            const rows = document.querySelectorAll('#usersTableBody tr[data-user-id]');
+            
+            rows.forEach(row => {
+                const name = row.dataset.name;
+                const email = row.dataset.email;
+                const rowStatus = row.dataset.status;
+                
+                const matchesSearch = name.includes(search) || email.includes(search);
+                const matchesStatus = !status || rowStatus === status;
+                
+                row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+            });
+        }
+
+        // Modal functions
+        function openCreateModal() {
+            document.getElementById('modalTitle').textContent = 'Add User';
+            document.getElementById('userId').value = '';
+            document.getElementById('userName').value = '';
+            document.getElementById('userEmail').value = '';
+            document.getElementById('userRole').value = document.getElementById('userRole').options[0].value;
+            document.getElementById('userPassword').value = '';
+            document.getElementById('passwordField').style.display = 'block';
+            document.getElementById('userModal').classList.add('active');
+        }
+
+        async function openEditModal(id) {
+            try {
+                const res = await fetch('/admin/api/users/' + id);
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('modalTitle').textContent = 'Edit User';
+                    document.getElementById('userId').value = data.user.id;
+                    document.getElementById('userName').value = data.user.name;
+                    document.getElementById('userEmail').value = data.user.email;
+                    document.getElementById('userRole').value = data.user.role_id || '';
+                    document.getElementById('passwordField').style.display = 'none';
+                    document.getElementById('userModal').classList.add('active');
+                }
+            } catch (err) {
+                alert('Failed to load user');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('userModal').classList.remove('active');
+        }
+
+        async function saveUser() {
+            const id = document.getElementById('userId').value;
+            const data = {
+                name: document.getElementById('userName').value,
+                email: document.getElementById('userEmail').value,
+                role_id: document.getElementById('userRole').value,
+                password: document.getElementById('userPassword').value
+            };
+
+            const url = id ? '/admin/api/users/' + id : '/admin/api/users';
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (result.success) {
+                    window.location.reload();
+                } else {
+                    alert(result.error || 'Failed to save user');
+                }
+            } catch (err) {
+                alert('Failed to save user');
+            }
+        }
+
+        // Freeze functions
+        function freezeUser(id, name) {
+            currentUserId = id;
+            document.getElementById('freezeUserName').textContent = name;
+            document.getElementById('freezeReason').value = '';
+            document.getElementById('freezeModal').classList.add('active');
+        }
+
+        function closeFreezeModal() {
+            document.getElementById('freezeModal').classList.remove('active');
+            currentUserId = null;
+        }
+
+        async function confirmFreeze() {
+            const reason = document.getElementById('freezeReason').value;
+            if (!reason.trim()) {
+                alert('Please enter a reason');
+                return;
+            }
+
+            try {
+                const res = await fetch('/admin/api/users/' + currentUserId + '/status', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'under_review', reason: reason })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    window.location.reload();
+                } else {
+                    alert(result.error || 'Failed to freeze user');
+                }
+            } catch (err) {
+                alert('Failed to freeze user');
+            }
+        }
+
+        // Terminate functions
+        function terminateUser(id, name) {
+            currentUserId = id;
+            document.getElementById('terminateUserName').textContent = name;
+            document.getElementById('terminateReason').value = '';
+            document.getElementById('terminateConfirm').value = '';
+            document.getElementById('terminateModal').classList.add('active');
+        }
+
+        function closeTerminateModal() {
+            document.getElementById('terminateModal').classList.remove('active');
+            currentUserId = null;
+        }
+
+        async function confirmTerminate() {
+            const reason = document.getElementById('terminateReason').value;
+            const confirm = document.getElementById('terminateConfirm').value;
+
+            if (!reason.trim()) {
+                alert('Please enter a reason');
+                return;
+            }
+            if (confirm !== 'TERMINATE') {
+                alert('Please type TERMINATE to confirm');
+                return;
+            }
+
+            try {
+                const res = await fetch('/admin/api/users/' + currentUserId + '/status', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'terminated', reason: reason })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    window.location.reload();
+                } else {
+                    alert(result.error || 'Failed to terminate user');
+                }
+            } catch (err) {
+                alert('Failed to terminate user');
+            }
+        }
+
+        // Activate function
+        async function activateUser(id, name) {
+            if (!confirm('Activate ' + name + '\'s account?')) return;
+
+            try {
+                const res = await fetch('/admin/api/users/' + id + '/status', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'active', reason: 'Reactivated by admin' })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    window.location.reload();
+                } else {
+                    alert(result.error || 'Failed to activate user');
+                }
+            } catch (err) {
+                alert('Failed to activate user');
+            }
+        }
+    </script>
+</body>
+</html>
