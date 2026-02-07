@@ -1,0 +1,93 @@
+{
+  "id": "listing-950-encore-way",
+  "propertyType": "medical",
+  "propertyTypeCustom": "PROFESSIONAL/MEDICAL OFFICE",
+  "buildingName": "JUST OFF US 41",
+  "transactionType": "lease",
+  
+  "address": {
+    "street": "950 Encore Way",
+    "unit": null,
+    "city": "Naples",
+    "state": "FL",
+    "zip": "34110"
+  },
+  
+  "leaseRate": 21.00,
+  "leaseType": "NNN",
+  "cam": 14.28,
+  "utilities": 1.20,
+  
+  "sizeSF": 2201,
+  "locationDescription": "Just off US 41, north of Immokalee Road",
+  "yearBuilt": 2000,
+  "renovatedYear": 2019,
+  
+  "zoning": "PUD",
+  "zoningDescription": "Planned Unit Development (Collier County)",
+  
+  "parcelId": null,
+  
+  "description": "This North Naples location, just off US 41, offers easy access to both the Naples and Bonita Springs markets. The building features newly renovated common areas, while monument signage on US 41 provides excellent visibility and exposure, with additional building signage available. Suite 101 is a Class A, first-floor corner office suite featuring private offices, reception area, and a kitchen. Expansive ceilings and floor-to-ceiling windows create a bright, open-concept workspace. The suite is approved for medical use \"as-is.\"",
+  
+  "highlights": [
+    "First floor unit",
+    "Newly renovated in 2019",
+    "High ceilings and floor to ceiling windows",
+    "Approved for medical use",
+    "Signage on US 41 (Tamiami Trail N)"
+  ],
+  
+  "availableSuites": [
+    {
+      "unit": "101",
+      "sizeSF": 2201,
+      "sizeType": "SF",
+      "leaseRate": 21.00,
+      "cam": 14.28,
+      "nnn": null,
+      "monthlyBaseRent": 3851.75,
+      "monthlyCAM": 2619.19,
+      "monthlyTotal": 6470.94,
+      "availability": "availableNow"
+    }
+  ],
+  
+  "photos": {
+    "hero": "/sample-photos/950-encore-exterior.jpg",
+    "exterior": [
+      "/sample-photos/950-encore-building-angle.jpg",
+      "/sample-photos/950-encore-signage.jpg"
+    ],
+    "interior": [
+      "/sample-photos/950-encore-lobby.jpg",
+      "/sample-photos/950-encore-office1.jpg",
+      "/sample-photos/950-encore-office2.jpg"
+    ],
+    "aerial": [
+      "/sample-photos/950-encore-aerial.jpg"
+    ],
+    "floorPlan": [
+      "/sample-photos/950-encore-floorplan.jpg"
+    ]
+  },
+  
+  "brokers": [
+    {
+      "name": "Dave Wallace",
+      "title": "Senior Vice President",
+      "credentials": ["CCIM", "SIOR"],
+      "phone": "239.659.1447 x218",
+      "email": "dave.wallace@creconsultants.com"
+    },
+    {
+      "name": "David Wallace",
+      "title": "Senior Associate",
+      "credentials": [],
+      "phone": "239.659.1447 x223",
+      "email": "david.wallace@creconsultants.com"
+    }
+  ],
+  
+  "flyerDate": "09/23/25"
+}

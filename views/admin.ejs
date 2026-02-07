@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Settings | Zenith OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-white: #FFFFFF; --bg-light: #F8FAFC; --bg-gray: #F1F5F9;
+            --accent-emerald: #10B981; --accent-cyan: #06B6D4; --accent-blue: #3B82F6;
+            --accent-violet: #8B5CF6; --accent-amber: #F59E0B; --accent-rose: #F43F5E;
+            --text-primary: #1E293B; --text-secondary: #475569; --text-muted: #64748B;
+            --border: #E2E8F0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-primary); min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 32px; }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .logo-icon { width: 48px; height: 48px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-violet)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .header-title h1 { font-size: 24px; font-weight: 700; }
+        .header-title p { font-size: 13px; color: var(--text-muted); }
+        .btn { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+        .btn-primary { background: var(--accent-blue); color: white; }
+        .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+        .card { background: var(--bg-white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+        .card-header { padding: 20px 24px; border-bottom: 1px solid var(--border); }
+        .card-title { font-size: 16px; font-weight: 600; }
+        .card-body { padding: 24px; }
+        .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { font-size: 13px; color: var(--text-muted); }
+        .info-value { font-size: 13px; font-weight: 600; }
+        .status-badge { padding: 4px 12px; border-radius: 100px; font-size: 11px; font-weight: 600; }
+        .status-active { background: rgba(16, 185, 129, 0.1); color: var(--accent-emerald); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; background: var(--bg-gray); }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 8px; background: var(--accent-blue); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: white; }
+        .user-name { font-weight: 600; }
+        .user-email { font-size: 12px; color: var(--text-muted); }
+        .role-badge { padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 500; }
+        .role-admin { background: rgba(139, 92, 246, 0.1); color: var(--accent-violet); }
+        .role-user { background: rgba(59, 130, 246, 0.1); color: var(--accent-blue); }
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--accent-emerald); text-decoration: none; font-size: 14px; margin-top: 24px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-left">
+                <div class="logo-icon">⚙️</div>
+                <div class="header-title"><h1>Admin Settings</h1><p><%= org.name %> • Organization Management</p></div>
+            </div>
+            <div>
+                <button class="btn btn-ghost" style="margin-right: 12px;">📥 Export Data</button>
+                <button class="btn btn-primary">+ Add User</button>
+            </div>
+        </header>
+
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header"><span class="card-title">Organization Details</span></div>
+                <div class="card-body">
+                    <div class="info-row"><span class="info-label">Organization</span><span class="info-value"><%= org.name %></span></div>
+                    <div class="info-row"><span class="info-label">License Key</span><span class="info-value" style="font-family: monospace;"><%= org.license_key %></span></div>
+                    <div class="info-row"><span class="info-label">Status</span><span class="status-badge status-active"><%= org.license_status %></span></div>
+                    <div class="info-row"><span class="info-label">Plan</span><span class="info-value"><%= org.license_type %></span></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="card-title">System Information</span></div>
+                <div class="card-body">
+                    <div class="info-row"><span class="info-label">Platform</span><span class="info-value">Zenith OS</span></div>
+                    <div class="info-row"><span class="info-label">Version</span><span class="info-value">2.4.0</span></div>
+                    <div class="info-row"><span class="info-label">Provider</span><span class="info-value">Main Street Group</span></div>
+                    <div class="info-row"><span class="info-label">Support</span><span class="info-value">support@umbrassi.com</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><span class="card-title">Team Members</span></div>
+            <table>
+                <thead><tr><th>User</th><th>Role</th><th>Last Login</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>
+                    <% if (users && users.length > 0) { %>
+                        <% users.forEach(u => { %>
+                        <tr>
+                            <td>
+                                <div class="user-info">
+                                    <div class="user-avatar"><%= u.name ? u.name.charAt(0) : 'U' %></div>
+                                    <div><div class="user-name"><%= u.name %></div><div class="user-email"><%= u.email %></div></div>
+                                </div>
+                            </td>
+                            <td><span class="role-badge <%= u.role === 'Admin' ? 'role-admin' : 'role-user' %>"><%= u.role %></span></td>
+                            <td><%= u.last_login ? new Date(u.last_login).toLocaleDateString() : 'Never' %></td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td><button class="btn btn-ghost" style="padding: 6px 12px; font-size: 12px;">Edit</button></td>
+                        </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No users found</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+    </div>
+</body>
+</html>

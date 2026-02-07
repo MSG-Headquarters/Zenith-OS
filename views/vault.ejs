@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Vault | Zenith OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-white: #FFFFFF; --bg-light: #F8FAFC; --bg-gray: #F1F5F9;
+            --accent-cyan: #06B6D4; --accent-emerald: #10B981; --accent-blue: #3B82F6;
+            --accent-violet: #8B5CF6; --accent-amber: #F59E0B; --accent-rose: #F43F5E;
+            --text-primary: #1E293B; --text-secondary: #475569; --text-muted: #64748B;
+            --border: #E2E8F0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-primary); min-height: 100vh; display: flex; }
+
+        .sidebar { width: 260px; background: var(--bg-white); border-right: 1px solid var(--border); position: fixed; height: 100vh; display: flex; flex-direction: column; box-shadow: 2px 0 8px rgba(0,0,0,0.04); }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent-cyan), #0891B2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .logo-text h1 { font-size: 16px; font-weight: 700; }
+        .logo-text p { font-size: 11px; color: var(--text-muted); }
+        .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+        .nav-section { margin-bottom: 20px; }
+        .nav-section-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; padding: 0 12px; margin-bottom: 8px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: var(--text-secondary); text-decoration: none; font-size: 14px; transition: all 0.15s ease; margin-bottom: 2px; }
+        .nav-item:hover { background: var(--bg-gray); color: var(--text-primary); }
+        .nav-item.active { background: rgba(6, 182, 212, 0.1); color: var(--accent-cyan); }
+        .nav-icon { font-size: 16px; }
+        .sidebar-footer { padding: 16px; border-top: 1px solid var(--border); }
+        .back-link { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); text-decoration: none; font-size: 13px; padding: 10px 12px; border-radius: 8px; }
+        .back-link:hover { background: var(--bg-gray); color: var(--accent-emerald); }
+        .storage-info { background: var(--bg-gray); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+        .storage-label { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
+        .storage-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+        .storage-fill { height: 100%; background: var(--accent-cyan); width: 35%; }
+        .storage-text { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+
+        .main-content { flex: 1; margin-left: 260px; }
+        .topbar { height: 64px; background: var(--bg-white); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        .topbar-title { font-size: 20px; font-weight: 700; }
+        .topbar-actions { display: flex; gap: 12px; }
+        .btn { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: var(--accent-cyan); color: white; }
+        .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+
+        .content-area { padding: 32px; }
+        .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+        .breadcrumb a { color: var(--accent-cyan); text-decoration: none; }
+
+        .view-toggle { display: flex; gap: 4px; background: var(--bg-gray); padding: 4px; border-radius: 8px; }
+        .view-btn { padding: 8px 16px; border: none; background: transparent; border-radius: 6px; cursor: pointer; font-size: 13px; color: var(--text-muted); }
+        .view-btn.active { background: var(--bg-white); color: var(--text-primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+        .folders-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px; }
+        .folder-card { background: var(--bg-white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s ease; text-align: center; }
+        .folder-card:hover { border-color: var(--accent-cyan); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+        .folder-icon { font-size: 40px; margin-bottom: 12px; }
+        .folder-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+        .folder-count { font-size: 12px; color: var(--text-muted); }
+
+        .section-title { font-size: 14px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; }
+        .files-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        .file-card { background: var(--bg-white); border: 1px solid var(--border); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s ease; }
+        .file-card:hover { border-color: var(--accent-cyan); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .file-preview { height: 120px; background: var(--bg-gray); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 12px; }
+        .file-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .file-meta { font-size: 11px; color: var(--text-muted); }
+
+        .upload-zone { border: 2px dashed var(--border); border-radius: 16px; padding: 48px; text-align: center; margin-bottom: 32px; transition: all 0.2s ease; cursor: pointer; }
+        .upload-zone:hover { border-color: var(--accent-cyan); background: rgba(6, 182, 212, 0.02); }
+        .upload-icon { font-size: 48px; margin-bottom: 16px; }
+        .upload-text { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+        .upload-hint { font-size: 13px; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon">🔐</div>
+            <div class="logo-text"><h1>The Vault</h1><p>Secure Documents</p></div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-label">Quick Access</div>
+                <a href="/vault" class="nav-item active"><span class="nav-icon">📁</span> All Files</a>
+                <a href="#" class="nav-item"><span class="nav-icon">⭐</span> Starred</a>
+                <a href="#" class="nav-item"><span class="nav-icon">🕐</span> Recent</a>
+                <a href="#" class="nav-item"><span class="nav-icon">🔗</span> Shared</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-label">Folders</div>
+                <% if (folders && folders.length > 0) { %>
+                    <% folders.forEach(folder => { %>
+                    <a href="#" class="nav-item"><span class="nav-icon"><%= folder.icon || '📁' %></span> <%= folder.name %></a>
+                    <% }); %>
+                <% } else { %>
+                    <a href="#" class="nav-item"><span class="nav-icon">📄</span> Contracts</a>
+                    <a href="#" class="nav-item"><span class="nav-icon">📊</span> Marketing</a>
+                    <a href="#" class="nav-item"><span class="nav-icon">🏢</span> Property Photos</a>
+                    <a href="#" class="nav-item"><span class="nav-icon">💰</span> Financial</a>
+                    <a href="#" class="nav-item"><span class="nav-icon">⚖️</span> Legal</a>
+                <% } %>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-label">Navigate</div>
+                <a href="/dashboard" class="nav-item"><span class="nav-icon">🏠</span> AXIS Home</a>
+                <a href="/crm" class="nav-item"><span class="nav-icon">📊</span> CRM</a>
+                <a href="/huddle" class="nav-item"><span class="nav-icon">💬</span> The Huddle</a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="storage-info">
+                <div class="storage-label">Storage Used</div>
+                <div class="storage-bar"><div class="storage-fill"></div></div>
+                <div class="storage-text">3.5 GB of 10 GB</div>
+            </div>
+            <a href="/dashboard" class="back-link">← Back to AXIS</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <h1 class="topbar-title">Document Vault</h1>
+            <div class="topbar-actions">
+                <div class="view-toggle">
+                    <button class="view-btn active">📊 Grid</button>
+                    <button class="view-btn">📋 List</button>
+                </div>
+                <button class="btn btn-ghost">🔍 Search</button>
+                <button class="btn btn-primary">📤 Upload</button>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <div class="breadcrumb">
+                <a href="/vault">The Vault</a>
+                <span>/</span>
+                <span>All Files</span>
+            </div>
+
+            <div class="upload-zone">
+                <div class="upload-icon">📤</div>
+                <div class="upload-text">Drop files here to upload</div>
+                <div class="upload-hint">or click to browse • Max 100MB per file</div>
+            </div>
+
+            <p class="section-title">Folders</p>
+            <div class="folders-grid">
+                <% if (folders && folders.length > 0) { %>
+                    <% folders.forEach(folder => { %>
+                    <div class="folder-card">
+                        <div class="folder-icon"><%= folder.icon || '📁' %></div>
+                        <div class="folder-name"><%= folder.name %></div>
+                        <div class="folder-count">0 files</div>
+                    </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="folder-card" style="text-align: center; padding: 30px;">
+                        <div class="folder-icon">📁</div>
+                        <div class="folder-name">No folders yet</div>
+                        <div class="folder-count">Create your first folder</div>
+                    </div>
+                <% } %>
+            </div>
+
+            <p class="section-title">Recent Files</p>
+            <div class="files-grid">
+                <% if (files && files.length > 0) { %>
+                    <% files.forEach(file => { %>
+                    <div class="file-card">
+                        <div class="file-preview">📄</div>
+                        <div class="file-name"><%= file.name %></div>
+                        <div class="file-meta"><%= new Date(file.created_at).toLocaleDateString() %></div>
+                    </div>
+                    <% }); %>
+                <% } else { %>
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted);">
+                        <p style="font-size: 32px; margin-bottom: 12px;">📂</p>
+                        <p>No files uploaded yet. Drag and drop to get started.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

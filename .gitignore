@@ -1,0 +1,28 @@
+﻿# Dependencies
+node_modules/
+
+# Data directories (large files)
+dbpr-downloads/
+sunbiz-data/
+county-pa-downloads/
+data/
+
+# Build artifacts
+*.zip
+*.log
+
+# Environment
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Temp files
+*.tmp
+*.bak

@@ -1,0 +1,74 @@
+{
+  "id": "listing-72nd-ave-homesite",
+  "propertyType": "land",
+  "propertyTypeCustom": "2.73± ACRE HOMESITE",
+  "buildingName": "GOLDEN GATE ESTATES",
+  "transactionType": "sale",
+  
+  "address": {
+    "street": "72nd Avenue NE",
+    "unit": null,
+    "city": "Naples",
+    "state": "FL",
+    "zip": "34120"
+  },
+  
+  "price": 87000,
+  "pricePerAcre": 31870,
+  "priceDisplay": "BELOW COUNTY ASSESSED VALUE $87,000 ($31,870/Acres)",
+  
+  "sizeAcres": 2.73,
+  "sizeSF": 118919,
+  "dimensions": "180'± x 660'±",
+  
+  "locationDescription": "One block south of Immokalee Road, ½ mile west of Everglades Blvd N",
+  
+  "zoning": "E",
+  "zoningDescription": "Estates, Golden Gate Estate Subdistrict (Collier County)",
+  
+  "floodZone": "AH",
+  "floodZoneLink": "https://example.com/flood-zone-description",
+  
+  "taxes": 621.03,
+  "taxYear": 2024,
+  
+  "parcelId": "39148120004",
+  
+  "description": "This 2.73± acre homesite offers both convenience and privacy, located off Immokalee Road and Everglades Boulevard N in Golden Gate Estates. Ideally positioned near significant residential and commercial development, the property provides easy access to Publix, shopping centers, restaurants and more. A wetland determination report is available upon request.",
+  
+  "highlights": [
+    "9± miles from Publix, restaurants, shopping centers, healthcare and more",
+    "Located in one of the fastest-growing areas in Southwest Florida",
+    "Highly sought-after Golden Gate Estates community"
+  ],
+  
+  "demographics": {
+    "year": 2024,
+    "radii": [3, 5, 10],
+    "population": [761, 4595, 22184],
+    "households": [229, 1328, 7086],
+    "medianIncome": [88241, 91922, 89841]
+  },
+  
+  "photos": {
+    "hero": "/sample-photos/72nd-ave-aerial.jpg",
+    "aerial": [
+      "/sample-photos/72nd-ave-aerial.jpg",
+      "/sample-photos/72nd-ave-regional.jpg"
+    ]
+  },
+  
+  "brokers": [
+    {
+      "name": "Fred Kermani",
+      "title": "Partner",
+      "credentials": ["CCIM", "AIA"],
+      "phone": "239.659.4960",
+      "cell": "239.860.6388",
+      "email": "Fred.Kermani@CREConsultants.com",
+      "personalUrl": "CREConsultants.com/FredKermani"
+    }
+  ],
+  
+  "flyerDate": "10/08/25"
+}

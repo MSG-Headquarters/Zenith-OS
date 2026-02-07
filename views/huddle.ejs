@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Huddle | Zenith OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-white: #FFFFFF; --bg-light: #F8FAFC; --bg-gray: #F1F5F9;
+            --accent-violet: #8B5CF6; --accent-emerald: #10B981; --accent-cyan: #06B6D4;
+            --accent-blue: #3B82F6; --accent-amber: #F59E0B; --accent-rose: #F43F5E;
+            --text-primary: #1E293B; --text-secondary: #475569; --text-muted: #64748B;
+            --border: #E2E8F0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-primary); min-height: 100vh; display: flex; }
+
+        .sidebar { width: 260px; background: var(--bg-white); border-right: 1px solid var(--border); position: fixed; height: 100vh; display: flex; flex-direction: column; box-shadow: 2px 0 8px rgba(0,0,0,0.04); }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent-violet), #7C3AED); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .logo-text h1 { font-size: 16px; font-weight: 700; }
+        .logo-text p { font-size: 11px; color: var(--text-muted); }
+        .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+        .nav-section { margin-bottom: 20px; }
+        .nav-section-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; padding: 0 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: var(--text-secondary); text-decoration: none; font-size: 14px; transition: all 0.15s ease; margin-bottom: 2px; }
+        .nav-item:hover { background: var(--bg-gray); color: var(--text-primary); }
+        .nav-item.active { background: rgba(139, 92, 246, 0.1); color: var(--accent-violet); }
+        .nav-icon { font-size: 16px; }
+        .nav-badge { margin-left: auto; background: var(--accent-rose); color: white; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 100px; }
+        .channel-hash { color: var(--text-muted); font-weight: 600; }
+        .sidebar-footer { padding: 16px; border-top: 1px solid var(--border); }
+        .back-link { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); text-decoration: none; font-size: 13px; padding: 10px 12px; border-radius: 8px; }
+        .back-link:hover { background: var(--bg-gray); color: var(--accent-emerald); }
+
+        .main-content { flex: 1; margin-left: 260px; display: flex; flex-direction: column; height: 100vh; }
+        .topbar { height: 64px; background: var(--bg-white); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); flex-shrink: 0; }
+        .channel-info { display: flex; align-items: center; gap: 12px; }
+        .channel-name { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .channel-desc { font-size: 12px; color: var(--text-muted); }
+        .topbar-actions { display: flex; gap: 12px; }
+        .btn { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+
+        .chat-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .messages-area { flex: 1; overflow-y: auto; padding: 24px 32px; }
+        .message { display: flex; gap: 12px; margin-bottom: 20px; }
+        .message-avatar { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, var(--accent-emerald), var(--accent-cyan)); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: white; flex-shrink: 0; }
+        .message-content { flex: 1; }
+        .message-header { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+        .message-author { font-size: 14px; font-weight: 600; }
+        .message-time { font-size: 11px; color: var(--text-muted); }
+        .message-text { font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
+        .message-reactions { display: flex; gap: 8px; margin-top: 8px; }
+        .reaction { display: flex; align-items: center; gap: 4px; padding: 4px 8px; background: var(--bg-gray); border-radius: 100px; font-size: 12px; cursor: pointer; }
+        .reaction:hover { background: var(--border); }
+
+        .compose-area { padding: 20px 32px; background: var(--bg-white); border-top: 1px solid var(--border); }
+        .compose-box { display: flex; gap: 12px; align-items: flex-end; }
+        .compose-input { flex: 1; padding: 14px 18px; background: var(--bg-light); border: 1px solid var(--border); border-radius: 12px; font-size: 14px; font-family: inherit; resize: none; min-height: 48px; max-height: 120px; }
+        .compose-input:focus { outline: none; border-color: var(--accent-violet); }
+        .compose-actions { display: flex; gap: 8px; }
+        .compose-btn { width: 40px; height: 40px; border-radius: 10px; background: var(--bg-gray); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .compose-btn.send { background: var(--accent-violet); color: white; }
+
+        .members-panel { width: 280px; background: var(--bg-white); border-left: 1px solid var(--border); padding: 20px; display: none; }
+        .members-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+        .member-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+        .member-avatar { width: 32px; height: 32px; border-radius: 8px; background: var(--accent-blue); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: white; }
+        .member-name { font-size: 13px; font-weight: 500; }
+        .member-status { width: 8px; height: 8px; background: var(--accent-emerald); border-radius: 50%; margin-left: auto; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon">💬</div>
+            <div class="logo-text"><h1>The Huddle</h1><p>Team Communication</p></div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-label">Channels <span style="cursor: pointer;">+</span></div>
+                <% if (channels && channels.length > 0) { %>
+                    <% channels.forEach((channel, index) => { %>
+                    <a href="#" class="nav-item <%= index === 0 ? 'active' : '' %>">
+                        <span class="channel-hash">#</span> <%= channel.name %>
+                    </a>
+                    <% }); %>
+                <% } else { %>
+                    <a href="#" class="nav-item active"><span class="channel-hash">#</span> general</a>
+                    <a href="#" class="nav-item"><span class="channel-hash">#</span> announcements</a>
+                    <a href="#" class="nav-item"><span class="channel-hash">#</span> leads</a>
+                <% } %>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-label">Deal Rooms <span style="cursor: pointer;">+</span></div>
+                <% if (dealRooms && dealRooms.length > 0) { %>
+                    <% dealRooms.forEach(room => { %>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">🏢</span> <%= room.name %>
+                    </a>
+                    <% }); %>
+                <% } else { %>
+                    <a href="#" class="nav-item"><span class="nav-icon">🏢</span> riverside-plaza</a>
+                    <a href="#" class="nav-item"><span class="nav-icon">🏬</span> downtown-retail</a>
+                    <a href="#" class="nav-item"><span class="nav-icon">🏭</span> tech-park-lease</a>
+                <% } %>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-label">Direct Messages</div>
+                <a href="#" class="nav-item"><span class="nav-icon">👤</span> Dan Smith</a>
+                <a href="#" class="nav-item"><span class="nav-icon">👤</span> Mitchell Tindell <span class="nav-badge">2</span></a>
+                <a href="#" class="nav-item"><span class="nav-icon">👤</span> Chris Khouri</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-label">Navigate</div>
+                <a href="/dashboard" class="nav-item"><span class="nav-icon">🏠</span> AXIS Home</a>
+                <a href="/crm" class="nav-item"><span class="nav-icon">📊</span> CRM</a>
+                <a href="/mailer" class="nav-item"><span class="nav-icon">📧</span> Mailer</a>
+            </div>
+        </nav>
+        <div class="sidebar-footer"><a href="/dashboard" class="back-link">← Back to AXIS</a></div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div class="channel-info">
+                <div>
+                    <div class="channel-name"><span style="color: var(--text-muted);">#</span> general</div>
+                    <div class="channel-desc">General team discussion and updates</div>
+                </div>
+            </div>
+            <div class="topbar-actions">
+                <button class="btn btn-ghost">👥 3 Members</button>
+                <button class="btn btn-ghost">📌 Pins</button>
+                <button class="btn btn-ghost">🔍</button>
+            </div>
+        </header>
+
+        <div class="chat-container">
+            <div class="messages-area">
+                <div style="text-align: center; padding: 80px 40px; color: var(--text-muted);">
+                    <p style="font-size: 48px; margin-bottom: 16px;">💬</p>
+                    <p style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Welcome to #general</p>
+                    <p style="font-size: 14px;">This is the beginning of your team's conversation. Say hello!</p>
+                </div>
+            </div>
+
+            <div class="compose-area">
+                <div class="compose-box">
+                    <textarea class="compose-input" placeholder="Message #general..." rows="1"></textarea>
+                    <div class="compose-actions">
+                        <button class="compose-btn">📎</button>
+                        <button class="compose-btn">😊</button>
+                        <button class="compose-btn send">➤</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

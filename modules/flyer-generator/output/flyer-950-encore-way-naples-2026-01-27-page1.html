@@ -1,0 +1,585 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>PROFESSIONAL/MEDICAL OFFICE - 950 ENCORE WAY, NAPLES, FL 34110</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Playfair+Display:wght@400;700&family=Open+Sans:wght@300;400;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    @page {
+      size: 8.5in 11in;
+      margin: 0;
+    }
+    
+    body {
+      font-family: 'Open Sans', 'Arial', sans-serif;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #1A1A1A;
+      background: white;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    
+    .page {
+      width: 8.5in;
+      height: 11in;
+      position: relative;
+      overflow: hidden;
+      background: white;
+      page-break-after: always;
+    }
+    
+    /* === HEADER SECTION === */
+    .header {
+      position: relative;
+      background: linear-gradient(135deg, #2a2a2a 0%, #3d3d3d 50%, #2a2a2a 100%);
+      padding: 12px 20px 8px 20px;
+    }
+    
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      pointer-events: none;
+    }
+    
+    .header-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    
+    .header-left {
+      flex: 1;
+    }
+    
+    .property-type {
+      font-family: 'Oswald', 'Arial Black', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #2E7D32;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      line-height: 1.1;
+    }
+    
+    .building-name {
+      font-family: 'Oswald', 'Arial Black', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      color: #2E7D32;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+    
+    .header-right {
+      text-align: right;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    
+    .logo-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+    
+    .logo-triangles {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .logo-triangles .row {
+      display: flex;
+      gap: 2px;
+      justify-content: flex-end;
+    }
+    
+    .logo-triangles .triangle {
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 10px solid #2E7D32;
+    }
+    
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+    
+    .logo-cre {
+      font-family: 'Oswald', 'Arial Black', sans-serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: #2E7D32;
+      line-height: 1;
+      letter-spacing: 2px;
+    }
+    
+    .logo-consultants {
+      font-family: 'Open Sans', 'Arial', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: #FFFFFF;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    
+    .logo-tagline {
+      font-family: 'Open Sans', 'Arial', sans-serif;
+      font-size: 7px;
+      color: rgba(255,255,255,0.7);
+      font-style: italic;
+      margin-top: 2px;
+    }
+    
+    .website {
+      font-family: 'Open Sans', 'Arial', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: #2E7D32;
+      margin-top: 4px;
+    }
+    
+    /* === TRANSACTION & ADDRESS BANNER === */
+    .transaction-banner {
+      background: white;
+      padding: 8px 20px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .for-sale-lease {
+      font-family: 'Playfair Display', 'Georgia', serif;
+      font-size: 36px;
+      font-weight: 400;
+      color: #2E7D32;
+      line-height: 1;
+    }
+    
+    .address-line {
+      font-family: 'Open Sans', 'Arial', sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      color: #4A4A4A;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    
+    /* === HERO IMAGE === */
+    .hero-section {
+      position: relative;
+      height: 300px;
+      overflow: hidden;
+    }
+    
+    .hero-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .hero-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #e0e0e0 0%, #c0c0c0 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      font-size: 24px;
+    }
+    
+    /* Suite highlight overlay */
+    .suite-highlight {
+      position: absolute;
+      border: 3px solid #ff0000;
+      background: transparent;
+    }
+    
+    /* === LEASE TABLE === */
+    .lease-table-section {
+      padding: 0 20px;
+      margin-top: -1px;
+    }
+    
+    .lease-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9px;
+    }
+    
+    .lease-table th {
+      background: #4A4A4A;
+      color: #FFFFFF;
+      padding: 6px 8px;
+      text-align: center;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 8px;
+      letter-spacing: 0.5px;
+    }
+    
+    .lease-table td {
+      padding: 6px 8px;
+      text-align: center;
+      border: 1px solid #CCCCCC;
+      background: white;
+    }
+    
+    /* === DETAILS SECTION === */
+    .content-section {
+      display: flex;
+      padding: 12px 20px 0 20px;
+      gap: 20px;
+    }
+    
+    .details-column {
+      flex: 1;
+    }
+    
+    .contact-column {
+      width: 200px;
+      text-align: right;
+    }
+    
+    /* Property Details */
+    .detail-row {
+      display: flex;
+      margin-bottom: 6px;
+      align-items: flex-start;
+    }
+    
+    .detail-label {
+      font-weight: 700;
+      color: #2E7D32;
+      text-transform: uppercase;
+      font-size: 10px;
+      min-width: 85px;
+      flex-shrink: 0;
+    }
+    
+    .detail-value {
+      font-size: 11px;
+      color: #1A1A1A;
+      flex: 1;
+    }
+    
+    .detail-value strong {
+      font-weight: 700;
+    }
+    
+    .detail-value a {
+      color: #2E7D32;
+      font-style: italic;
+      font-size: 10px;
+    }
+    
+    /* Description */
+    .description-section {
+      margin-top: 12px;
+      padding-right: 20px;
+    }
+    
+    .description-title {
+      font-weight: 700;
+      color: #2E7D32;
+      text-transform: uppercase;
+      font-size: 10px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .description-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #2E7D32;
+      margin-left: 8px;
+    }
+    
+    .description-text {
+      font-size: 10.5px;
+      line-height: 1.5;
+      color: #1A1A1A;
+      text-align: justify;
+    }
+    
+    .description-text strong {
+      font-weight: 700;
+    }
+    
+    /* === CONTACT SECTION === */
+    .contact-section {
+      margin-top: 0;
+    }
+    
+    .contact-header {
+      font-family: 'Open Sans', 'Arial', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: #2E7D32;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    
+    .broker-card {
+      margin-bottom: 12px;
+    }
+    
+    .broker-name {
+      font-weight: 700;
+      font-size: 11px;
+      color: #1A1A1A;
+    }
+    
+    .broker-title {
+      font-size: 10px;
+      color: #4A4A4A;
+      font-style: italic;
+    }
+    
+    .broker-phone {
+      font-size: 10px;
+      color: #1A1A1A;
+      margin-top: 2px;
+    }
+    
+    .broker-email {
+      font-size: 9px;
+      color: #2E7D32;
+    }
+    
+    .office-addresses {
+      margin-top: 16px;
+      font-size: 9px;
+      color: #4A4A4A;
+      line-height: 1.4;
+    }
+    
+    .office-address {
+      margin-bottom: 8px;
+    }
+    
+    /* === FOOTER === */
+    .footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 8px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    
+    .disclaimer {
+      font-size: 6.5px;
+      color: #666666;
+      max-width: 450px;
+      line-height: 1.3;
+    }
+    
+    .date-stamp {
+      font-size: 9px;
+      color: #666666;
+    }
+    
+    /* === GREEN ACCENT LINE === */
+    .green-accent {
+      height: 6px;
+      background: #2E7D32;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-content">
+        <div class="header-left">
+          <div class="property-type">PROFESSIONAL/MEDICAL OFFICE</div>
+          <div class="building-name">JUST OFF US 41</div>
+        </div>
+        <div class="header-right">
+          <div class="logo-container">
+            <div class="logo-icon">
+              <div class="logo-triangles">
+                <div class="row"><div class="triangle"></div></div>
+                <div class="row"><div class="triangle"></div><div class="triangle"></div></div>
+                <div class="row"><div class="triangle"></div><div class="triangle"></div><div class="triangle"></div></div>
+              </div>
+            </div>
+            <div class="logo-text">
+              <div class="logo-cre">CRE</div>
+              <div class="logo-consultants">CONSULTANTS</div>
+              <div class="logo-tagline">Commercial Real Estate Consultants, LLC</div>
+            </div>
+          </div>
+          <div class="website">CRECONSULTANTS.COM</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Transaction & Address -->
+    <div class="transaction-banner">
+      <div class="for-sale-lease">FOR LEASE</div>
+      <div class="address-line">950 ENCORE WAY, NAPLES, FL 34110</div>
+    </div>
+    
+    <!-- Hero Image -->
+    <div class="hero-section">
+      <img class="hero-image" src="/sample-photos/950-encore-exterior.jpg" alt="Property exterior">
+    </div>
+    
+    <!-- Lease Table (if applicable) -->
+    
+    <div class="lease-table-section">
+      <table class="lease-table">
+        <thead>
+          <tr>
+            <th>UNIT</th>
+            <th>SIZE<br>(SF)</th>
+            <th>LEASE RATE (PSF)</th>
+            <th>MONTHLY BASE RENT</th>
+            <th>CAM<br>(PSF)</th>
+            <th>MONTHLY CAM</th>
+            <th>MONTHLY<br>TOTAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+      <tr>
+        <td>101</td>
+        <td>2,201</td>
+        <td>$21.00</td>
+        <td>$3,851.75</td>
+        <td>$14.28</td>
+        <td>$2,619.19</td>
+        <td>$6,470.94</td>
+      </tr>
+    
+        </tbody>
+      </table>
+    </div>
+    
+    
+    <!-- Content Section -->
+    <div class="content-section">
+      <div class="details-column">
+        <!-- Property Details -->
+        
+      <div class="detail-row">
+        <span class="detail-label">LEASE RATE:</span>
+        <span class="detail-value"><strong>$21.00 PSF NNN</strong> + Utilities ($1.20 PSF Estimated)</span>
+      </div>
+    
+      <div class="detail-row">
+        <span class="detail-label">CAM:</span>
+        <span class="detail-value">$14.28 PSF</span>
+      </div>
+    
+      <div class="detail-row">
+        <span class="detail-label">SIZE:</span>
+        <span class="detail-value">2,201± SF</span>
+      </div>
+    
+      <div class="detail-row">
+        <span class="detail-label">LOCATION:</span>
+        <span class="detail-value">Just off US 41, north of Immokalee Road</span>
+      </div>
+    
+      <div class="detail-row">
+        <span class="detail-label">ZONING:</span>
+        <span class="detail-value">PUD - Planned Unit Development (Collier County)</span>
+      </div>
+    
+      <div class="detail-row">
+        <span class="detail-label">YEAR BUILT:</span>
+        <span class="detail-value">2000 (Renovated in 2019)</span>
+      </div>
+    
+        
+        <!-- Description -->
+        
+        <div class="description-section">
+          
+          <div class="description-text">This North Naples location, just off US 41, offers easy access to both the Naples and Bonita Springs markets. The building features newly renovated common areas, while monument signage on US 41 provides excellent visibility and exposure, with additional building signage available. Suite 101 is a Class A, first-floor corner office suite featuring private offices, reception area, and a kitchen. Expansive ceilings and floor-to-ceiling windows create a bright, open-concept workspace. The suite is approved for medical use "as-is."</div>
+        </div>
+        
+      </div>
+      
+      <div class="contact-column">
+        <div class="contact-section">
+          <div class="contact-header">CONTACT</div>
+          
+      <div class="broker-card">
+        <div class="broker-name">Dave Wallace, CCIM, SIOR</div>
+        <div class="broker-title">Senior Vice President</div>
+        <div class="broker-phone">239.659.1447 x218</div>
+        <div class="broker-email">dave.wallace@creconsultants.com</div>
+        
+      </div>
+    
+      <div class="broker-card">
+        <div class="broker-name">David Wallace</div>
+        <div class="broker-title">Senior Associate</div>
+        <div class="broker-phone">239.659.1447 x223</div>
+        <div class="broker-email">david.wallace@creconsultants.com</div>
+        
+      </div>
+    
+          
+          <div class="office-addresses">
+            
+              <div class="office-address">
+                12140 Carissa Commerce Ct, Suite 102<br>
+                Fort Myers, FL 33966
+              </div>
+            
+              <div class="office-address">
+                1100 Fifth Ave. S, Suite 404<br>
+                Naples, FL 34102
+              </div>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+      <div class="disclaimer">The information contained herein was obtained from sources believed reliable. CRE Consultants makes no guarantees, warranties or representations as to the completeness or accuracy thereof, and is subject to errors, omissions, change of price or conditions prior to sale or lease, or withdrawal without notice.</div>
+      <div class="date-stamp">09/23/25</div>
+    </div>
+    
+    <!-- Green Accent Line -->
+    <div class="green-accent" style="position: absolute; bottom: 0; left: 0; right: 0;"></div>
+  </div>
+</body>
+</html>
+  

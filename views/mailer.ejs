@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunday-Mail | Zenith OS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* ═══════════════════════════════════════════════════════════════
+           SUNDAY-MAIL — Zenith OS Email Marketing Platform
+           CRE Consultants / CIBB / Main Street Group
+           ═══════════════════════════════════════════════════════════ */
+
+        :root {
+            --bg-body: #f8f9fb;
+            --bg-white: #ffffff;
+            --bg-sidebar: #1a1f2e;
+            --bg-sidebar-hover: #252b3d;
+            --bg-sidebar-active: #2d3548;
+            --bg-gray: #f3f4f6;
+            --bg-input: #f9fafb;
+
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --text-muted: #9ca3af;
+            --text-sidebar: #94a3b8;
+            --text-sidebar-active: #ffffff;
+
+            --accent-green: #10b981;
+            --accent-green-bg: rgba(16, 185, 129, 0.1);
+            --accent-blue: #3b82f6;
+            --accent-blue-bg: rgba(59, 130, 246, 0.08);
+            --accent-amber: #f59e0b;
+            --accent-amber-bg: rgba(245, 158, 11, 0.1);
+            --accent-red: #ef4444;
+            --accent-red-bg: rgba(239, 68, 68, 0.1);
+            --accent-purple: #8b5cf6;
+            --accent-purple-bg: rgba(139, 92, 246, 0.08);
+
+            --border: #e5e7eb;
+            --border-light: #f3f4f6;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Sidebar ─────────────────────────────────────────────── */
+        .sidebar {
+            width: 240px;
+            background: var(--bg-sidebar);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            padding: 24px 20px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .sidebar-brand-icon {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, var(--accent-green), #059669);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+        .sidebar-brand h1 {
+            font-size: 16px; font-weight: 700; color: #fff;
+            letter-spacing: -0.3px;
+        }
+        .sidebar-brand p {
+            font-size: 11px; color: var(--text-sidebar);
+            margin-top: 1px;
+        }
+
+        .sidebar-section {
+            padding: 16px 12px 4px;
+        }
+        .sidebar-section-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(148,163,184,0.5);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            padding: 0 8px 8px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            color: var(--text-sidebar);
+            font-size: 13.5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none;
+            margin-bottom: 2px;
+        }
+        .sidebar-item:hover {
+            background: var(--bg-sidebar-hover);
+            color: #e2e8f0;
+        }
+        .sidebar-item.active {
+            background: var(--bg-sidebar-active);
+            color: var(--text-sidebar-active);
+        }
+        .sidebar-item .icon {
+            width: 20px;
+            text-align: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .sidebar-item .badge {
+            margin-left: auto;
+            font-size: 10px;
+            font-weight: 700;
+            background: var(--accent-green);
+            color: #fff;
+            padding: 2px 7px;
+            border-radius: 10px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .sidebar-footer a {
+            color: var(--text-sidebar);
+            text-decoration: none;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0.7;
+            transition: opacity 0.15s;
+        }
+        .sidebar-footer a:hover { opacity: 1; }
+
+        /* ── Main Content ────────────────────────────────────────── */
+        .main {
+            margin-left: 240px;
+            flex: 1;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 32px;
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .topbar h2 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        .topbar-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .ses-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 20px;
+        }
+        .ses-status.sandbox {
+            background: var(--accent-amber-bg);
+            color: #b45309;
+        }
+        .ses-status.production {
+            background: var(--accent-green-bg);
+            color: #059669;
+        }
+        .ses-status .dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .ses-status.sandbox .dot { background: var(--accent-amber); }
+        .ses-status.production .dot { background: var(--accent-green); }
+
+        .content {
+            padding: 28px 32px 40px;
+        }
+
+        /* ── Buttons ─────────────────────────────────────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 13.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-primary {
+            background: var(--accent-green);
+            color: #fff;
+        }
+        .btn-primary:hover { background: #059669; }
+        .btn-secondary {
+            background: var(--bg-white);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover { border-color: #d1d5db; background: var(--bg-gray); }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            padding: 9px 14px;
+        }
+        .btn-ghost:hover { background: var(--bg-gray); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .btn-danger { background: var(--accent-red-bg); color: var(--accent-red); }
+        .btn-danger:hover { background: rgba(239,68,68,0.15); }
+
+        /* ── Stat Cards ──────────────────────────────────────────── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px 22px;
+            box-shadow: var(--shadow-sm);
+        }
+        .stat-card .label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .stat-card .change {
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+        .stat-card .change.up { color: var(--accent-green); }
+        .stat-card .change.neutral { color: var(--text-muted); }
+
+        /* ── Section Headers ─────────────────────────────────────── */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* ── Campaign Cards ──────────────────────────────────────── */
+        .campaigns-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .campaign-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px 22px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        .campaign-card:hover {
+            border-color: var(--accent-green);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+        .campaign-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .campaign-name {
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .campaign-desc {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+        .campaign-metrics {
+            display: flex;
+            gap: 28px;
+        }
+        .campaign-metric .metric-val {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .campaign-metric .metric-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .status-pill {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+        .status-active { background: var(--accent-green-bg); color: #059669; }
+        .status-paused { background: var(--accent-amber-bg); color: #b45309; }
+        .status-draft { background: var(--bg-gray); color: var(--text-muted); }
+        .status-completed { background: var(--accent-blue-bg); color: var(--accent-blue); }
+
+        /* ── Tables ──────────────────────────────────────────────── */
+        .table-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        .table-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .table-toolbar .info {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            font-size: 10.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: left;
+            padding: 10px 20px;
+            background: var(--bg-gray);
+            border-bottom: 1px solid var(--border);
+        }
+        td {
+            padding: 12px 20px;
+            font-size: 13.5px;
+            border-bottom: 1px solid var(--border-light);
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(249,250,251,0.5); }
+
+        .email-cell { font-weight: 500; }
+        .sub-status {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 9px;
+            border-radius: 20px;
+        }
+        .sub-active { background: var(--accent-green-bg); color: #059669; }
+        .sub-bounced { background: var(--accent-red-bg); color: var(--accent-red); }
+        .sub-unsub { background: var(--bg-gray); color: var(--text-muted); }
+
+        /* ── Sections (page views) ───────────────────────────────── */
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+
+        /* ── Campaign Builder ────────────────────────────────────── */
+        .builder-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 24px;
+        }
+        .form-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+        .form-card h3 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 13.5px;
+            color: var(--text-primary);
+            background: var(--bg-input);
+            transition: border-color 0.15s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
+        }
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* ── Email Preview ───────────────────────────────────────── */
+        .preview-frame {
+            background: var(--bg-gray);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+        .preview-bar {
+            background: var(--bg-white);
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .preview-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+        }
+        .preview-dot.r { background: #ef4444; }
+        .preview-dot.y { background: #f59e0b; }
+        .preview-dot.g { background: #10b981; }
+        .preview-body {
+            padding: 20px;
+            min-height: 300px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .preview-body .email-header {
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .preview-body .email-header .from {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .preview-body .email-header .subject {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 4px;
+        }
+
+        /* ── Template Cards ──────────────────────────────────────── */
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .template-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .template-card:hover {
+            border-color: var(--accent-green);
+            box-shadow: var(--shadow-md);
+        }
+        .template-card.selected {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 2px rgba(16,185,129,0.25);
+        }
+        .template-preview {
+            height: 160px;
+            background: linear-gradient(135deg, var(--bg-gray), var(--bg-input));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .template-info {
+            padding: 14px 16px;
+        }
+        .template-info h4 {
+            font-size: 13.5px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        .template-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ── Import Section ──────────────────────────────────────── */
+        .import-zone {
+            background: var(--bg-white);
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-lg);
+            padding: 48px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .import-zone:hover {
+            border-color: var(--accent-green);
+            background: rgba(16,185,129,0.02);
+        }
+        .import-zone .icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+        .import-zone h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .import-zone p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .import-manual {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-top: 20px;
+        }
+
+        /* ── Segments ────────────────────────────────────────────── */
+        .segments-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .segment-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .segment-card:hover {
+            border-color: var(--accent-blue);
+            box-shadow: var(--shadow-md);
+        }
+        .segment-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+        .segment-card h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .segment-card .seg-count {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ── Drip Sequence Builder ───────────────────────────────── */
+        .sequence-timeline {
+            position: relative;
+            padding-left: 32px;
+        }
+        .sequence-timeline::before {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 24px;
+            bottom: 24px;
+            width: 2px;
+            background: var(--border);
+        }
+        .sequence-step {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            position: relative;
+            box-shadow: var(--shadow-sm);
+        }
+        .sequence-step::before {
+            content: '';
+            position: absolute;
+            left: -27px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            border: 2px solid var(--bg-body);
+        }
+        .sequence-step .step-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .step-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--accent-green);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .step-delay {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .step-subject {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .step-preview {
+            font-size: 12.5px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            line-height: 1.5;
+        }
+
+        .add-step-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-md);
+            background: transparent;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-top: 8px;
+        }
+        .add-step-btn:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        /* ── Toast / Notifications ───────────────────────────────── */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toast {
+            background: var(--bg-sidebar);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+        }
+        .toast.success { border-left: 3px solid var(--accent-green); }
+        .toast.error { border-left: 3px solid var(--accent-red); }
+        .toast.info { border-left: 3px solid var(--accent-blue); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* ── Modal ───────────────────────────────────────────────── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.visible {
+            display: flex;
+        }
+        .modal {
+            background: var(--bg-white);
+            border-radius: var(--radius-lg);
+            width: 560px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        .modal-header h3 {
+            font-size: 15px;
+            font-weight: 700;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+        }
+        .modal-body { padding: 24px; }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ── Empty States ────────────────────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+        }
+        .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
+        .empty-state h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .empty-state p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        /* ── Loading ─────────────────────────────────────────────── */
+        .spinner {
+            width: 18px; height: 18px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent-green);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Responsive ──────────────────────────────────────────── */
+        @media (max-width: 1100px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .campaigns-grid { grid-template-columns: 1fr; }
+            .templates-grid { grid-template-columns: repeat(2, 1fr); }
+            .builder-grid { grid-template-columns: 1fr; }
+            .segments-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SIDEBAR
+         ═══════════════════════════════════════════════════════════ -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-brand-icon">📧</div>
+            <div>
+                <h1>Sunday-Mail</h1>
+                <p>Email Automation</p>
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Campaigns</div>
+            <div class="sidebar-item active" onclick="showPage('dashboard')" data-page="dashboard">
+                <span class="icon">📊</span> Dashboard
+            </div>
+            <div class="sidebar-item" onclick="showPage('campaigns')" data-page="campaigns">
+                <span class="icon">📧</span> All Campaigns
+            </div>
+            <div class="sidebar-item" onclick="showPage('create')" data-page="create">
+                <span class="icon">✨</span> Create New
+            </div>
+            <div class="sidebar-item" onclick="showPage('templates')" data-page="templates">
+                <span class="icon">📝</span> Templates
+                <span class="badge" id="templateBadge">6</span>
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Audience</div>
+            <div class="sidebar-item" onclick="showPage('subscribers')" data-page="subscribers">
+                <span class="icon">👥</span> Subscribers
+            </div>
+            <div class="sidebar-item" onclick="showPage('segments')" data-page="segments">
+                <span class="icon">🏷️</span> Segments
+            </div>
+            <div class="sidebar-item" onclick="showPage('import')" data-page="import">
+                <span class="icon">📥</span> Import
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Navigate</div>
+            <a href="/dashboard" class="sidebar-item"><span class="icon">🏠</span> AXIS Home</a>
+            <a href="/crm" class="sidebar-item"><span class="icon">📊</span> CRM</a>
+            <a href="/huddle" class="sidebar-item"><span class="icon">💬</span> The Huddle</a>
+            <a href="/vault" class="sidebar-item"><span class="icon">🔐</span> The Vault</a>
+        </div>
+
+        <div class="sidebar-footer">
+            <a href="/dashboard">← Back to AXIS</a>
+        </div>
+    </aside>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         MAIN CONTENT
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="main">
+        <div class="topbar">
+            <h2 id="pageTitle">Email Marketing</h2>
+            <div class="topbar-actions">
+                <div class="ses-status sandbox" id="sesStatus">
+                    <span class="dot"></span>
+                    <span id="sesLabel">SES Sandbox</span>
+                </div>
+                <button class="btn btn-secondary" onclick="showPage('campaigns')">📈 Analytics</button>
+                <button class="btn btn-primary" onclick="showPage('create')">+ New Campaign</button>
+            </div>
+        </div>
+
+        <div class="content">
+
+            <!-- ═══════════════════════════════════════════════════════
+                 DASHBOARD
+                 ═══════════════════════════════════════════════════ -->
+            <div class="page-section active" id="page-dashboard">
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="label">Total Subscribers</div>
+                        <div class="value" id="statSubscribers">0</div>
+                        <div class="change up" id="statSubChange">Loading...</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Emails Sent</div>
+                        <div class="value" id="statSent">0</div>
+                        <div class="change neutral" id="statSentChange">This month</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Open Rate</div>
+                        <div class="value" id="statOpenRate">--</div>
+                        <div class="change up" id="statOpenChange">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Click Rate</div>
+                        <div class="value" id="statClickRate">--</div>
+                        <div class="change up" id="statClickChange">--</div>
+                    </div>
+                </div>
+
+                <div class="section-header">
+                    <div class="section-title">Active Campaigns</div>
+                    <button class="btn btn-ghost btn-sm" onclick="showPage('campaigns')">View All →</button>
+                </div>
+                <div class="campaigns-grid" id="dashCampaigns">
+                    <!-- Populated by JS -->
+                </div>
+
+                <div class="section-header">
+                    <div class="section-title">Recent Subscribers</div>
+                    <button class="btn btn-ghost btn-sm" onclick="showPage('subscribers')">View All →</button>
+                </div>
+                <div class="table-card">
+                    <div class="table-toolbar">
+                        <span class="info" id="subCountLabel">Loading...</span>
+                        <button class="btn btn-ghost btn-sm" onclick="loadSubscribers()">↻ Refresh</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Name</th>
+                                <th>Source</th>
+                                <th>Status</th>
+                                <th>Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subTableBody">
+                            <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px;">Loading subscribers...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════
+                 ALL CAMPAIGNS
+                 ═══════════════════════════════════════════════════ -->
+            <div class="page-section" id="page-campaigns">
+                <div class="section-header" style="margin-bottom:20px;">
+                    <div class="section-title">All Campaigns</div>
+                    <button class="btn btn-primary btn-sm" onclick="showPage('create')">+ New Campaign</button>
+                </div>
+                <div class="table-card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Campaign</th>
+                                <th>Status</th>
+                                <th>Recipients</th>
+                                <th>Open Rate</th>
+                                <th>Click Rate</th>
+                                <th>Created</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="campaignTableBody">
+                            <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">Loading campaigns...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════
+                 CREATE CAMPAIGN
+                 ═══════════════════════════════════════════════════ -->
+            <div class="page-section" id="page-create">
+                <div class="builder-grid">
+                    <div>
+                        <div class="form-card" style="margin-bottom:20px;">
+                            <h3>📧 Campaign Details</h3>
+                            <div class="form-group">
+                                <label>Campaign Name</label>
+                                <input type="text" id="campName" placeholder="e.g. Q1 Property Inquiry Nurture">
+                            </div>
+                            <div class="form-group">
+                                <label>Subject Line</label>
+                                <input type="text" id="campSubject" placeholder="e.g. New Commercial Listings in SW Florida">
+                            </div>
+                            <div class="form-group">
+                                <label>From Name</label>
+                                <input type="text" id="campFromName" value="CRE Consultants">
+                            </div>
+                            <div class="form-group">
+                                <label>From Email</label>
+                                <input type="text" id="campFromEmail" value="noreply@cre-us.com" readonly style="color:var(--text-muted);">
+                            </div>
+                            <div class="form-group">
+                                <label>Campaign Type</label>
+                                <select id="campType">
+                                    <option value="broadcast">Single Broadcast</option>
+                                    <option value="drip">Drip Sequence</option>
+                                    <option value="automated">Automated Trigger</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-card" style="margin-bottom:20px;">
+                            <h3>📝 Email Template</h3>
+                            <div class="form-group">
+                                <label>Choose Template</label>
+                                <select id="campTemplate" onchange="updatePreview()">
+                                    <option value="blank">Blank Template</option>
+                                    <option value="leadWelcome">Lead Welcome</option>
+                                    <option value="propertyAlert">Property Alert</option>
+                                    <option value="marketUpdate">Market Update</option>
+                                    <option value="listingDrip1">Listing Drip - Email 1</option>
+                                    <option value="reEngagement">Re-engagement</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Email Body (HTML supported)</label>
+                                <textarea id="campBody" placeholder="Write your email content here. Use {{name}} for personalization..." rows="10"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-card" id="dripSection" style="display:none;">
+                            <h3>🔄 Drip Sequence</h3>
+                            <div class="sequence-timeline" id="sequenceTimeline">
+                                <div class="sequence-step">
+                                    <div class="step-header">
+                                        <span class="step-label">Email 1 — Day 0</span>
+                                        <span class="step-delay">Immediately</span>
+                                    </div>
+                                    <div class="step-subject">Welcome to CRE Consultants</div>
+                                    <div class="step-preview">Introduction, what to expect, featured listings...</div>
+                                </div>
+                            </div>
+                            <button class="add-step-btn" onclick="addSequenceStep()">+ Add Email to Sequence</button>
+                        </div>
+
+                        <div class="form-card" style="margin-top:20px;">
+                            <h3>👥 Recipients</h3>
+                            <div class="form-group">
+                                <label>Send To</label>
+                                <select id="campAudience">
+                                    <option value="all">All Active Subscribers</option>
+                                    <option value="segment-buyers">Segment: Potential Buyers</option>
+                                    <option value="segment-sellers">Segment: Business Sellers</option>
+                                    <option value="segment-investors">Segment: Investors</option>
+                                    <option value="segment-new">Segment: New Leads (Last 30 Days)</option>
+                                    <option value="manual">Manual Selection</option>
+                                </select>
+                            </div>
+                            <div style="display:flex;gap:10px;margin-top:8px;">
+                                <button class="btn btn-secondary" onclick="saveDraft()">💾 Save Draft</button>
+                                <button class="btn btn-primary" onclick="sendCampaign()" id="sendBtn">🚀 Send Campaign</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview Panel -->
+                    <div>
+                        <div class="form-card" style="position:sticky;top:96px;">
+                            <h3>👁️ Preview</h3>
+                            <div class="preview-frame">
+                                <div class="preview-bar">
+                                    <span class="preview-dot r"></span>
+                                    <span class="preview-dot y"></span>
+                                    <span class="preview-dot g"></span>
+                                </div>
+                                <div class="preview-body" id="emailPreview">
+                                    <div class="email-header">
+                                        <div class="from">CRE Consultants &lt;noreply@cre-us.com&gt;</div>
+                                        <div class="subject" id="previewSubject">Your subject line here...</div>
+                                    </div>
+                                    <div id="previewContent">
+                                        <p style="color:var(--text-muted);text-align:center;margin-top:40px;">Start typing to see preview</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-top:12px;font-size:11px;color:var(--text-muted);">
+                                Personalization tags: <code style="background:var(--bg-gray);padding:2px 5px;border-radius:3px;">{{name}}</code>
+                                <code style="background:var(--bg-gray);padding:2px 5px;border-radius:3px;">{{email}}</code>
+                                <code style="background:var(--bg-gray);padding:2px 5px;border-radius:3px;">{{company}}</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════
+                 TEMPLATES
+                 ═══════════════════════════════════════════════════ -->
+            <div class="page-section" id="page-templates">
+                <div class="section-header" style="margin-bottom:20px;">
+                    <div class="section-title">Email Templates</div>
+                    <button class="btn btn-primary btn-sm" onclick="openNewTemplateModal()">+ New Template</button>
+                </div>
+                <div class="templates-grid" id="templatesGrid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════
+                 SUBSCRIBERS
+                 ═══════════════════════════════════════════════════ -->
+            <div class="page-section" id="page-subscribers">
+                <div class="section-header" style="margin-bottom:20px;">
+                    <div class="section-title">Subscriber List</div>
+                    <div style="display:flex;gap:8px;">
+                        <button class="btn btn-secondary btn-sm" onclick="showPage('import')">📥 Import</button>
+                        <button class="btn btn-primary btn-sm" onclick="openAddSubscriberModal()">+ Add Subscriber</button>
+                    </div>
+                </div>
+                <div class="table-card">
+                    <div class="table-toolbar">
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            <input type="text" id="subSearch" placeholder="Search subscribers..." style="padding:7px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;width:260px;" oninput="filterSubscribers()">
+                            <select id="subFilter" style="padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;" onchange="filterSubscribers()">
+                                <option value="all">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="bounced">Bounced</option>
+                                <option value="unsubscribed">Unsubscribed</option>
+                            </select>
+                        </div>
+                        <span class="info" id="subFullCount">--</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Name</th>
+                                <th>Source</th>
+                                <th>Status</th>
+                                <th>Segments</th>
+                                <th>Joined</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="subFullTableBody">
+                            <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════
+                 SEGMENTS
+                 ═══════════════════════════════════════════════════ -->
+            <div class="page-section" id="page-segments">
+                <div class="section-header" style="margin-bottom:20px;">
+                    <div class="section-title">Audience Segments</div>
+                    <button class="btn btn-primary btn-sm" onclick="openNewSegmentModal()">+ New Segment</button>
+                </div>
+                <div class="segments-grid" id="segmentsGrid">
+                    <!-- Default segments -->
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════
+                 IMPORT
+                 ═══════════════════════════════════════════════════ -->
+            <div class="page-section" id="page-import">
+                <div class="section-header" style="margin-bottom:20px;">
+                    <div class="section-title">Import Subscribers</div>
+                </div>
+
+                <div class="import-zone" onclick="document.getElementById('csvFile').click()">
+                    <div class="icon">📄</div>
+                    <h3>Drop CSV file here or click to browse</h3>
+                    <p>CSV should include columns: email, name (optional), source (optional)</p>
+                    <input type="file" id="csvFile" accept=".csv" style="display:none;" onchange="handleCSVUpload(event)">
+                </div>
+
+                <div class="import-manual">
+                    <h3 style="font-size:14px;font-weight:700;margin-bottom:14px;">Or add manually</h3>
+                    <div class="form-group">
+                        <label>Paste emails (one per line)</label>
+                        <textarea id="manualEmails" placeholder="john@example.com&#10;sarah@company.com&#10;mike@business.com" rows="6"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Source Tag</label>
+                        <input type="text" id="manualSource" placeholder="e.g. CIBB Leads, Website Signup, Referral">
+                    </div>
+                    <button class="btn btn-primary" onclick="importManualEmails()">📥 Import Subscribers</button>
+                </div>
+
+                <div class="form-card" style="margin-top:20px;">
+                    <h3>🔗 CRM Lead Import</h3>
+                    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;">Import contacts directly from your CRM pipeline who have email addresses.</p>
+                    <div style="display:flex;gap:10px;">
+                        <button class="btn btn-secondary" onclick="importFromCRM('all')">Import All CRM Leads</button>
+                        <button class="btn btn-secondary" onclick="importFromCRM('new')">Import New Leads Only</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         ADD SUBSCRIBER MODAL
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="modal-overlay" id="addSubModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Add Subscriber</h3>
+                <button class="modal-close" onclick="closeModal('addSubModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Email Address *</label>
+                    <input type="email" id="newSubEmail" placeholder="email@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="newSubName" placeholder="John Smith">
+                </div>
+                <div class="form-group">
+                    <label>Source</label>
+                    <input type="text" id="newSubSource" placeholder="e.g. Website, Referral, CIBB">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('addSubModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="addSubscriber()">Add Subscriber</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         JAVASCRIPT — Full API Integration
+         ═══════════════════════════════════════════════════════════ -->
+    <script>
+        // ── State ──────────────────────────────────────────────────
+        let currentPage = 'dashboard';
+        let subscribers = [];
+        let campaigns = [];
+        let dripStepCount = 1;
+
+        // ── Templates Data ─────────────────────────────────────────
+        const emailTemplates = {
+            blank: { name: 'Blank', icon: '📄', desc: 'Start from scratch', subject: '', body: '' },
+            leadWelcome: {
+                name: 'Lead Welcome',
+                icon: '👋',
+                desc: 'Welcome new leads to CRE',
+                subject: 'Welcome to CRE Consultants — Your Commercial Real Estate Partner',
+                body: '<h2>Welcome, {{name}}!</h2>\n<p>Thank you for your interest in commercial real estate opportunities in Southwest Florida.</p>\n<p>At CRE Consultants, we specialize in connecting business owners and investors with the right commercial properties. Whether you\'re looking to buy, sell, or lease, our team of licensed brokers is here to guide you.</p>\n<h3>What\'s Next?</h3>\n<ul>\n<li>Browse our <a href="https://cre-us.com">latest listings</a></li>\n<li>Tell us about your property needs</li>\n<li>Schedule a consultation with our team</li>\n</ul>\n<p>We look forward to working with you.</p>\n<p><strong>CRE Consultants</strong><br>1415 Hendry St, Fort Myers, FL 33901<br>(239) 489-3600</p>'
+            },
+            propertyAlert: {
+                name: 'Property Alert',
+                icon: '🏢',
+                desc: 'New listing notification',
+                subject: 'New Commercial Listing: {{property_type}} in {{location}}',
+                body: '<h2>New Listing Alert</h2>\n<p>Hi {{name}},</p>\n<p>A new commercial property matching your criteria just hit the market:</p>\n<div style="background:#f8f9fb;padding:16px;border-radius:8px;margin:16px 0;">\n<h3 style="margin:0 0 8px;">{{property_address}}</h3>\n<p style="margin:0;color:#6b7280;">{{property_type}} | {{property_sf}} SF | {{property_price}}</p>\n</div>\n<p>Contact your broker for details or to schedule a showing.</p>\n<p><a href="https://cre-us.com" style="display:inline-block;background:#10b981;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;">View Listing</a></p>'
+            },
+            marketUpdate: {
+                name: 'Market Update',
+                icon: '📈',
+                desc: 'Monthly market newsletter',
+                subject: 'SW Florida CRE Market Update — {{month}} {{year}}',
+                body: '<h2>SW Florida Commercial Real Estate Market Update</h2>\n<p>Hi {{name}},</p>\n<p>Here\'s your monthly snapshot of the Southwest Florida commercial real estate market:</p>\n<h3>Key Highlights</h3>\n<ul>\n<li>Cap rates remain competitive across retail and office segments</li>\n<li>Industrial warehouse demand continues to outpace supply</li>\n<li>Notable transactions in the Fort Myers and Naples corridors</li>\n</ul>\n<h3>Featured Listings</h3>\n<p>[Insert current featured properties here]</p>\n<p>Have questions about the market? Reach out to our team anytime.</p>\n<p><strong>CRE Consultants</strong></p>'
+            },
+            listingDrip1: {
+                name: 'Listing Drip — Email 1',
+                icon: '🔄',
+                desc: 'First email in listing nurture',
+                subject: 'Thank You for Your Inquiry — {{name}}',
+                body: '<h2>Thanks for reaching out, {{name}}!</h2>\n<p>We received your inquiry about commercial properties in Southwest Florida. Our team is reviewing your requirements and will be in touch shortly with personalized recommendations.</p>\n<p>In the meantime, here are some resources:</p>\n<ul>\n<li><a href="https://cre-us.com">Browse current listings</a></li>\n<li>Learn about our <a href="https://cre-us.com">brokerage services</a></li>\n</ul>\n<p>Your dedicated broker will reach out within 24 hours.</p>'
+            },
+            reEngagement: {
+                name: 'Re-engagement',
+                icon: '🔔',
+                desc: 'Win back inactive contacts',
+                subject: 'We Miss You, {{name}} — See What\'s New at CRE',
+                body: '<h2>It\'s been a while, {{name}}!</h2>\n<p>We noticed you haven\'t been in touch recently. The Southwest Florida commercial real estate market has been active, and we wanted to make sure you don\'t miss out.</p>\n<h3>Here\'s what\'s new:</h3>\n<ul>\n<li>New listings in Fort Myers, Naples, and Cape Coral</li>\n<li>Updated market reports for Q1</li>\n<li>Exclusive buyer and seller opportunities</li>\n</ul>\n<p>Would you like to reconnect? We\'re here when you\'re ready.</p>\n<p><a href="https://cre-us.com" style="display:inline-block;background:#10b981;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;">View Listings</a></p>'
+            }
+        };
+
+        // ── Default Segments ───────────────────────────────────────
+        const defaultSegments = [
+            { id: 'buyers', name: 'Potential Buyers', icon: '🏢', color: 'var(--accent-blue-bg)', count: 0, desc: 'Contacts interested in purchasing' },
+            { id: 'sellers', name: 'Business Sellers', icon: '💼', color: 'var(--accent-green-bg)', count: 0, desc: 'Business owners looking to sell' },
+            { id: 'investors', name: 'Investors', icon: '📊', color: 'var(--accent-purple-bg)', count: 0, desc: 'Investment-focused contacts' },
+            { id: 'new-leads', name: 'New Leads (30d)', icon: '✨', color: 'var(--accent-amber-bg)', count: 0, desc: 'Leads from the last 30 days' },
+            { id: 'cibb', name: 'CIBB Contacts', icon: '🤝', color: 'var(--accent-blue-bg)', count: 0, desc: 'Business brokerage leads' },
+            { id: 'newsletter', name: 'Newsletter', icon: '📧', color: 'var(--accent-green-bg)', count: 0, desc: 'Opted into market updates' }
+        ];
+
+        // ── Navigation ─────────────────────────────────────────────
+        function showPage(page) {
+            currentPage = page;
+            document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('page-' + page).classList.add('active');
+
+            document.querySelectorAll('.sidebar-item[data-page]').forEach(el => {
+                el.classList.toggle('active', el.dataset.page === page);
+            });
+
+            const titles = {
+                dashboard: 'Email Marketing',
+                campaigns: 'All Campaigns',
+                create: 'Create Campaign',
+                templates: 'Email Templates',
+                subscribers: 'Subscribers',
+                segments: 'Audience Segments',
+                import: 'Import Subscribers'
+            };
+            document.getElementById('pageTitle').textContent = titles[page] || 'Sunday-Mail';
+        }
+
+        // ── Toast ──────────────────────────────────────────────────
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast ' + type;
+            toast.innerHTML = message;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 4000);
+        }
+
+        // ── Modal ──────────────────────────────────────────────────
+        function openModal(id) { document.getElementById(id).classList.add('visible'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('visible'); }
+        function openAddSubscriberModal() { openModal('addSubModal'); }
+
+        // ── API Calls ──────────────────────────────────────────────
+        async function apiCall(url, method = 'GET', body = null) {
+            try {
+                const opts = { method, headers: { 'Content-Type': 'application/json' } };
+                if (body) opts.body = JSON.stringify(body);
+                const res = await fetch(url, opts);
+                return await res.json();
+            } catch (err) {
+                console.error('API Error:', err);
+                return { error: err.message };
+            }
+        }
+
+        // ── Load Dashboard Data ────────────────────────────────────
+        async function loadDashboard() {
+            // Load subscribers for count
+            await loadSubscribers();
+
+            // Load campaigns
+            await loadCampaigns();
+
+            // Update stats from real data
+            document.getElementById('statSubscribers').textContent = subscribers.length.toLocaleString();
+            document.getElementById('statSubChange').textContent = subscribers.length > 0 ? 'Active subscribers' : 'No subscribers yet';
+
+            // Render dashboard campaign cards
+            renderDashboardCampaigns();
+
+            // Check SES status
+            checkSESStatus();
+        }
+
+        async function loadSubscribers() {
+            try {
+                const data = await apiCall('/api/subscribers/list');
+                if (data && !data.error) {
+                    subscribers = Array.isArray(data) ? data : (data.subscribers || []);
+                }
+            } catch (e) {
+                subscribers = [];
+            }
+            renderSubscriberTable();
+            renderFullSubscriberTable();
+        }
+
+        async function loadCampaigns() {
+            try {
+                const data = await apiCall('/api/campaign/list');
+                if (data && !data.error) {
+                    campaigns = Array.isArray(data) ? data : (data.campaigns || []);
+                }
+            } catch (e) {
+                campaigns = [];
+            }
+            renderCampaignTable();
+        }
+
+        function checkSESStatus() {
+            // Check if SES is in production or sandbox
+            // For now we know it's sandbox - this can be updated via env check
+            const statusEl = document.getElementById('sesStatus');
+            const labelEl = document.getElementById('sesLabel');
+            <% if (typeof sesProduction !== 'undefined' && sesProduction) { %>
+                statusEl.className = 'ses-status production';
+                labelEl.textContent = 'SES Production';
+            <% } else { %>
+                statusEl.className = 'ses-status sandbox';
+                labelEl.textContent = 'SES Sandbox';
+            <% } %>
+        }
+
+        // ── Render Functions ───────────────────────────────────────
+        function renderSubscriberTable() {
+            const tbody = document.getElementById('subTableBody');
+            const label = document.getElementById('subCountLabel');
+
+            if (subscribers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><div class="empty-icon">📧</div><h3>No subscribers yet</h3><p>Add subscribers or import from CSV</p></td></tr>';
+                label.textContent = 'No subscribers';
+                return;
+            }
+
+            const recent = subscribers.slice(0, 5);
+            label.textContent = 'Showing ' + recent.length + ' of ' + subscribers.length.toLocaleString();
+
+            tbody.innerHTML = recent.map(s => {
+                const statusClass = s.status === 'active' ? 'sub-active' : s.status === 'bounced' ? 'sub-bounced' : 'sub-unsub';
+                const joined = s.created_at ? new Date(s.created_at).toLocaleDateString() : '--';
+                return '<tr>' +
+                    '<td class="email-cell">' + (s.email || '--') + '</td>' +
+                    '<td>' + (s.name || '--') + '</td>' +
+                    '<td>' + (s.source || 'Manual') + '</td>' +
+                    '<td><span class="sub-status ' + statusClass + '">' + (s.status || 'active') + '</span></td>' +
+                    '<td>' + joined + '</td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        function renderFullSubscriberTable() {
+            const tbody = document.getElementById('subFullTableBody');
+            const label = document.getElementById('subFullCount');
+
+            if (subscribers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon">👥</div><h3>No subscribers</h3><p>Import subscribers or add them manually</p></td></tr>';
+                label.textContent = '0 subscribers';
+                return;
+            }
+
+            label.textContent = subscribers.length.toLocaleString() + ' subscribers';
+            tbody.innerHTML = subscribers.map(s => {
+                const statusClass = s.status === 'active' ? 'sub-active' : s.status === 'bounced' ? 'sub-bounced' : 'sub-unsub';
+                const joined = s.created_at ? new Date(s.created_at).toLocaleDateString() : '--';
+                return '<tr>' +
+                    '<td class="email-cell">' + (s.email || '--') + '</td>' +
+                    '<td>' + (s.name || '--') + '</td>' +
+                    '<td>' + (s.source || 'Manual') + '</td>' +
+                    '<td><span class="sub-status ' + statusClass + '">' + (s.status || 'active') + '</span></td>' +
+                    '<td>—</td>' +
+                    '<td>' + joined + '</td>' +
+                    '<td><button class="btn btn-ghost btn-sm" onclick="removeSubscriber(\'' + s.email + '\')">✕</button></td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        function renderDashboardCampaigns() {
+            const grid = document.getElementById('dashCampaigns');
+
+            if (campaigns.length === 0) {
+                grid.innerHTML =
+                    '<div class="campaign-card" onclick="showPage(\'create\')">' +
+                        '<div class="campaign-top"><span class="campaign-name">Create Your First Campaign</span><span class="status-pill status-draft">New</span></div>' +
+                        '<div class="campaign-desc">Set up a property inquiry nurture, newsletter, or re-engagement series</div>' +
+                        '<div class="campaign-metrics"><div class="campaign-metric"><div class="metric-val">--</div><div class="metric-label">Recipients</div></div><div class="campaign-metric"><div class="metric-val">--</div><div class="metric-label">Open Rate</div></div><div class="campaign-metric"><div class="metric-val">--</div><div class="metric-label">Click Rate</div></div></div>' +
+                    '</div>';
+                return;
+            }
+
+            grid.innerHTML = campaigns.map(c => {
+                const statusClass = c.status === 'active' ? 'status-active' : c.status === 'paused' ? 'status-paused' : c.status === 'completed' ? 'status-completed' : 'status-draft';
+                return '<div class="campaign-card">' +
+                    '<div class="campaign-top"><span class="campaign-name">' + (c.name || 'Untitled') + '</span><span class="status-pill ' + statusClass + '">' + (c.status || 'draft') + '</span></div>' +
+                    '<div class="campaign-desc">' + (c.description || c.subject || '') + '</div>' +
+                    '<div class="campaign-metrics">' +
+                        '<div class="campaign-metric"><div class="metric-val">' + (c.recipients || 0) + '</div><div class="metric-label">Recipients</div></div>' +
+                        '<div class="campaign-metric"><div class="metric-val">' + (c.open_rate || '--') + '</div><div class="metric-label">Open Rate</div></div>' +
+                        '<div class="campaign-metric"><div class="metric-val">' + (c.click_rate || '--') + '</div><div class="metric-label">Click Rate</div></div>' +
+                    '</div></div>';
+            }).join('');
+        }
+
+        function renderCampaignTable() {
+            const tbody = document.getElementById('campaignTableBody');
+
+            if (campaigns.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon">🚀</div><h3>No campaigns yet</h3><p>Create your first campaign to start reaching subscribers</p><button class="btn btn-primary btn-sm" onclick="showPage(\'create\')" style="margin-top:8px;">+ Create Campaign</button></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = campaigns.map(c => {
+                const statusClass = c.status === 'active' ? 'status-active' : c.status === 'paused' ? 'status-paused' : c.status === 'completed' ? 'status-completed' : 'status-draft';
+                const created = c.created_at ? new Date(c.created_at).toLocaleDateString() : '--';
+                return '<tr>' +
+                    '<td style="font-weight:600;">' + (c.name || 'Untitled') + '</td>' +
+                    '<td><span class="status-pill ' + statusClass + '">' + (c.status || 'draft') + '</span></td>' +
+                    '<td>' + (c.recipients || 0) + '</td>' +
+                    '<td>' + (c.open_rate || '--') + '</td>' +
+                    '<td>' + (c.click_rate || '--') + '</td>' +
+                    '<td>' + created + '</td>' +
+                    '<td><button class="btn btn-ghost btn-sm">Edit</button></td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        // ── Templates ──────────────────────────────────────────────
+        function renderTemplates() {
+            const grid = document.getElementById('templatesGrid');
+            grid.innerHTML = Object.entries(emailTemplates).map(([key, t]) => {
+                return '<div class="template-card" onclick="useTemplate(\'' + key + '\')">' +
+                    '<div class="template-preview">' + t.icon + '</div>' +
+                    '<div class="template-info"><h4>' + t.name + '</h4><p>' + t.desc + '</p></div>' +
+                    '</div>';
+            }).join('');
+        }
+
+        function useTemplate(key) {
+            const t = emailTemplates[key];
+            if (!t) return;
+            document.getElementById('campTemplate').value = key;
+            document.getElementById('campSubject').value = t.subject;
+            document.getElementById('campBody').value = t.body;
+            updatePreview();
+            showPage('create');
+            showToast('Template loaded: ' + t.name, 'success');
+        }
+
+        // ── Segments ───────────────────────────────────────────────
+        function renderSegments() {
+            const grid = document.getElementById('segmentsGrid');
+            grid.innerHTML = defaultSegments.map(s => {
+                return '<div class="segment-card">' +
+                    '<div class="segment-icon" style="background:' + s.color + ';">' + s.icon + '</div>' +
+                    '<h4>' + s.name + '</h4>' +
+                    '<div class="seg-count">' + s.count + ' contacts · ' + s.desc + '</div>' +
+                    '</div>';
+            }).join('');
+        }
+
+        // ── Preview ────────────────────────────────────────────────
+        function updatePreview() {
+            const subject = document.getElementById('campSubject').value || 'Your subject line here...';
+            const body = document.getElementById('campBody').value;
+            document.getElementById('previewSubject').textContent = subject;
+
+            if (body) {
+                // Render HTML preview with sample personalization
+                const rendered = body
+                    .replace(/\{\{name\}\}/g, 'John')
+                    .replace(/\{\{email\}\}/g, 'john@example.com')
+                    .replace(/\{\{company\}\}/g, 'ABC Properties')
+                    .replace(/\{\{month\}\}/g, new Date().toLocaleString('default', { month: 'long' }))
+                    .replace(/\{\{year\}\}/g, new Date().getFullYear());
+                document.getElementById('previewContent').innerHTML = rendered;
+            } else {
+                document.getElementById('previewContent').innerHTML = '<p style="color:var(--text-muted);text-align:center;margin-top:40px;">Start typing to see preview</p>';
+            }
+        }
+
+        // ── Campaign Type Toggle ───────────────────────────────────
+        document.getElementById('campType').addEventListener('change', function() {
+            document.getElementById('dripSection').style.display = this.value === 'drip' ? 'block' : 'none';
+        });
+
+        // ── Drip Sequence ──────────────────────────────────────────
+        function addSequenceStep() {
+            dripStepCount++;
+            const days = dripStepCount <= 2 ? 3 : dripStepCount <= 3 ? 7 : 14;
+            const timeline = document.getElementById('sequenceTimeline');
+            const step = document.createElement('div');
+            step.className = 'sequence-step';
+            step.innerHTML =
+                '<div class="step-header">' +
+                    '<span class="step-label">Email ' + dripStepCount + ' — Day ' + days + '</span>' +
+                    '<span class="step-delay">After ' + days + ' days</span>' +
+                '</div>' +
+                '<input type="text" placeholder="Subject line..." style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:4px;font-family:inherit;font-size:13px;margin-bottom:6px;">' +
+                '<textarea placeholder="Email content..." style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:4px;font-family:inherit;font-size:12px;min-height:60px;resize:vertical;"></textarea>';
+            timeline.appendChild(step);
+        }
+
+        // ── Subject / Body live preview binding ────────────────────
+        document.getElementById('campSubject').addEventListener('input', updatePreview);
+        document.getElementById('campBody').addEventListener('input', updatePreview);
+
+        // ── Add Subscriber ─────────────────────────────────────────
+        async function addSubscriber() {
+            const email = document.getElementById('newSubEmail').value.trim();
+            const name = document.getElementById('newSubName').value.trim();
+            const source = document.getElementById('newSubSource').value.trim();
+
+            if (!email) { showToast('Email is required', 'error'); return; }
+
+            const result = await apiCall('/api/subscribers/add', 'POST', { email, name, source: source || 'Manual' });
+            if (result && !result.error) {
+                showToast('Subscriber added: ' + email, 'success');
+                closeModal('addSubModal');
+                document.getElementById('newSubEmail').value = '';
+                document.getElementById('newSubName').value = '';
+                document.getElementById('newSubSource').value = '';
+                await loadSubscribers();
+                document.getElementById('statSubscribers').textContent = subscribers.length.toLocaleString();
+            } else {
+                showToast('Error: ' + (result.error || 'Failed to add subscriber'), 'error');
+            }
+        }
+
+        // ── Remove Subscriber ──────────────────────────────────────
+        async function removeSubscriber(email) {
+            if (!confirm('Remove ' + email + ' from subscribers?')) return;
+            // Use unsubscribe endpoint
+            const result = await apiCall('/unsubscribe?email=' + encodeURIComponent(email));
+            showToast('Removed: ' + email, 'info');
+            await loadSubscribers();
+        }
+
+        // ── Filter Subscribers ─────────────────────────────────────
+        function filterSubscribers() {
+            const search = document.getElementById('subSearch').value.toLowerCase();
+            const status = document.getElementById('subFilter').value;
+
+            const filtered = subscribers.filter(s => {
+                const matchSearch = !search ||
+                    (s.email && s.email.toLowerCase().includes(search)) ||
+                    (s.name && s.name.toLowerCase().includes(search));
+                const matchStatus = status === 'all' || s.status === status;
+                return matchSearch && matchStatus;
+            });
+
+            const tbody = document.getElementById('subFullTableBody');
+            document.getElementById('subFullCount').textContent = filtered.length + ' of ' + subscribers.length + ' subscribers';
+
+            tbody.innerHTML = filtered.map(s => {
+                const statusClass = s.status === 'active' ? 'sub-active' : s.status === 'bounced' ? 'sub-bounced' : 'sub-unsub';
+                const joined = s.created_at ? new Date(s.created_at).toLocaleDateString() : '--';
+                return '<tr>' +
+                    '<td class="email-cell">' + (s.email || '--') + '</td>' +
+                    '<td>' + (s.name || '--') + '</td>' +
+                    '<td>' + (s.source || 'Manual') + '</td>' +
+                    '<td><span class="sub-status ' + statusClass + '">' + (s.status || 'active') + '</span></td>' +
+                    '<td>—</td>' +
+                    '<td>' + joined + '</td>' +
+                    '<td><button class="btn btn-ghost btn-sm" onclick="removeSubscriber(\'' + s.email + '\')">✕</button></td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        // ── CSV Upload ─────────────────────────────────────────────
+        function handleCSVUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const lines = e.target.result.split('\n').filter(l => l.trim());
+                const header = lines[0].toLowerCase();
+                const hasHeader = header.includes('email') || header.includes('name');
+                const dataLines = hasHeader ? lines.slice(1) : lines;
+
+                const recipients = dataLines.map(line => {
+                    const parts = line.split(',').map(p => p.trim().replace(/"/g, ''));
+                    return { email: parts[0], name: parts[1] || '', source: 'CSV Import' };
+                }).filter(r => r.email && r.email.includes('@'));
+
+                if (recipients.length === 0) {
+                    showToast('No valid emails found in CSV', 'error');
+                    return;
+                }
+
+                const result = await apiCall('/api/subscribers/import', 'POST', { subscribers: recipients });
+                if (result && !result.error) {
+                    showToast('Imported ' + recipients.length + ' subscribers!', 'success');
+                    await loadSubscribers();
+                    document.getElementById('statSubscribers').textContent = subscribers.length.toLocaleString();
+                } else {
+                    showToast('Import error: ' + (result.error || 'unknown'), 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ── Manual Email Import ────────────────────────────────────
+        async function importManualEmails() {
+            const text = document.getElementById('manualEmails').value.trim();
+            const source = document.getElementById('manualSource').value.trim() || 'Manual Import';
+
+            if (!text) { showToast('Please enter at least one email', 'error'); return; }
+
+            const emails = text.split('\n').map(e => e.trim()).filter(e => e.includes('@'));
+            const recipients = emails.map(e => ({ email: e, name: '', source: source }));
+
+            const result = await apiCall('/api/subscribers/import', 'POST', { subscribers: recipients });
+            if (result && !result.error) {
+                showToast('Imported ' + recipients.length + ' subscribers!', 'success');
+                document.getElementById('manualEmails').value = '';
+                await loadSubscribers();
+                document.getElementById('statSubscribers').textContent = subscribers.length.toLocaleString();
+            } else {
+                showToast('Import error: ' + (result.error || 'unknown'), 'error');
+            }
+        }
+
+        // ── CRM Import ─────────────────────────────────────────────
+        async function importFromCRM(type) {
+            showToast('Importing leads from CRM...', 'info');
+            try {
+                const leads = await apiCall('/api/crm/leads');
+                if (leads && !leads.error) {
+                    const leadsArray = Array.isArray(leads) ? leads : (leads.leads || []);
+                    const withEmails = leadsArray.filter(l => l.email);
+
+                    if (withEmails.length === 0) {
+                        showToast('No CRM leads with email addresses found', 'error');
+                        return;
+                    }
+
+                    const recipients = withEmails.map(l => ({
+                        email: l.email,
+                        name: l.name || l.contact_name || '',
+                        source: 'CRM Import'
+                    }));
+
+                    const result = await apiCall('/api/subscribers/import', 'POST', { subscribers: recipients });
+                    if (result && !result.error) {
+                        showToast('Imported ' + recipients.length + ' CRM leads as subscribers!', 'success');
+                        await loadSubscribers();
+                    }
+                } else {
+                    showToast('Could not load CRM leads', 'error');
+                }
+            } catch (err) {
+                showToast('CRM import failed: ' + err.message, 'error');
+            }
+        }
+
+        // ── Save Draft ─────────────────────────────────────────────
+        async function saveDraft() {
+            const name = document.getElementById('campName').value.trim();
+            const subject = document.getElementById('campSubject').value.trim();
+            const body = document.getElementById('campBody').value.trim();
+
+            if (!name) { showToast('Campaign name is required', 'error'); return; }
+
+            const result = await apiCall('/api/campaign/create', 'POST', {
+                name, subject, html: body, status: 'draft', send: false
+            });
+
+            if (result && !result.error) {
+                showToast('Draft saved: ' + name, 'success');
+                await loadCampaigns();
+            } else {
+                showToast('Error saving draft: ' + (result.error || 'unknown'), 'error');
+            }
+        }
+
+        // ── Send Campaign ──────────────────────────────────────────
+        async function sendCampaign() {
+            const name = document.getElementById('campName').value.trim();
+            const subject = document.getElementById('campSubject').value.trim();
+            const body = document.getElementById('campBody').value.trim();
+
+            if (!name || !subject || !body) {
+                showToast('Please fill in campaign name, subject, and email body', 'error');
+                return;
+            }
+
+            if (!confirm('Send campaign "' + name + '" to subscribers now?')) return;
+
+            const btn = document.getElementById('sendBtn');
+            btn.innerHTML = '<span class="spinner"></span> Sending...';
+            btn.disabled = true;
+
+            const result = await apiCall('/api/campaign/create', 'POST', {
+                name, subject, html: body, send: true
+            });
+
+            btn.innerHTML = '🚀 Send Campaign';
+            btn.disabled = false;
+
+            if (result && !result.error) {
+                showToast('Campaign sent successfully!', 'success');
+                await loadCampaigns();
+                // Clear form
+                document.getElementById('campName').value = '';
+                document.getElementById('campSubject').value = '';
+                document.getElementById('campBody').value = '';
+                updatePreview();
+                showPage('campaigns');
+            } else {
+                showToast('Send error: ' + (result.error || result.message || 'unknown'), 'error');
+            }
+        }
+
+        // ── Initialize ─────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+            renderTemplates();
+            renderSegments();
+        });
+    </script>
+
+</body>
+</html>

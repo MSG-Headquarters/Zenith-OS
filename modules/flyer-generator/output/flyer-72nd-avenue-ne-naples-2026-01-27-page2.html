@@ -1,0 +1,808 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>2.73± ACRE HOMESITE - 72ND AVENUE NE, NAPLES, FL 34120 - Page 2</title>
+  <style>
+    
+    @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Playfair+Display:wght@400;700&family=Open+Sans:wght@300;400;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    @page {
+      size: 8.5in 11in;
+      margin: 0;
+    }
+    
+    body {
+      font-family: 'Open Sans', 'Arial', sans-serif;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #1A1A1A;
+      background: white;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    
+    .page {
+      width: 8.5in;
+      height: 11in;
+      position: relative;
+      overflow: hidden;
+      background: white;
+      page-break-after: always;
+    }
+    
+    /* === HEADER SECTION === */
+    .header {
+      position: relative;
+      background: linear-gradient(135deg, #2a2a2a 0%, #3d3d3d 50%, #2a2a2a 100%);
+      padding: 12px 20px 8px 20px;
+    }
+    
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      pointer-events: none;
+    }
+    
+    .header-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    
+    .header-left {
+      flex: 1;
+    }
+    
+    .property-type {
+      font-family: 'Oswald', 'Arial Black', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #2E7D32;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      line-height: 1.1;
+    }
+    
+    .building-name {
+      font-family: 'Oswald', 'Arial Black', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      color: #2E7D32;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+    
+    .header-right {
+      text-align: right;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    
+    .logo-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+    
+    .logo-triangles {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .logo-triangles .row {
+      display: flex;
+      gap: 2px;
+      justify-content: flex-end;
+    }
+    
+    .logo-triangles .triangle {
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 10px solid #2E7D32;
+    }
+    
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+    
+    .logo-cre {
+      font-family: 'Oswald', 'Arial Black', sans-serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: #2E7D32;
+      line-height: 1;
+      letter-spacing: 2px;
+    }
+    
+    .logo-consultants {
+      font-family: 'Open Sans', 'Arial', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: #FFFFFF;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    
+    .logo-tagline {
+      font-family: 'Open Sans', 'Arial', sans-serif;
+      font-size: 7px;
+      color: rgba(255,255,255,0.7);
+      font-style: italic;
+      margin-top: 2px;
+    }
+    
+    .website {
+      font-family: 'Open Sans', 'Arial', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: #2E7D32;
+      margin-top: 4px;
+    }
+    
+    /* === TRANSACTION & ADDRESS BANNER === */
+    .transaction-banner {
+      background: white;
+      padding: 8px 20px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .for-sale-lease {
+      font-family: 'Playfair Display', 'Georgia', serif;
+      font-size: 36px;
+      font-weight: 400;
+      color: #2E7D32;
+      line-height: 1;
+    }
+    
+    .address-line {
+      font-family: 'Open Sans', 'Arial', sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      color: #4A4A4A;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    
+    /* === HERO IMAGE === */
+    .hero-section {
+      position: relative;
+      height: 300px;
+      overflow: hidden;
+    }
+    
+    .hero-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .hero-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #e0e0e0 0%, #c0c0c0 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      font-size: 24px;
+    }
+    
+    /* Suite highlight overlay */
+    .suite-highlight {
+      position: absolute;
+      border: 3px solid #ff0000;
+      background: transparent;
+    }
+    
+    /* === LEASE TABLE === */
+    .lease-table-section {
+      padding: 0 20px;
+      margin-top: -1px;
+    }
+    
+    .lease-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9px;
+    }
+    
+    .lease-table th {
+      background: #4A4A4A;
+      color: #FFFFFF;
+      padding: 6px 8px;
+      text-align: center;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 8px;
+      letter-spacing: 0.5px;
+    }
+    
+    .lease-table td {
+      padding: 6px 8px;
+      text-align: center;
+      border: 1px solid #CCCCCC;
+      background: white;
+    }
+    
+    /* === DETAILS SECTION === */
+    .content-section {
+      display: flex;
+      padding: 12px 20px 0 20px;
+      gap: 20px;
+    }
+    
+    .details-column {
+      flex: 1;
+    }
+    
+    .contact-column {
+      width: 200px;
+      text-align: right;
+    }
+    
+    /* Property Details */
+    .detail-row {
+      display: flex;
+      margin-bottom: 6px;
+      align-items: flex-start;
+    }
+    
+    .detail-label {
+      font-weight: 700;
+      color: #2E7D32;
+      text-transform: uppercase;
+      font-size: 10px;
+      min-width: 85px;
+      flex-shrink: 0;
+    }
+    
+    .detail-value {
+      font-size: 11px;
+      color: #1A1A1A;
+      flex: 1;
+    }
+    
+    .detail-value strong {
+      font-weight: 700;
+    }
+    
+    .detail-value a {
+      color: #2E7D32;
+      font-style: italic;
+      font-size: 10px;
+    }
+    
+    /* Description */
+    .description-section {
+      margin-top: 12px;
+      padding-right: 20px;
+    }
+    
+    .description-title {
+      font-weight: 700;
+      color: #2E7D32;
+      text-transform: uppercase;
+      font-size: 10px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .description-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #2E7D32;
+      margin-left: 8px;
+    }
+    
+    .description-text {
+      font-size: 10.5px;
+      line-height: 1.5;
+      color: #1A1A1A;
+      text-align: justify;
+    }
+    
+    .description-text strong {
+      font-weight: 700;
+    }
+    
+    /* === CONTACT SECTION === */
+    .contact-section {
+      margin-top: 0;
+    }
+    
+    .contact-header {
+      font-family: 'Open Sans', 'Arial', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: #2E7D32;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    
+    .broker-card {
+      margin-bottom: 12px;
+    }
+    
+    .broker-name {
+      font-weight: 700;
+      font-size: 11px;
+      color: #1A1A1A;
+    }
+    
+    .broker-title {
+      font-size: 10px;
+      color: #4A4A4A;
+      font-style: italic;
+    }
+    
+    .broker-phone {
+      font-size: 10px;
+      color: #1A1A1A;
+      margin-top: 2px;
+    }
+    
+    .broker-email {
+      font-size: 9px;
+      color: #2E7D32;
+    }
+    
+    .office-addresses {
+      margin-top: 16px;
+      font-size: 9px;
+      color: #4A4A4A;
+      line-height: 1.4;
+    }
+    
+    .office-address {
+      margin-bottom: 8px;
+    }
+    
+    /* === FOOTER === */
+    .footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 8px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    
+    .disclaimer {
+      font-size: 6.5px;
+      color: #666666;
+      max-width: 450px;
+      line-height: 1.3;
+    }
+    
+    .date-stamp {
+      font-size: 9px;
+      color: #666666;
+    }
+    
+    /* === GREEN ACCENT LINE === */
+    .green-accent {
+      height: 6px;
+      background: #2E7D32;
+    }
+  
+    
+    /* === PAGE 2 SPECIFIC STYLES === */
+    
+    .page-2 {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Map Section */
+    .map-section {
+      position: relative;
+      height: 380px;
+      background: #f0f0f0;
+    }
+    
+    .map-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .map-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #666;
+    }
+    
+    /* Subject marker on map */
+    .subject-marker {
+      position: absolute;
+      background: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .subject-arrow {
+      width: 0;
+      height: 0;
+      border-top: 12px solid transparent;
+      border-bottom: 12px solid transparent;
+      border-right: 20px solid #ff0000;
+    }
+    
+    .subject-label {
+      background: rgba(255, 0, 0, 0.9);
+      color: white;
+      padding: 4px 10px;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transform: rotate(-15deg);
+    }
+    
+    /* Compass */
+    .compass {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      width: 40px;
+      height: 40px;
+    }
+    
+    .compass svg {
+      width: 100%;
+      height: 100%;
+    }
+    
+    /* Highlights Panel */
+    .highlights-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 220px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      height: 100%;
+      box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+    }
+    
+    .highlights-title {
+      font-family: 'Oswald', 'Arial Black', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #2E7D32;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      letter-spacing: 1px;
+    }
+    
+    .highlight-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    
+    .highlight-bullet {
+      width: 10px;
+      height: 10px;
+      background: #2E7D32;
+      margin-right: 10px;
+      margin-top: 3px;
+      flex-shrink: 0;
+    }
+    
+    .highlight-text {
+      font-size: 11px;
+      line-height: 1.4;
+      color: #1A1A1A;
+    }
+    
+    .highlight-text strong {
+      display: block;
+      font-weight: 700;
+    }
+    
+    /* Frontage callout */
+    .frontage-callout {
+      position: absolute;
+      left: 20px;
+      bottom: 20px;
+      background: rgba(46, 125, 50, 0.9);
+      color: white;
+      padding: 12px 16px;
+    }
+    
+    .frontage-number {
+      font-family: 'Playfair Display', 'Georgia', serif;
+      font-size: 42px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    
+    .frontage-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Photo Grid */
+    .photo-grid-section {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+    }
+    
+    .photo-grid-2x2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+    }
+    
+    .photo-cell {
+      position: relative;
+      overflow: hidden;
+      background: #f0f0f0;
+    }
+    
+    .photo-cell img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .photo-cell.large {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+    
+    .photo-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #e0e0e0 0%, #c0c0c0 100%);
+      color: #888;
+      font-size: 14px;
+    }
+    
+    /* Demographics Table */
+    .demographics-section {
+      padding: 12px 20px;
+      background: white;
+      border-top: 1px solid #e0e0e0;
+    }
+    
+    .demographics-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9px;
+    }
+    
+    .demographics-table th {
+      background: white;
+      padding: 6px 12px;
+      text-align: center;
+      font-weight: 700;
+      border-bottom: 2px solid #2E7D32;
+    }
+    
+    .demographics-table th:first-child {
+      text-align: left;
+      font-weight: 700;
+    }
+    
+    .demographics-table td {
+      padding: 5px 12px;
+      text-align: center;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .demographics-table td:first-child {
+      text-align: left;
+      font-weight: 400;
+    }
+    
+    .demographics-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .traffic-row td {
+      padding-top: 8px;
+      border-top: 1px solid #ccc;
+    }
+    
+    .traffic-row td:first-child {
+      font-weight: 700;
+    }
+    
+    /* Contact section on page 2 */
+    .page2-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 10px 20px;
+      background: white;
+    }
+    
+    .page2-contact {
+      text-align: right;
+    }
+  
+  </style>
+</head>
+<body>
+  <div class="page page-2">
+    <!-- Header (same as page 1) -->
+    <div class="header">
+      <div class="header-content">
+        <div class="header-left">
+          <div class="property-type">2.73± ACRE HOMESITE</div>
+          <div class="building-name">GOLDEN GATE ESTATES</div>
+        </div>
+        <div class="header-right">
+          <div class="logo-container">
+            <div class="logo-icon">
+              <div class="logo-triangles">
+                <div class="row"><div class="triangle"></div></div>
+                <div class="row"><div class="triangle"></div><div class="triangle"></div></div>
+                <div class="row"><div class="triangle"></div><div class="triangle"></div><div class="triangle"></div></div>
+              </div>
+            </div>
+            <div class="logo-text">
+              <div class="logo-cre">CRE</div>
+              <div class="logo-consultants">CONSULTANTS</div>
+              <div class="logo-tagline">Commercial Real Estate Consultants, LLC</div>
+            </div>
+          </div>
+          <div class="website">CRECONSULTANTS.COM</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Transaction & Address -->
+    <div class="transaction-banner">
+      <div class="for-sale-lease">FOR SALE</div>
+      <div class="address-line">72ND AVENUE NE, NAPLES, FL 34120</div>
+    </div>
+    
+    <!-- Map Section with Highlights -->
+    <div class="map-section">
+      <img class="map-image" src="/sample-photos/72nd-ave-aerial.jpg" alt="Aerial view">
+      
+      <!-- Compass -->
+      <div class="compass">
+    <svg viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="25" cy="25" r="20" fill="white" stroke="#333" stroke-width="1"/>
+      <polygon points="25,8 28,20 25,18 22,20" fill="#333"/>
+      <polygon points="25,42 28,30 25,32 22,30" fill="#ccc"/>
+      <text x="25" y="7" text-anchor="middle" font-size="6" font-weight="bold" fill="#333">N</text>
+    </svg>
+  </div>
+      
+      <!-- Subject Marker -->
+      <div class="subject-marker" style="top: 45%; left: 30%;">
+        <div class="subject-arrow"></div>
+        <div class="subject-label">SUBJECT</div>
+      </div>
+      
+      
+      
+      <!-- Highlights Panel -->
+      <div class="highlights-panel">
+        <div class="highlights-title">HIGHLIGHTS</div>
+        
+        <div class="highlight-item">
+          <div class="highlight-bullet"></div>
+          <div class="highlight-text">9± miles from Publix, restaurants, shopping centers, healthcare and more</div>
+        </div>
+      
+        <div class="highlight-item">
+          <div class="highlight-bullet"></div>
+          <div class="highlight-text">Located in one of the fastest-growing areas in Southwest Florida</div>
+        </div>
+      
+        <div class="highlight-item">
+          <div class="highlight-bullet"></div>
+          <div class="highlight-text">Highly sought-after Golden Gate Estates community</div>
+        </div>
+      
+      </div>
+    </div>
+    
+    <!-- Photo Grid (for non-land properties) -->
+    
+    
+    <!-- Demographics Table (for land/development) -->
+    
+      <div class="demographics-section">
+        <table class="demographics-table">
+          <thead>
+            <tr>
+              <th>2024 DEMOGRAPHICS</th>
+              <th>3 MILES</th><th>5 MILES</th><th>10 MILES</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>EST. POPULATION</td>
+              <td>761</td><td>4,595</td><td>22,184</td>
+            </tr>
+            <tr>
+              <td>EST. HOUSEHOLDS</td>
+              <td>229</td><td>1,328</td><td>7,086</td>
+            </tr>
+            <tr>
+              <td>EST. MEDIAN HOUSEHOLD INCOME</td>
+              <td>$88,241</td><td>$91,922</td><td>$89,841</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    
+    
+    <!-- Footer with Contact -->
+    <div class="page2-footer">
+      <div class="disclaimer">The information contained herein was obtained from sources believed reliable. CRE Consultants makes no guarantees, warranties or representations as to the completeness or accuracy thereof, and is subject to errors, omissions, change of price or conditions prior to sale or lease, or withdrawal without notice.</div>
+      <div class="page2-contact">
+        <div class="contact-header">CONTACT</div>
+        
+      <div class="broker-card">
+        <div class="broker-name">Fred Kermani, CCIM, AIA</div>
+        <div class="broker-title">Partner</div>
+        <div class="broker-phone">239.659.4960</div>
+        <div class="broker-email">Fred.Kermani@CREConsultants.com</div>
+      </div>
+    
+      </div>
+    </div>
+    
+    <div class="date-stamp" style="position: absolute; bottom: 10px; right: 20px;">
+      10/08/25
+    </div>
+    
+    <!-- Green Accent Line -->
+    <div class="green-accent" style="position: absolute; bottom: 0; left: 0; right: 0;"></div>
+  </div>
+</body>
+</html>
+  

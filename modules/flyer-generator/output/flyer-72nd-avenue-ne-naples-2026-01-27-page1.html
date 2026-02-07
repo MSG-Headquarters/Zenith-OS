@@ -1,0 +1,558 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>2.73± ACRE HOMESITE - 72ND AVENUE NE, NAPLES, FL 34120</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Playfair+Display:wght@400;700&family=Open+Sans:wght@300;400;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    @page {
+      size: 8.5in 11in;
+      margin: 0;
+    }
+    
+    body {
+      font-family: 'Open Sans', 'Arial', sans-serif;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #1A1A1A;
+      background: white;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    
+    .page {
+      width: 8.5in;
+      height: 11in;
+      position: relative;
+      overflow: hidden;
+      background: white;
+      page-break-after: always;
+    }
+    
+    /* === HEADER SECTION === */
+    .header {
+      position: relative;
+      background: linear-gradient(135deg, #2a2a2a 0%, #3d3d3d 50%, #2a2a2a 100%);
+      padding: 12px 20px 8px 20px;
+    }
+    
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      pointer-events: none;
+    }
+    
+    .header-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    
+    .header-left {
+      flex: 1;
+    }
+    
+    .property-type {
+      font-family: 'Oswald', 'Arial Black', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #2E7D32;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      line-height: 1.1;
+    }
+    
+    .building-name {
+      font-family: 'Oswald', 'Arial Black', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      color: #2E7D32;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+    
+    .header-right {
+      text-align: right;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    
+    .logo-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+    
+    .logo-triangles {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .logo-triangles .row {
+      display: flex;
+      gap: 2px;
+      justify-content: flex-end;
+    }
+    
+    .logo-triangles .triangle {
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 10px solid #2E7D32;
+    }
+    
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+    
+    .logo-cre {
+      font-family: 'Oswald', 'Arial Black', sans-serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: #2E7D32;
+      line-height: 1;
+      letter-spacing: 2px;
+    }
+    
+    .logo-consultants {
+      font-family: 'Open Sans', 'Arial', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: #FFFFFF;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    
+    .logo-tagline {
+      font-family: 'Open Sans', 'Arial', sans-serif;
+      font-size: 7px;
+      color: rgba(255,255,255,0.7);
+      font-style: italic;
+      margin-top: 2px;
+    }
+    
+    .website {
+      font-family: 'Open Sans', 'Arial', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: #2E7D32;
+      margin-top: 4px;
+    }
+    
+    /* === TRANSACTION & ADDRESS BANNER === */
+    .transaction-banner {
+      background: white;
+      padding: 8px 20px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .for-sale-lease {
+      font-family: 'Playfair Display', 'Georgia', serif;
+      font-size: 36px;
+      font-weight: 400;
+      color: #2E7D32;
+      line-height: 1;
+    }
+    
+    .address-line {
+      font-family: 'Open Sans', 'Arial', sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      color: #4A4A4A;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    
+    /* === HERO IMAGE === */
+    .hero-section {
+      position: relative;
+      height: 300px;
+      overflow: hidden;
+    }
+    
+    .hero-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .hero-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #e0e0e0 0%, #c0c0c0 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      font-size: 24px;
+    }
+    
+    /* Suite highlight overlay */
+    .suite-highlight {
+      position: absolute;
+      border: 3px solid #ff0000;
+      background: transparent;
+    }
+    
+    /* === LEASE TABLE === */
+    .lease-table-section {
+      padding: 0 20px;
+      margin-top: -1px;
+    }
+    
+    .lease-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9px;
+    }
+    
+    .lease-table th {
+      background: #4A4A4A;
+      color: #FFFFFF;
+      padding: 6px 8px;
+      text-align: center;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 8px;
+      letter-spacing: 0.5px;
+    }
+    
+    .lease-table td {
+      padding: 6px 8px;
+      text-align: center;
+      border: 1px solid #CCCCCC;
+      background: white;
+    }
+    
+    /* === DETAILS SECTION === */
+    .content-section {
+      display: flex;
+      padding: 12px 20px 0 20px;
+      gap: 20px;
+    }
+    
+    .details-column {
+      flex: 1;
+    }
+    
+    .contact-column {
+      width: 200px;
+      text-align: right;
+    }
+    
+    /* Property Details */
+    .detail-row {
+      display: flex;
+      margin-bottom: 6px;
+      align-items: flex-start;
+    }
+    
+    .detail-label {
+      font-weight: 700;
+      color: #2E7D32;
+      text-transform: uppercase;
+      font-size: 10px;
+      min-width: 85px;
+      flex-shrink: 0;
+    }
+    
+    .detail-value {
+      font-size: 11px;
+      color: #1A1A1A;
+      flex: 1;
+    }
+    
+    .detail-value strong {
+      font-weight: 700;
+    }
+    
+    .detail-value a {
+      color: #2E7D32;
+      font-style: italic;
+      font-size: 10px;
+    }
+    
+    /* Description */
+    .description-section {
+      margin-top: 12px;
+      padding-right: 20px;
+    }
+    
+    .description-title {
+      font-weight: 700;
+      color: #2E7D32;
+      text-transform: uppercase;
+      font-size: 10px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .description-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #2E7D32;
+      margin-left: 8px;
+    }
+    
+    .description-text {
+      font-size: 10.5px;
+      line-height: 1.5;
+      color: #1A1A1A;
+      text-align: justify;
+    }
+    
+    .description-text strong {
+      font-weight: 700;
+    }
+    
+    /* === CONTACT SECTION === */
+    .contact-section {
+      margin-top: 0;
+    }
+    
+    .contact-header {
+      font-family: 'Open Sans', 'Arial', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: #2E7D32;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    
+    .broker-card {
+      margin-bottom: 12px;
+    }
+    
+    .broker-name {
+      font-weight: 700;
+      font-size: 11px;
+      color: #1A1A1A;
+    }
+    
+    .broker-title {
+      font-size: 10px;
+      color: #4A4A4A;
+      font-style: italic;
+    }
+    
+    .broker-phone {
+      font-size: 10px;
+      color: #1A1A1A;
+      margin-top: 2px;
+    }
+    
+    .broker-email {
+      font-size: 9px;
+      color: #2E7D32;
+    }
+    
+    .office-addresses {
+      margin-top: 16px;
+      font-size: 9px;
+      color: #4A4A4A;
+      line-height: 1.4;
+    }
+    
+    .office-address {
+      margin-bottom: 8px;
+    }
+    
+    /* === FOOTER === */
+    .footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 8px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    
+    .disclaimer {
+      font-size: 6.5px;
+      color: #666666;
+      max-width: 450px;
+      line-height: 1.3;
+    }
+    
+    .date-stamp {
+      font-size: 9px;
+      color: #666666;
+    }
+    
+    /* === GREEN ACCENT LINE === */
+    .green-accent {
+      height: 6px;
+      background: #2E7D32;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-content">
+        <div class="header-left">
+          <div class="property-type">2.73± ACRE HOMESITE</div>
+          <div class="building-name">GOLDEN GATE ESTATES</div>
+        </div>
+        <div class="header-right">
+          <div class="logo-container">
+            <div class="logo-icon">
+              <div class="logo-triangles">
+                <div class="row"><div class="triangle"></div></div>
+                <div class="row"><div class="triangle"></div><div class="triangle"></div></div>
+                <div class="row"><div class="triangle"></div><div class="triangle"></div><div class="triangle"></div></div>
+              </div>
+            </div>
+            <div class="logo-text">
+              <div class="logo-cre">CRE</div>
+              <div class="logo-consultants">CONSULTANTS</div>
+              <div class="logo-tagline">Commercial Real Estate Consultants, LLC</div>
+            </div>
+          </div>
+          <div class="website">CRECONSULTANTS.COM</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Transaction & Address -->
+    <div class="transaction-banner">
+      <div class="for-sale-lease">FOR SALE</div>
+      <div class="address-line">72ND AVENUE NE, NAPLES, FL 34120</div>
+    </div>
+    
+    <!-- Hero Image -->
+    <div class="hero-section">
+      <img class="hero-image" src="/sample-photos/72nd-ave-aerial.jpg" alt="Property exterior">
+    </div>
+    
+    <!-- Lease Table (if applicable) -->
+    
+    
+    <!-- Content Section -->
+    <div class="content-section">
+      <div class="details-column">
+        <!-- Property Details -->
+        
+      <div class="detail-row">
+        <span class="detail-label">PRICE:</span>
+        <span class="detail-value"><strong>BELOW COUNTY ASSESSED VALUE $87,000 ($31,870/Acres)</strong></span>
+      </div>
+    
+      <div class="detail-row">
+        <span class="detail-label">SIZE:</span>
+        <span class="detail-value">2.73± Acres (118,919± SF)</span>
+      </div>
+    
+      <div class="detail-row">
+        <span class="detail-label">DIMENSIONS:</span>
+        <span class="detail-value">180'± x 660'±</span>
+      </div>
+    
+      <div class="detail-row">
+        <span class="detail-label">LOCATION:</span>
+        <span class="detail-value">One block south of Immokalee Road, ½ mile west of Everglades Blvd N</span>
+      </div>
+    
+      <div class="detail-row">
+        <span class="detail-label">ZONING:</span>
+        <span class="detail-value">E - Estates, Golden Gate Estate Subdistrict (Collier County)</span>
+      </div>
+    
+      <div class="detail-row">
+        <span class="detail-label">FLOOD ZONE:</span>
+        <span class="detail-value">AH <a href="https://example.com/flood-zone-description">Click here for description</a></span>
+      </div>
+    
+      <div class="detail-row">
+        <span class="detail-label">RE TAXES:</span>
+        <span class="detail-value">$621.03 (2024)</span>
+      </div>
+    
+      <div class="detail-row">
+        <span class="detail-label">PARCEL ID:</span>
+        <span class="detail-value">39148120004</span>
+      </div>
+    
+        
+        <!-- Description -->
+        
+        <div class="description-section">
+          <div class="description-title">ACRE HOMESITE</div>
+          <div class="description-text">This 2.73± acre homesite offers both convenience and privacy, located off Immokalee Road and Everglades Boulevard N in Golden Gate Estates. Ideally positioned near significant residential and commercial development, the property provides easy access to Publix, shopping centers, restaurants and more. A wetland determination report is available upon request.</div>
+        </div>
+        
+      </div>
+      
+      <div class="contact-column">
+        <div class="contact-section">
+          <div class="contact-header">CONTACT</div>
+          
+      <div class="broker-card">
+        <div class="broker-name">Fred Kermani, CCIM, AIA</div>
+        <div class="broker-title">Partner</div>
+        <div class="broker-phone">239.659.4960<br>Cell: 239.860.6388</div>
+        <div class="broker-email">Fred.Kermani@CREConsultants.com</div>
+        <div class="broker-email">CREConsultants.com/FredKermani</div>
+      </div>
+    
+          
+          <div class="office-addresses">
+            
+              <div class="office-address">
+                12140 Carissa Commerce Ct, Suite 102<br>
+                Fort Myers, FL 33966
+              </div>
+            
+              <div class="office-address">
+                1100 Fifth Ave. S, Suite 404<br>
+                Naples, FL 34102
+              </div>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+      <div class="disclaimer">The information contained herein was obtained from sources believed reliable. CRE Consultants makes no guarantees, warranties or representations as to the completeness or accuracy thereof, and is subject to errors, omissions, change of price or conditions prior to sale or lease, or withdrawal without notice.</div>
+      <div class="date-stamp">10/08/25</div>
+    </div>
+    
+    <!-- Green Accent Line -->
+    <div class="green-accent" style="position: absolute; bottom: 0; left: 0; right: 0;"></div>
+  </div>
+</body>
+</html>
+  
