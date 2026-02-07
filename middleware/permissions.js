@@ -152,6 +152,8 @@ function loadPermissions(pool) {
 
         } catch (error) {
             console.error('[Permissions] Error loading permissions:', error);
+        } finally {
+            console.log('[Permissions] User:', req.session.user?.id, 'Permissions:', JSON.stringify(req.permissions || 'none'));
         }
         
         next();
@@ -227,3 +229,4 @@ module.exports = {
     requirePermission,
     getSidebarModules
 };
+

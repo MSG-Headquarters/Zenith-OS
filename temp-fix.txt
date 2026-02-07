@@ -1,0 +1,55 @@
+/**
+ * Middleware: Require specific module access
+ */
+function requirePermission(moduleSlug, minLevel = 'view') {
+    return (req, res, next) => {
+        // Skip for unauthenticated (auth middleware handles that)
+        if (!req.session?.user) {
+            return res.redirect('/auth/login');
+        }
+        
+        // Check user status
+        if (req.session.user.status === 'under_review') {
+            return res.redirect('/auth/under-review');
+        }
+        if (req.session.user.status === 'terminated') {
+            req.session.destroy();
+            return res.redirect('/auth/login?error=account_terminated');
+        }
+        
+        // If permissions weren't loaded, check if user has admin role in session
+        if (!req.hasModuleAccess) {
+            console.log('[Permissions] hasModuleAccess not set, checking session role');
+            const userRole = req.session.user.role?.toLowerCase();
+            if (userRole === 'admin' || userRole === 'administrator') {
+                console.log('[Permissions] User has admin role in session, allowing access');
+                return next();
+            }
+        }
+        
+        // Check permission using the helper if available
+        if (req.hasModuleAccess && req.hasModuleAccess(moduleSlug, minLevel)) {
+            return next();
+        }
+        
+        // Also check isAdmin flag directly on permissions
+        if (req.permissions?.isAdmin) {
+            return next();
+        }
+        
+        console.log('[Permissions] Access denied for user', req.session.user.id, 'to module', moduleSlug);
+        
+        if (req.xhr || req.path.startsWith('/api/')) {
+            return res.status(403).json({
+                success: false,
+                error: 'Access denied',
+                required_module: moduleSlug,
+                required_level: minLevel
+            });
+        }
+        return res.status(403).render('errors/403', {
+            message: 'You do not have permission to access this module.',
+            module: moduleSlug
+        });
+    };
+}
