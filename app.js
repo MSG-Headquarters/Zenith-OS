@@ -283,7 +283,7 @@ app.use((req, res, next) => {
 });
 
 // API Routes (must be after session middleware)
-app.use('/admin', adminRoutes(pool));
+app.use('/system', adminRoutes(pool));
 app.use('/api/danimal', danimalApi);
 app.use('/api/intel', intelApi(pool));
 

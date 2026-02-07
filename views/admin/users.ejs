@@ -332,7 +332,7 @@
 
         async function openEditModal(id) {
             try {
-                const res = await fetch('/admin/api/users/' + id);
+                const res = await fetch('/system/api/users/' + id);
                 const data = await res.json();
                 if (data.success) {
                     document.getElementById('modalTitle').textContent = 'Edit User';
@@ -361,7 +361,7 @@
                 password: document.getElementById('userPassword').value
             };
 
-            const url = id ? '/admin/api/users/' + id : '/admin/api/users';
+            const url = id ? '/system/api/users/' + id : '/system/api/users';
             const method = id ? 'PUT' : 'POST';
 
             try {
@@ -402,7 +402,7 @@
             }
 
             try {
-                const res = await fetch('/admin/api/users/' + currentUserId + '/status', {
+                const res = await fetch('/system/api/users/' + currentUserId + '/status', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: 'under_review', reason: reason })
@@ -446,7 +446,7 @@
             }
 
             try {
-                const res = await fetch('/admin/api/users/' + currentUserId + '/status', {
+                const res = await fetch('/system/api/users/' + currentUserId + '/status', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: 'terminated', reason: reason })
@@ -467,7 +467,7 @@
             if (!confirm('Activate ' + name + '\'s account?')) return;
 
             try {
-                const res = await fetch('/admin/api/users/' + id + '/status', {
+                const res = await fetch('/system/api/users/' + id + '/status', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: 'active', reason: 'Reactivated by admin' })
