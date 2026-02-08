@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Hub - Danimal Data</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1724; color: #e2e8f0; min-height: 100vh; display: flex; }
+
+        .main-content { flex: 1; margin-left: 240px; min-height: 100vh; }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 16px 32px; border-bottom: 1px solid rgba(255,255,255,0.06); background: #1a2332; }
+        .top-bar h1 { font-size: 1.35rem; font-weight: 700; }
+        .top-bar h1 .accent { color: #8b5cf6; }
+
+        .sub-tabs { display: flex; gap: 4px; padding: 12px 32px 0; background: #1a2332; }
+        .sub-tab { padding: 10px 20px; border-radius: 8px 8px 0 0; font-size: 0.85rem; font-weight: 500; color: #64748b; text-decoration: none; display: flex; align-items: center; gap: 8px; transition: all 0.15s; border: 1px solid transparent; border-bottom: none; }
+        .sub-tab:hover { color: #e2e8f0; background: rgba(255,255,255,0.03); }
+        .sub-tab.active { color: #8b5cf6; background: #0f1724; border-color: rgba(255,255,255,0.06); }
+
+        .content { padding: 24px 32px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: #1a2332; border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.06); }
+        .stat-card .stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 12px; }
+        .stat-card .stat-icon.purple { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+        .stat-card .stat-icon.green { background: rgba(16,185,129,0.12); color: #10b981; }
+        .stat-card .stat-icon.blue { background: rgba(59,130,246,0.12); color: #3b82f6; }
+        .stat-card .stat-icon.amber { background: rgba(245,158,11,0.12); color: #f59e0b; }
+        .stat-card .stat-value { font-size: 1.75rem; font-weight: 700; color: #e2e8f0; }
+        .stat-card .stat-label { font-size: 0.8rem; color: #64748b; margin-top: 4px; }
+
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+        .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+
+        .card { background: #1a2332; border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 20px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .card-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; display: flex; align-items: center; gap: 8px; }
+        .card-title i { color: #8b5cf6; }
+
+        .btn { padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; border: none; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; }
+        .btn-primary { background: #8b5cf6; color: #fff; }
+        .btn-primary:hover { background: #7c3aed; }
+        .btn-secondary { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+        .btn-success { background: #10b981; color: #fff; }
+        .btn-success:hover { background: #059669; }
+        .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed rgba(139,92,246,0.3);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+            background: rgba(139,92,246,0.03);
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: #8b5cf6;
+            background: rgba(139,92,246,0.08);
+        }
+
+        .drop-zone i {
+            font-size: 2.5rem;
+            color: #8b5cf6;
+            margin-bottom: 12px;
+        }
+
+        .drop-zone h3 {
+            font-size: 1rem;
+            color: #e2e8f0;
+            margin-bottom: 8px;
+        }
+
+        .drop-zone p {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+
+        .drop-zone .supported {
+            font-size: 0.75rem;
+            color: #64748b;
+            background: rgba(255,255,255,0.05);
+            padding: 6px 12px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        /* Data Source Cards */
+        .source-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+        .source-card {
+            background: #0f1724;
+            border-radius: 10px;
+            padding: 16px;
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.15s;
+        }
+
+        .source-card:hover {
+            border-color: rgba(139,92,246,0.3);
+        }
+
+        .source-card.loaded {
+            border-left: 3px solid #10b981;
+        }
+
+        .source-card.pending {
+            border-left: 3px solid #f59e0b;
+        }
+
+        .source-card.running {
+            border-left: 3px solid #3b82f6;
+        }
+
+        .source-header {
+            display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;
+        }
+
+        .source-icon {
+            width: 40px; height: 40px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .source-icon.dbpr { background: rgba(16,185,129,0.12); color: #10b981; }
+        .source-icon.sunbiz { background: rgba(59,130,246,0.12); color: #3b82f6; }
+        .source-icon.doh { background: rgba(236,72,153,0.12); color: #ec4899; }
+        .source-icon.county { background: rgba(245,158,11,0.12); color: #f59e0b; }
+        .source-icon.census { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+        .source-icon.fdot { background: rgba(100,116,139,0.12); color: #64748b; }
+
+        .source-status {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .source-status.loaded { background: rgba(16,185,129,0.15); color: #10b981; }
+        .source-status.pending { background: rgba(245,158,11,0.15); color: #f59e0b; }
+        .source-status.running { background: rgba(59,130,246,0.15); color: #3b82f6; }
+
+        .source-name { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; margin-bottom: 4px; }
+        .source-description { font-size: 0.8rem; color: #64748b; margin-bottom: 12px; }
+
+        .source-stats {
+            display: flex; gap: 16px; margin-bottom: 12px;
+            padding: 10px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 6px;
+        }
+
+        .source-stat {
+            text-align: center;
+        }
+
+        .source-stat-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+
+        .source-stat-label {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+
+        .source-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-top: 12px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 6px;
+        }
+
+        /* Import History Table */
+        .import-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .import-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .import-table td {
+            padding: 14px 16px;
+            font-size: 0.85rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .import-table tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .import-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .import-status.complete { background: rgba(16,185,129,0.12); color: #10b981; }
+        .import-status.running { background: rgba(59,130,246,0.12); color: #3b82f6; }
+        .import-status.failed { background: rgba(239,68,68,0.12); color: #ef4444; }
+        .import-status.queued { background: rgba(100,116,139,0.12); color: #94a3b8; }
+
+        /* API Sources Panel */
+        .api-source {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #0f1724;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .api-source-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .api-source-info {
+            flex: 1;
+        }
+
+        .api-source-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #e2e8f0;
+        }
+
+        .api-source-desc {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        .api-status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .api-status-dot.connected { background: #10b981; }
+        .api-status-dot.disconnected { background: #64748b; }
+        .api-status-dot.error { background: #ef4444; }
+
+        /* Modal */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-backdrop.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #1a2332;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .modal-close:hover {
+            color: #e2e8f0;
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            max-height: calc(90vh - 140px);
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #94a3b8;
+            margin-bottom: 6px;
+        }
+
+        .form-select, .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            background: #0f1724;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        .form-select:focus, .form-input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1a2332;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 14px 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 1100;
+        }
+
+        .toast.success { border-left: 3px solid #10b981; }
+        .toast.error { border-left: 3px solid #ef4444; }
+        .toast.show { display: flex; animation: slideIn 0.3s ease; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 1200px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .grid-3 { grid-template-columns: 1fr; }
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/sidebar') %>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <h1><span class="accent">🗄️ Data</span> Hub</h1>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-secondary" onclick="refreshStats()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+                <button class="btn btn-primary" onclick="openImportModal()"><i class="bi bi-cloud-upload"></i> New Import</button>
+            </div>
+        </div>
+
+        <div class="sub-tabs">
+            <a href="/danimal" class="sub-tab"><i class="bi bi-search"></i> Search</a>
+            <a href="/danimal/hub" class="sub-tab active"><i class="bi bi-database"></i> Data Hub</a>
+            <a href="/danimal/enrichment" class="sub-tab"><i class="bi bi-magic"></i> Enrichment</a>
+            <a href="/danimal/exports" class="sub-tab"><i class="bi bi-download"></i> Exports</a>
+        </div>
+
+        <div class="content">
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon purple"><i class="bi bi-database"></i></div>
+                    <div class="stat-value" id="totalLeads"><%= stats?.total?.toLocaleString() || '0' %></div>
+                    <div class="stat-label">Total Records</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="bi bi-check-circle"></i></div>
+                    <div class="stat-value" id="sourcesLoaded"><%= stats?.sources || '0' %></div>
+                    <div class="stat-label">Data Sources Loaded</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="bi bi-telephone"></i></div>
+                    <div class="stat-value" id="withPhone"><%= stats?.with_phone?.toLocaleString() || '0' %></div>
+                    <div class="stat-label">With Phone Numbers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon amber"><i class="bi bi-envelope"></i></div>
+                    <div class="stat-value" id="withEmail"><%= stats?.with_email?.toLocaleString() || '0' %></div>
+                    <div class="stat-label">With Email Addresses</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div>
+                    <!-- Drop Zone -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><i class="bi bi-cloud-arrow-up"></i> Quick Import</div>
+                        </div>
+                        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                            <i class="bi bi-file-earmark-arrow-up"></i>
+                            <h3>Drop files here to import</h3>
+                            <p>or click to browse</p>
+                            <span class="supported">CSV, JSON, ZIP supported</span>
+                        </div>
+                        <input type="file" id="fileInput" style="display: none;" accept=".csv,.json,.zip" multiple onchange="handleFileSelect(event)">
+                    </div>
+
+                    <!-- Data Sources -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><i class="bi bi-collection"></i> Data Sources</div>
+                        </div>
+                        <div class="source-grid">
+                            <% sources.forEach(source => { %>
+                                <div class="source-card <%= source.status %>">
+                                    <div class="source-header">
+                                        <div class="source-icon <%= source.icon_class %>"><i class="bi bi-<%= source.icon %>"></i></div>
+                                        <span class="source-status <%= source.status %>">
+                                            <%= source.status === 'loaded' ? '✓ Loaded' : source.status === 'running' ? '⟳ Running' : '○ Pending' %>
+                                        </span>
+                                    </div>
+                                    <div class="source-name"><%= source.name %></div>
+                                    <div class="source-description"><%= source.description %></div>
+                                    <div class="source-stats">
+                                        <div class="source-stat">
+                                            <div class="source-stat-value"><%= source.records?.toLocaleString() || '0' %></div>
+                                            <div class="source-stat-label">Records</div>
+                                        </div>
+                                        <div class="source-stat">
+                                            <div class="source-stat-value"><%= source.last_updated || 'Never' %></div>
+                                            <div class="source-stat-label">Updated</div>
+                                        </div>
+                                    </div>
+                                    <% if (source.status === 'running') { %>
+                                        <div class="progress-container">
+                                            <div class="progress-bar">
+                                                <div class="progress-fill" style="width: <%= source.progress || 0 %>%"></div>
+                                            </div>
+                                            <div class="progress-text">
+                                                <span><%= source.imported?.toLocaleString() || 0 %> imported</span>
+                                                <span><%= source.progress || 0 %>%</span>
+                                            </div>
+                                        </div>
+                                    <% } else { %>
+                                        <div class="source-actions">
+                                            <% if (source.status === 'pending') { %>
+                                                <button class="btn btn-primary btn-sm" onclick="startImport('<%= source.id %>')">
+                                                    <i class="bi bi-play-fill"></i> Start Import
+                                                </button>
+                                            <% } else { %>
+                                                <button class="btn btn-secondary btn-sm" onclick="refreshSource('<%= source.id %>')">
+                                                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                                                </button>
+                                            <% } %>
+                                            <button class="btn btn-secondary btn-sm" onclick="viewSourceDetails('<%= source.id %>')">
+                                                <i class="bi bi-info-circle"></i>
+                                            </button>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <!-- API Integrations -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><i class="bi bi-plug"></i> API Integrations</div>
+                            <a href="/danimal/settings" class="btn btn-secondary btn-sm"><i class="bi bi-gear"></i> Configure</a>
+                        </div>
+                        
+                        <div class="api-source">
+                            <div class="api-source-icon" style="background: rgba(66,133,244,0.12); color: #4285f4;"><i class="bi bi-geo-alt"></i></div>
+                            <div class="api-source-info">
+                                <div class="api-source-name">Google Places</div>
+                                <div class="api-source-desc">Business info & tenant ID</div>
+                            </div>
+                            <div class="api-status-dot <%= apiStatus?.google_places ? 'connected' : 'disconnected' %>"></div>
+                        </div>
+
+                        <div class="api-source">
+                            <div class="api-source-icon" style="background: rgba(59,130,246,0.12); color: #3b82f6;"><i class="bi bi-camera"></i></div>
+                            <div class="api-source-info">
+                                <div class="api-source-name">EagleView</div>
+                                <div class="api-source-desc">Aerial imagery</div>
+                            </div>
+                            <div class="api-status-dot <%= apiStatus?.eagleview ? 'connected' : 'disconnected' %>"></div>
+                        </div>
+
+                        <div class="api-source">
+                            <div class="api-source-icon" style="background: rgba(139,92,246,0.12); color: #8b5cf6;"><i class="bi bi-diagram-3"></i></div>
+                            <div class="api-source-info">
+                                <div class="api-source-name">ArcGIS</div>
+                                <div class="api-source-desc">Demographics & mapping</div>
+                            </div>
+                            <div class="api-status-dot <%= apiStatus?.arcgis ? 'connected' : 'disconnected' %>"></div>
+                        </div>
+
+                        <div class="api-source">
+                            <div class="api-source-icon" style="background: rgba(100,116,139,0.12); color: #64748b;"><i class="bi bi-signpost-2"></i></div>
+                            <div class="api-source-info">
+                                <div class="api-source-name">FDOT Traffic</div>
+                                <div class="api-source-desc">Traffic count data</div>
+                            </div>
+                            <div class="api-status-dot <%= apiStatus?.fdot ? 'connected' : 'disconnected' %>"></div>
+                        </div>
+
+                        <div class="api-source">
+                            <div class="api-source-icon" style="background: rgba(16,185,129,0.12); color: #10b981;"><i class="bi bi-people"></i></div>
+                            <div class="api-source-info">
+                                <div class="api-source-name">US Census</div>
+                                <div class="api-source-desc">Demographics data</div>
+                            </div>
+                            <div class="api-status-dot <%= apiStatus?.census ? 'connected' : 'disconnected' %>"></div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Imports -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><i class="bi bi-clock-history"></i> Recent Imports</div>
+                        </div>
+                        <table class="import-table">
+                            <thead>
+                                <tr>
+                                    <th>Source</th>
+                                    <th>Records</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% recentImports.forEach(imp => { %>
+                                    <tr>
+                                        <td>
+                                            <div style="font-weight: 500;"><%= imp.source %></div>
+                                            <div style="font-size: 0.75rem; color: #64748b;"><%= imp.date %></div>
+                                        </td>
+                                        <td><%= imp.records?.toLocaleString() %></td>
+                                        <td>
+                                            <span class="import-status <%= imp.status %>">
+                                                <i class="bi bi-<%= imp.status === 'complete' ? 'check-circle' : imp.status === 'running' ? 'arrow-repeat' : 'x-circle' %>"></i>
+                                                <%= imp.status %>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal-backdrop" id="importModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title"><i class="bi bi-cloud-upload"></i> New Import</div>
+                <button class="modal-close" onclick="closeImportModal()"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Data Source</label>
+                    <select class="form-select" id="importSource">
+                        <option value="">Select source type...</option>
+                        <option value="dbpr">FL DBPR - Professional Licenses</option>
+                        <option value="sunbiz">Sunbiz - Florida Corporations</option>
+                        <option value="doh">FL DOH - Medical Licenses</option>
+                        <option value="county_pa">County Property Appraiser</option>
+                        <option value="fdot">FDOT - Traffic Counts</option>
+                        <option value="census">US Census Data</option>
+                        <option value="costar">CoStar Meta Files</option>
+                        <option value="custom">Custom CSV</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="countySelect" style="display: none;">
+                    <label class="form-label">County</label>
+                    <select class="form-select" id="importCounty">
+                        <option value="">Select county...</option>
+                        <option value="lee">Lee County</option>
+                        <option value="collier">Collier County</option>
+                        <option value="charlotte">Charlotte County</option>
+                        <option value="sarasota">Sarasota County</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">File</label>
+                    <input type="file" class="form-input" id="importFile" accept=".csv,.json,.zip">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Notes (optional)</label>
+                    <input type="text" class="form-input" id="importNotes" placeholder="Import notes...">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeImportModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitImport()"><i class="bi bi-cloud-upload"></i> Start Import</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <i class="bi bi-check-circle-fill" style="color: #10b981;"></i>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        // Drop zone handling
+        const dropZone = document.getElementById('dropZone');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFiles(files);
+            }
+        });
+
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            if (files.length > 0) {
+                handleFiles(files);
+            }
+        }
+
+        async function handleFiles(files) {
+            for (const file of files) {
+                showToast(`Uploading ${file.name}...`, 'success');
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('source', 'upload');
+
+                try {
+                    const res = await fetch('/api/danimal/import/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast(`${file.name} uploaded successfully`, 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showToast(`Failed: ${data.error}`, 'error');
+                    }
+                } catch (err) {
+                    showToast(`Upload failed: ${err.message}`, 'error');
+                }
+            }
+        }
+
+        // Import modal
+        function openImportModal() {
+            document.getElementById('importModal').classList.add('active');
+        }
+
+        function closeImportModal() {
+            document.getElementById('importModal').classList.remove('active');
+        }
+
+        document.getElementById('importSource').addEventListener('change', function() {
+            const countySelect = document.getElementById('countySelect');
+            countySelect.style.display = this.value === 'county_pa' ? 'block' : 'none';
+        });
+
+        async function submitImport() {
+            const source = document.getElementById('importSource').value;
+            const county = document.getElementById('importCounty').value;
+            const file = document.getElementById('importFile').files[0];
+            const notes = document.getElementById('importNotes').value;
+
+            if (!source) {
+                showToast('Please select a data source', 'error');
+                return;
+            }
+
+            if (!file) {
+                showToast('Please select a file', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('source', source);
+            if (county) formData.append('county', county);
+            if (notes) formData.append('notes', notes);
+
+            try {
+                const res = await fetch('/api/danimal/import', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Import started successfully', 'success');
+                    closeImportModal();
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(`Failed: ${data.error}`, 'error');
+                }
+            } catch (err) {
+                showToast(`Import failed: ${err.message}`, 'error');
+            }
+        }
+
+        async function startImport(sourceId) {
+            try {
+                const res = await fetch(`/api/danimal/import/start/${sourceId}`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Import started', 'success');
+                    location.reload();
+                } else {
+                    showToast(`Failed: ${data.error}`, 'error');
+                }
+            } catch (err) {
+                showToast(`Error: ${err.message}`, 'error');
+            }
+        }
+
+        async function refreshSource(sourceId) {
+            showToast('Refreshing source...', 'success');
+            // Implement refresh logic
+        }
+
+        function viewSourceDetails(sourceId) {
+            // Open details modal
+            alert('Source details: ' + sourceId);
+        }
+
+        async function refreshStats() {
+            try {
+                const res = await fetch('/api/danimal/stats');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('totalLeads').textContent = data.stats.total_leads?.toLocaleString() || '0';
+                    document.getElementById('withPhone').textContent = data.stats.with_phone?.toLocaleString() || '0';
+                    document.getElementById('withEmail').textContent = data.stats.with_email?.toLocaleString() || '0';
+                    showToast('Stats refreshed', 'success');
+                }
+            } catch (err) {
+                showToast('Failed to refresh stats', 'error');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = toast.querySelector('i');
+            document.getElementById('toastMessage').textContent = message;
+            toast.className = 'toast show ' + type;
+            icon.className = type === 'success' ? 'bi bi-check-circle-fill' : 'bi bi-exclamation-circle-fill';
+            icon.style.color = type === 'success' ? '#10b981' : '#ef4444';
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>

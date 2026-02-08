@@ -183,7 +183,7 @@ function initDatabase() {
     if (connectionString) {
         pool = new Pool({
             connectionString,
-            ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+            ssl: { rejectUnauthorized: false }
         });
     } else {
         pool = new Pool({
@@ -1532,26 +1532,10 @@ app.get('/command', async (req, res) => {
 });
 
 // Admin
-app.get('/admin', async (req, res) => {
-    if (req.session.user.role !== 'Admin') {
-        return res.redirect('/dashboard');
-    }
-    
-    try {
-        const usersResult = await pool.query(
-            'SELECT * FROM users WHERE organization_id = $1 ORDER BY name',
-            [req.session.org.id]
-        );
-        
-        res.render('admin', {
-            users: usersResult.rows,
-            org: req.session.org
-        });
-    } catch (err) {
-        console.error('Admin error:', err);
-        res.render('admin', { users: [], org: req.session.org });
-    }
-});
+// Old /admin route - redirect to new system
+app.get('/admin', (req, res) => res.redirect('/system'));
+
+
 
 // Super Admin (MSG only)
 app.get('/superadmin', async (req, res) => {
@@ -2282,27 +2266,66 @@ app.get('/danimal/export', async (req, res) => {
     res.render('danimal/dashboard', { user: req.session.user, activeTab: 'export' });
 });
 
+// DATA HUB - Central Data Management
+app.get('/danimal/hub', async (req, res) => {
+    if (!req.session.user) return res.redirect('/auth/login');
+    try {
+        // Get stats from cache (fast!)
+        const cacheResult = await pool.query('SELECT * FROM danimal_stats_cache WHERE id = 1');
+        const cache = cacheResult.rows[0] || {};
+        
+        const stats = {
+            total: parseInt(cache.total_leads) || 0,
+            with_phone: parseInt(cache.with_phone) || 0,
+            with_email: parseInt(cache.with_email) || 0,
+            sources: parseInt(cache.sources_count) || 0
+        };
+        
+        // Build sources array from cache
+        const sources = [
+            { id: 'dbpr', name: 'FL DBPR', description: 'Professional licenses', status: cache.dbpr_count > 0 ? 'loaded' : 'pending', records: parseInt(cache.dbpr_count) || 0 },
+            { id: 'sunbiz', name: 'Sunbiz', description: 'FL Corporations', status: cache.sunbiz_count > 0 ? 'loaded' : 'pending', records: parseInt(cache.sunbiz_count) || 0 },
+            { id: 'doh', name: 'FL DOH', description: 'Medical licenses', status: cache.doh_count > 0 ? 'loaded' : 'pending', records: parseInt(cache.doh_count) || 0 },
+            { id: 'fdot', name: 'FDOT', description: 'Traffic counts', status: cache.fdot_count > 0 ? 'loaded' : 'pending', records: parseInt(cache.fdot_count) || 0 }
+        ];
+        
+        res.render('danimal/hub', {
+            title: 'Data Hub',
+            user: req.session.user,
+            org: req.session.org,
+            stats,
+            sources,
+            recentImports: [],
+            apiStatus: { google_places: !!process.env.GOOGLE_PLACES_API_KEY, eagleview: false, arcgis: false, fdot: true, census: true }
+        });
+    } catch (error) {
+        console.error('[DataHub] Error:', error);
+        res.status(500).send('Error loading Data Hub: ' + error.message);
+    }
+});
+
 // API: Get Danimal stats
 app.get('/api/danimal/stats', async (req, res) => {
     if (!req.session.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
     try {
-        // Get stats from database
-        const totalResult = await pool.query('SELECT COUNT(*) FROM danimal_leads');
-        const dbprResult = await pool.query("SELECT COUNT(*) FROM danimal_leads WHERE source = 'dbpr'");
-        const sunbizResult = await pool.query("SELECT COUNT(*) FROM danimal_leads WHERE source = 'sunbiz'");
-        const gradeAResult = await pool.query("SELECT COUNT(*) FROM danimal_leads WHERE lead_grade = 'A'");
-        const syncedResult = await pool.query('SELECT COUNT(*) FROM danimal_leads WHERE synced_to_crm = true');
-        const todayResult = await pool.query("SELECT COUNT(*) FROM danimal_leads WHERE created_at > NOW() - INTERVAL '1 day'");
-        
+        // Get stats from cache (fast!)
+        const cacheResult = await pool.query('SELECT * FROM danimal_stats_cache WHERE id = 1');
+        const cache = cacheResult.rows[0] || {};
         res.json({
             success: true,
             stats: {
-                total: parseInt(totalResult.rows[0].count) || 0,
-                dbpr: parseInt(dbprResult.rows[0].count) || 0,
-                sunbiz: parseInt(sunbizResult.rows[0].count) || 0,
-                grade_a: parseInt(gradeAResult.rows[0].count) || 0,
-                synced: parseInt(syncedResult.rows[0].count) || 0,
-                new_today: parseInt(todayResult.rows[0].count) || 0
+                total: parseInt(cache.total_leads) || 0,
+                total_leads: parseInt(cache.total_leads) || 0,
+                dbpr: parseInt(cache.dbpr_count) || 0,
+                sunbiz: parseInt(cache.sunbiz_count) || 0,
+                doh: parseInt(cache.doh_count) || 0,
+                fdot: parseInt(cache.fdot_count) || 0,
+                grade_a: parseInt(cache.grade_a_count) || 0,
+                synced: parseInt(cache.synced_count) || 0,
+                new_today: 0,
+                with_phone: parseInt(cache.with_phone) || 0,
+                with_email: parseInt(cache.with_email) || 0,
+                sources: parseInt(cache.sources_count) || 0
             }
         });
     } catch (error) {
@@ -2574,4 +2597,5 @@ app.listen(PORT, async () => {
     
     await initializeDatabase();
 });
+
 

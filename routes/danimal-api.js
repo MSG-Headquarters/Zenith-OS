@@ -546,4 +546,181 @@ router.get('/api-usage', requireAuth, async (req, res) => {
     }
 });
 
+
+// ---------------------------------------------------------------------------
+// DATA HUB PAGE - Central data management interface
+// ---------------------------------------------------------------------------
+router.get('/hub', async (req, res) => {
+    try {
+        // Get overall stats
+        const statsResult = await pool.query(`
+            SELECT 
+                COUNT(*) as total,
+                COUNT(CASE WHEN phone IS NOT NULL AND phone != '' THEN 1 END) as with_phone,
+                COUNT(CASE WHEN email IS NOT NULL AND email != '' THEN 1 END) as with_email,
+                COUNT(DISTINCT source) as sources
+            FROM danimal_leads
+        `);
+
+        // Get source counts
+        const sourceCounts = await pool.query(`
+            SELECT source, COUNT(*) as count, MAX(created_at) as last_updated
+            FROM danimal_leads
+            GROUP BY source
+            ORDER BY count DESC
+        `);
+
+        const sourceMap = {};
+        sourceCounts.rows.forEach(row => {
+            sourceMap[row.source.toLowerCase()] = {
+                records: parseInt(row.count),
+                last_updated: row.last_updated ? new Date(row.last_updated).toLocaleDateString() : null
+            };
+        });
+
+        // Define all sources
+        const sources = [
+            { id: 'dbpr', name: 'FL DBPR', description: 'Professional licenses', icon: 'award', icon_class: 'dbpr', status: sourceMap['dbpr'] ? 'loaded' : 'pending', records: sourceMap['dbpr']?.records || 0, last_updated: sourceMap['dbpr']?.last_updated || 'Never' },
+            { id: 'sunbiz', name: 'Sunbiz', description: 'Florida corporations & LLCs', icon: 'building', icon_class: 'sunbiz', status: sourceMap['sunbiz'] ? 'loaded' : 'pending', records: sourceMap['sunbiz']?.records || 0, last_updated: sourceMap['sunbiz']?.last_updated || 'Never' },
+            { id: 'doh', name: 'FL DOH', description: 'Medical licenses', icon: 'heart-pulse', icon_class: 'doh', status: sourceMap['doh'] ? 'loaded' : 'pending', records: sourceMap['doh']?.records || 0, last_updated: sourceMap['doh']?.last_updated || 'Never' },
+            { id: 'fdot', name: 'FDOT Traffic', description: 'Traffic count data', icon: 'signpost-2', icon_class: 'fdot', status: sourceMap['fdot'] ? 'loaded' : 'pending', records: sourceMap['fdot']?.records || 0, last_updated: sourceMap['fdot']?.last_updated || 'Never' },
+            { id: 'lee_county', name: 'Lee County PA', description: 'Property records', icon: 'house', icon_class: 'county', status: sourceMap['lee_county'] ? 'loaded' : 'pending', records: sourceMap['lee_county']?.records || 0, last_updated: sourceMap['lee_county']?.last_updated || 'Never' },
+            { id: 'collier_county', name: 'Collier County PA', description: 'Property records', icon: 'house', icon_class: 'county', status: sourceMap['collier_county'] ? 'loaded' : 'pending', records: sourceMap['collier_county']?.records || 0, last_updated: sourceMap['collier_county']?.last_updated || 'Never' },
+            { id: 'charlotte_county', name: 'Charlotte County PA', description: 'Property records', icon: 'house', icon_class: 'county', status: sourceMap['charlotte_county'] ? 'loaded' : 'pending', records: sourceMap['charlotte_county']?.records || 0, last_updated: sourceMap['charlotte_county']?.last_updated || 'Never' },
+            { id: 'sarasota_county', name: 'Sarasota County PA', description: 'Property records', icon: 'house', icon_class: 'county', status: sourceMap['sarasota_county'] ? 'loaded' : 'pending', records: sourceMap['sarasota_county']?.records || 0, last_updated: sourceMap['sarasota_county']?.last_updated || 'Never' }
+        ];
+
+        // Recent imports
+        let recentImports = [];
+        try {
+            const importsResult = await pool.query(`
+                SELECT * FROM import_jobs ORDER BY created_at DESC LIMIT 10
+            `);
+            recentImports = importsResult.rows.map(row => ({
+                source: row.source,
+                records: row.records_imported || 0,
+                status: row.status,
+                date: row.created_at ? new Date(row.created_at).toLocaleDateString() : '-'
+            }));
+        } catch (e) { /* table may not exist */ }
+
+        // API status
+        const apiStatus = {
+            google_places: !!process.env.GOOGLE_PLACES_API_KEY,
+            eagleview: !!process.env.EAGLEVIEW_API_KEY,
+            arcgis: !!process.env.ARCGIS_API_KEY,
+            fdot: true,
+            census: true
+        };
+
+        res.render('danimal/hub', {
+            title: 'Data Hub',
+            currentModule: 'danimal',
+            user: req.session.user,
+            org: req.session.org,
+            permissions: req.permissions,
+            sidebarModules: res.locals.sidebarModules,
+            stats: statsResult.rows[0],
+            sources,
+            recentImports,
+            apiStatus
+        });
+    } catch (error) {
+        console.error('[DataHub] Page error:', error);
+        res.status(500).render('errors/500', { message: 'Failed to load Data Hub' });
+    }
+});
+
+// ---------------------------------------------------------------------------
+// INTEL API - Demographics query for property enrichment
+// ---------------------------------------------------------------------------
+router.get('/api/demographics/:geoId', async (req, res) => {
+    try {
+        const { geoId } = req.params;
+        
+        const result = await pool.query(`
+            SELECT * FROM danimal_census 
+            WHERE geo_id = $1 OR geo_name ILIKE $2
+            ORDER BY year DESC
+        `, [geoId, `%${geoId}%`]);
+
+        res.json({ success: true, demographics: result.rows });
+    } catch (error) {
+        console.error('[INTEL] Demographics error:', error);
+        res.status(500).json({ success: false, error: 'Failed to load demographics' });
+    }
+});
+
+// ---------------------------------------------------------------------------
+// INTEL API - Traffic counts near location
+// ---------------------------------------------------------------------------
+router.get('/api/traffic/:county', async (req, res) => {
+    try {
+        const { county } = req.params;
+        const { road } = req.query;
+
+        let query = `
+            SELECT * FROM danimal_leads 
+            WHERE source = 'fdot' AND city ILIKE $1
+        `;
+        const params = [`%${county}%`];
+
+        if (road) {
+            query += ` AND (business_name ILIKE $2 OR street_address ILIKE $2)`;
+            params.push(`%${road}%`);
+        }
+
+        query += ` ORDER BY contact_name DESC LIMIT 50`; // contact_name stores AADT
+
+        const result = await pool.query(query, params);
+        res.json({ success: true, traffic: result.rows });
+    } catch (error) {
+        console.error('[INTEL] Traffic error:', error);
+        res.status(500).json({ success: false, error: 'Failed to load traffic data' });
+    }
+});
+
+// ---------------------------------------------------------------------------
+// INTEL API - Economic indicators
+// ---------------------------------------------------------------------------
+router.get('/api/economic/:geoId', async (req, res) => {
+    try {
+        const { geoId } = req.params;
+        const { type, yearFrom, yearTo } = req.query;
+
+        let query = `
+            SELECT * FROM danimal_economic 
+            WHERE geo_id = $1
+        `;
+        const params = [geoId];
+        let paramCount = 1;
+
+        if (type) {
+            paramCount++;
+            query += ` AND data_type_code = ${paramCount}`;
+            params.push(type);
+        }
+
+        if (yearFrom) {
+            paramCount++;
+            query += ` AND year >= ${paramCount}`;
+            params.push(parseInt(yearFrom));
+        }
+
+        if (yearTo) {
+            paramCount++;
+            query += ` AND year <= ${paramCount}`;
+            params.push(parseInt(yearTo));
+        }
+
+        query += ` ORDER BY year DESC, quarter DESC`;
+
+        const result = await pool.query(query, params);
+        res.json({ success: true, economic: result.rows });
+    } catch (error) {
+        console.error('[INTEL] Economic error:', error);
+        res.status(500).json({ success: false, error: 'Failed to load economic data' });
+    }
+});
+
 module.exports = router;

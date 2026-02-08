@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activate License - Zenith OS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: linear-gradient(135deg, #0f1724 0%, #1a2332 50%, #0f1724 100%);
+            color: #e2e8f0; 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+        }
+
+        .activation-container {
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .logo span:first-child { color: #10b981; }
+        .logo span:last-child { color: #e2e8f0; }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .card {
+            background: #1a2332;
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: #f59e0b;
+        }
+
+        .card-description {
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .step {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+
+        .step.active {
+            background: #10b981;
+            width: 30px;
+            border-radius: 5px;
+        }
+
+        .step.complete {
+            background: #10b981;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: #0f1724;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #e2e8f0;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
+        }
+
+        .form-input.license-key {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .form-input.error {
+            border-color: #ef4444;
+            animation: shake 0.3s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .password-toggle:hover {
+            color: #e2e8f0;
+        }
+
+        .password-strength {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+
+        .password-strength-bar.weak { width: 25%; background: #ef4444; }
+        .password-strength-bar.fair { width: 50%; background: #f59e0b; }
+        .password-strength-bar.good { width: 75%; background: #3b82f6; }
+        .password-strength-bar.strong { width: 100%; background: #10b981; }
+
+        .password-requirements {
+            margin-top: 12px;
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .requirement i {
+            font-size: 0.7rem;
+        }
+
+        .requirement.met {
+            color: #10b981;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(16,185,129,0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            color: #94a3b8;
+            margin-top: 12px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+            color: #e2e8f0;
+        }
+
+        .error-message {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #ef4444;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .success-message {
+            background: rgba(16,185,129,0.1);
+            border: 1px solid rgba(16,185,129,0.3);
+            color: #10b981;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-info-display {
+            background: rgba(16,185,129,0.08);
+            border: 1px solid rgba(16,185,129,0.2);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .user-info-display .label {
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .user-info-display .value {
+            font-size: 1rem;
+            color: #e2e8f0;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .user-info-display .role {
+            display: inline-block;
+            background: rgba(245,158,11,0.15);
+            color: #f59e0b;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            margin-top: 8px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 24px 0;
+            color: #475569;
+            font-size: 0.8rem;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .login-link a {
+            color: #10b981;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Hidden steps */
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="activation-container">
+        <div class="logo-section">
+            <div class="logo"><span>Zenith</span> <span>OS</span></div>
+            <div class="subtitle">License Activation Portal</div>
+        </div>
+
+        <div class="card">
+            <div class="step-indicator">
+                <div class="step active" id="step1Dot"></div>
+                <div class="step" id="step2Dot"></div>
+                <div class="step" id="step3Dot"></div>
+            </div>
+
+            <!-- Step 1: Enter License Key -->
+            <div class="step-content active" id="step1">
+                <div class="card-title"><i class="bi bi-key-fill"></i> Enter License Key</div>
+                <div class="card-description">
+                    Enter the license key provided by your administrator to activate your account.
+                </div>
+
+                <div class="error-message" id="licenseError">
+                    <i class="bi bi-exclamation-circle"></i>
+                    <span id="licenseErrorText">Invalid license key</span>
+                </div>
+
+                <form id="licenseForm">
+                    <div class="form-group">
+                        <label class="form-label">License Key</label>
+                        <input type="text" 
+                               class="form-input license-key" 
+                               id="licenseKey" 
+                               placeholder="ZENO-XXXX-2026-XXXXX"
+                               maxlength="25"
+                               autocomplete="off"
+                               required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="verifyBtn">
+                        <span id="verifyBtnText">Verify License</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                </form>
+
+                <div class="login-link">
+                    Already activated? <a href="/login">Sign in here</a>
+                </div>
+            </div>
+
+            <!-- Step 2: Set Password -->
+            <div class="step-content" id="step2">
+                <div class="card-title"><i class="bi bi-shield-lock-fill"></i> Create Password</div>
+                <div class="card-description">
+                    Set a secure password for your account. This will be used to sign in.
+                </div>
+
+                <div class="user-info-display" id="userInfoDisplay">
+                    <div class="label">Welcome</div>
+                    <div class="value" id="userName">-</div>
+                    <div class="role" id="userRole">-</div>
+                </div>
+
+                <div class="error-message" id="passwordError">
+                    <i class="bi bi-exclamation-circle"></i>
+                    <span id="passwordErrorText">Error</span>
+                </div>
+
+                <form id="passwordForm">
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" 
+                                   class="form-input" 
+                                   id="password" 
+                                   placeholder="Enter password"
+                                   required>
+                            <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength">
+                            <div class="password-strength-bar" id="strengthBar"></div>
+                        </div>
+                        <div class="password-requirements">
+                            <div class="requirement" id="reqLength"><i class="bi bi-circle"></i> At least 8 characters</div>
+                            <div class="requirement" id="reqUpper"><i class="bi bi-circle"></i> One uppercase letter</div>
+                            <div class="requirement" id="reqLower"><i class="bi bi-circle"></i> One lowercase letter</div>
+                            <div class="requirement" id="reqNumber"><i class="bi bi-circle"></i> One number</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Confirm Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" 
+                                   class="form-input" 
+                                   id="confirmPassword" 
+                                   placeholder="Confirm password"
+                                   required>
+                            <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="activateBtn">
+                        <span id="activateBtnText">Activate Account</span>
+                    </button>
+
+                    <button type="button" class="btn btn-secondary" onclick="goToStep(1)">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </button>
+                </form>
+            </div>
+
+            <!-- Step 3: Success -->
+            <div class="step-content" id="step3">
+                <div style="text-align: center; padding: 20px 0;">
+                    <div style="width: 80px; height: 80px; background: rgba(16,185,129,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                        <i class="bi bi-check-lg" style="font-size: 2.5rem; color: #10b981;"></i>
+                    </div>
+                    <div class="card-title" style="justify-content: center;">Account Activated!</div>
+                    <div class="card-description" style="text-align: center;">
+                        Your license has been activated and your password has been set. You can now sign in to Zenith OS.
+                    </div>
+
+                    <a href="/login" class="btn btn-primary" style="margin-top: 20px;">
+                        <i class="bi bi-box-arrow-in-right"></i> Sign In Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let verifiedUser = null;
+
+        // Format license key as user types
+        document.getElementById('licenseKey').addEventListener('input', function(e) {
+            let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            let formatted = '';
+            
+            // Format: ZENO-XXXX-2026-XXXXX
+            if (value.length > 0) formatted += value.substring(0, 4);
+            if (value.length > 4) formatted += '-' + value.substring(4, 8);
+            if (value.length > 8) formatted += '-' + value.substring(8, 12);
+            if (value.length > 12) formatted += '-' + value.substring(12, 17);
+            
+            e.target.value = formatted;
+        });
+
+        // Step 1: Verify License
+        document.getElementById('licenseForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const licenseKey = document.getElementById('licenseKey').value.trim();
+            const btn = document.getElementById('verifyBtn');
+            const btnText = document.getElementById('verifyBtnText');
+            const errorEl = document.getElementById('licenseError');
+            
+            btn.disabled = true;
+            btnText.innerHTML = '<div class="spinner"></div>';
+            errorEl.classList.remove('show');
+
+            try {
+                const res = await fetch('/auth/verify-license', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ license_key: licenseKey })
+                });
+
+                const data = await res.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Invalid license key');
+                }
+
+                verifiedUser = data.user;
+                document.getElementById('userName').textContent = data.user.name;
+                document.getElementById('userRole').textContent = data.user.role || 'User';
+                
+                goToStep(2);
+            } catch (err) {
+                document.getElementById('licenseErrorText').textContent = err.message;
+                errorEl.classList.add('show');
+                document.getElementById('licenseKey').classList.add('error');
+                setTimeout(() => document.getElementById('licenseKey').classList.remove('error'), 300);
+            } finally {
+                btn.disabled = false;
+                btnText.innerHTML = 'Verify License';
+            }
+        });
+
+        // Password strength checker
+        document.getElementById('password').addEventListener('input', function(e) {
+            const password = e.target.value;
+            let strength = 0;
+            
+            // Check requirements
+            const hasLength = password.length >= 8;
+            const hasUpper = /[A-Z]/.test(password);
+            const hasLower = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            
+            updateRequirement('reqLength', hasLength);
+            updateRequirement('reqUpper', hasUpper);
+            updateRequirement('reqLower', hasLower);
+            updateRequirement('reqNumber', hasNumber);
+            
+            if (hasLength) strength++;
+            if (hasUpper) strength++;
+            if (hasLower) strength++;
+            if (hasNumber) strength++;
+            
+            const bar = document.getElementById('strengthBar');
+            bar.className = 'password-strength-bar';
+            if (strength === 1) bar.classList.add('weak');
+            else if (strength === 2) bar.classList.add('fair');
+            else if (strength === 3) bar.classList.add('good');
+            else if (strength === 4) bar.classList.add('strong');
+        });
+
+        function updateRequirement(id, met) {
+            const el = document.getElementById(id);
+            const icon = el.querySelector('i');
+            if (met) {
+                el.classList.add('met');
+                icon.className = 'bi bi-check-circle-fill';
+            } else {
+                el.classList.remove('met');
+                icon.className = 'bi bi-circle';
+            }
+        }
+
+        // Step 2: Set Password & Activate
+        document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const btn = document.getElementById('activateBtn');
+            const btnText = document.getElementById('activateBtnText');
+            const errorEl = document.getElementById('passwordError');
+            
+            // Validate
+            if (password.length < 8) {
+                showPasswordError('Password must be at least 8 characters');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showPasswordError('Passwords do not match');
+                return;
+            }
+            
+            btn.disabled = true;
+            btnText.innerHTML = '<div class="spinner"></div>';
+            errorEl.classList.remove('show');
+
+            try {
+                const res = await fetch('/auth/activate-license', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        license_key: document.getElementById('licenseKey').value,
+                        password: password
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Activation failed');
+                }
+
+                goToStep(3);
+            } catch (err) {
+                showPasswordError(err.message);
+            } finally {
+                btn.disabled = false;
+                btnText.innerHTML = 'Activate Account';
+            }
+        });
+
+        function showPasswordError(msg) {
+            document.getElementById('passwordErrorText').textContent = msg;
+            document.getElementById('passwordError').classList.add('show');
+        }
+
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = field.nextElementSibling.querySelector('i');
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                field.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        }
+
+        function goToStep(step) {
+            currentStep = step;
+            
+            // Update dots
+            document.querySelectorAll('.step').forEach((dot, i) => {
+                dot.classList.remove('active', 'complete');
+                if (i + 1 < step) dot.classList.add('complete');
+                if (i + 1 === step) dot.classList.add('active');
+            });
+            
+            // Update content
+            document.querySelectorAll('.step-content').forEach((content, i) => {
+                content.classList.remove('active');
+                if (i + 1 === step) content.classList.add('active');
+            });
+        }
+    </script>
+</body>
+</html>

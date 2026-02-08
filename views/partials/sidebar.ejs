@@ -26,7 +26,7 @@
     <% if (typeof sidebarModules !== 'undefined' && sidebarModules.some(m => m.slug === 'admin')) { %>
     <div class="nav-section">
         <div class="nav-section-label">Administration</div>
-        <a href="/admin" class="nav-item <%= typeof currentModule !== 'undefined' && currentModule === 'admin' ? 'active' : '' %>">
+        <a href="/system" class="nav-item <%= typeof currentModule !== 'undefined' && currentModule === 'admin' ? 'active' : '' %>">
             <span class="nav-icon"><i class="bi bi-gear"></i></span> Admin
         </a>
     </div>
