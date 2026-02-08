@@ -650,6 +650,133 @@ module.exports = function(pool) {
         }
     });
 
+
+    // ============================================
+    // PROPERTY ENRICHMENT API
+    // ============================================
+    
+    const enrichmentService = require('../services/intel-enrichment');
+
+    // Full property enrichment (combines all sources)
+    router.post('/enrich', async (req, res) => {
+        try {
+            const { address } = req.body;
+            if (!address) {
+                return res.status(400).json({ success: false, error: 'Address required' });
+            }
+            
+            console.log('[INTEL] Enriching property:', address);
+            const enrichment = await enrichmentService.enrichProperty(address);
+            
+            res.json({ success: true, enrichment });
+        } catch (error) {
+            console.error('[INTEL] Enrichment error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    });
+
+    // Geocode address only
+    router.get('/geocode', async (req, res) => {
+        try {
+            const { address } = req.query;
+            if (!address) {
+                return res.status(400).json({ success: false, error: 'Address required' });
+            }
+            
+            const result = await enrichmentService.googleGeocode(address);
+            res.json(result);
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    });
+
+    // Google Places search
+    router.get('/places/search', async (req, res) => {
+        try {
+            const { query, lat, lng } = req.query;
+            if (!query) {
+                return res.status(400).json({ success: false, error: 'Query required' });
+            }
+            
+            const location = lat && lng ? { lat: parseFloat(lat), lng: parseFloat(lng) } : null;
+            const result = await enrichmentService.googlePlacesSearch(query, location);
+            res.json(result);
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    });
+
+    // Google Place details
+    router.get('/places/:placeId', async (req, res) => {
+        try {
+            const result = await enrichmentService.googlePlaceDetails(req.params.placeId);
+            res.json(result);
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    });
+
+    // EagleView aerial imagery
+    router.get('/aerial', async (req, res) => {
+        try {
+            const { lat, lon, zoom, width, height, type } = req.query;
+            if (!lat || !lon) {
+                return res.status(400).json({ success: false, error: 'lat and lon required' });
+            }
+            
+            const result = await enrichmentService.getEagleViewImagery(
+                parseFloat(lat),
+                parseFloat(lon),
+                { zoom, width, height, type }
+            );
+            
+            // Return as JSON with base64 image
+            res.json(result);
+        } catch (error) {
+            console.error('[INTEL] Aerial error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    });
+
+    // EagleView aerial image (direct image response)
+    router.get('/aerial/image', async (req, res) => {
+        try {
+            const { lat, lon, zoom, width, height, type } = req.query;
+            if (!lat || !lon) {
+                return res.status(400).json({ success: false, error: 'lat and lon required' });
+            }
+            
+            const result = await enrichmentService.getEagleViewImagery(
+                parseFloat(lat),
+                parseFloat(lon),
+                { zoom, width, height, type }
+            );
+            
+            // Return as actual image
+            const buffer = Buffer.from(result.image, 'base64');
+            res.set('Content-Type', 'image/jpeg');
+            res.send(buffer);
+        } catch (error) {
+            console.error('[INTEL] Aerial image error:', error);
+            res.status(500).send('Failed to get aerial image');
+        }
+    });
+
+    // EagleView property data
+    router.get('/property-data', async (req, res) => {
+        try {
+            const { address } = req.query;
+            if (!address) {
+                return res.status(400).json({ success: false, error: 'Address required' });
+            }
+            
+            const result = await enrichmentService.getEagleViewPropertyData(address);
+            res.json(result);
+        } catch (error) {
+            res.status(500).json({ success: false, error: error.message });
+        }
+    });
+
     // Health check
     router.get('/health', (req, res) => {
         res.json({ status: 'healthy', module: 'INTEL', version: '2.0.0' });
