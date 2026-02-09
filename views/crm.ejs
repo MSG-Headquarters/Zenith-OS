@@ -125,6 +125,14 @@
         .lead-tags { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
         .lead-tag { font-size: 10px; padding: 3px 8px; border-radius: 100px; background: rgba(59, 130, 246, 0.1); color: var(--accent-blue); }
         .lead-tag.hot { background: rgba(244, 63, 94, 0.1); color: var(--accent-rose); }
+        
+        /* Flyer Buttons */
+        .lead-actions { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+        .btn-flyer { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; width: 100%; justify-content: center; text-decoration: none; }
+        .btn-flyer-create { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; }
+        .btn-flyer-create:hover { background: linear-gradient(135deg, #7c3aed, #6d28d9); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4); }
+        .btn-flyer-edit { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .btn-flyer-edit:hover { background: linear-gradient(135deg, #059669, #047857); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); }
         .lead-tag.warm { background: rgba(245, 158, 11, 0.1); color: var(--accent-amber); }
         .lead-tag.won { background: rgba(16, 185, 129, 0.1); color: var(--accent-emerald); }
         .lead-tag.danimal { background: rgba(16, 185, 129, 0.1); color: var(--accent-emerald); }
@@ -718,6 +726,39 @@
         function bulkUpdateStage() {
             // TODO: Implement bulk stage update
             showToast('Bulk stage update coming soon!', 'success');
+        }
+        // Create Flyer from Lead
+        async function createFlyer(leadId) {
+            const btn = event.target.closest('.btn-flyer');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creating...';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/intel/create-from-lead', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lead_id: leadId })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast('Flyer project created! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/intel/create?project=' + data.project_id;
+                    }, 1000);
+                } else {
+                    showToast(data.error || 'Failed to create flyer', 'error');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Create flyer error:', error);
+                showToast('Failed to create flyer project', 'error');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
     </script>
 </body>

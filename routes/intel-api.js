@@ -777,6 +777,125 @@ module.exports = function(pool) {
         }
     });
 
+    // ============================================
+    // CRM -> INTEL INTEGRATION
+    // ============================================
+    
+    // Create INTEL project from CRM lead (Closed Won)
+    router.post('/create-from-lead', async (req, res) => {
+        try {
+            const { lead_id } = req.body;
+            const userId = req.session.user.id;
+            const orgId = req.session.org?.id;
+            
+            if (!lead_id) {
+                return res.status(400).json({ success: false, error: 'Lead ID required' });
+            }
+            
+            // Get lead details
+            const leadResult = await pool.query(
+                `SELECT * FROM leads WHERE id = $1 AND organization_id = $2`,
+                [lead_id, orgId]
+            );
+            
+            if (leadResult.rows.length === 0) {
+                return res.status(404).json({ success: false, error: 'Lead not found' });
+            }
+            
+            const lead = leadResult.rows[0];
+            
+            // Check if flyer already exists
+            if (lead.intel_project_id) {
+                return res.json({ success: true, project_id: lead.intel_project_id, existing: true });
+            }
+            
+            // Build property address
+            const propertyAddress = lead.property_address || lead.company || lead.name;
+            const fullAddress = [
+                lead.property_address,
+                lead.property_city,
+                lead.property_state,
+                lead.property_zip
+            ].filter(Boolean).join(', ') || propertyAddress;
+            
+            // Create INTEL project
+            const projectResult = await pool.query(`
+                INSERT INTO intel_projects (
+                    tenant_id, organization_id, created_by, user_id, title, 
+                    property_address, property_city, property_state, property_zip,
+                    property_type, lead_id, status, canvas_data, notes, created_at
+                ) VALUES ($1, $1, $2, $2, $3, $4, $5, $6, $7, $8, $9, 'draft', $10, $11, NOW())
+                RETURNING id
+            `, [
+                orgId,
+                userId,
+                `${lead.company || lead.name} - Marketing Flyer`,
+                lead.property_address || '',
+                lead.property_city || '',
+                lead.property_state || 'FL',
+                lead.property_zip || '',
+                lead.property_type || 'Commercial',
+                lead_id,
+                JSON.stringify({ objects: [], background: '#ffffff' }),
+                `Auto-generated from CRM lead #${lead.id}`
+            ]);
+            
+            const projectId = projectResult.rows[0].id;
+            
+            // Link project back to lead
+            await pool.query(`
+                UPDATE leads 
+                SET intel_project_id = $1, flyer_created_at = NOW()
+                WHERE id = $2
+            `, [projectId, lead_id]);
+            
+            // Try to enrich with Google Places if we have an address
+            let enrichment = null;
+            if (fullAddress && fullAddress.length > 5) {
+                try {
+                    const enrichmentService = require('../services/intel-enrichment');
+                    enrichment = await enrichmentService.enrichProperty(fullAddress);
+                    
+                    // Update project with enrichment data
+                    if (enrichment.location) {
+                        await pool.query(`
+                            UPDATE intel_projects 
+                            SET lat = $1, lng = $2, enrichment_data = $3
+                            WHERE id = $4
+                        `, [
+                            enrichment.location.lat,
+                            enrichment.location.lng,
+                            JSON.stringify(enrichment),
+                            projectId
+                        ]);
+                        
+                        // Also update lead with coordinates
+                        await pool.query(`
+                            UPDATE leads 
+                            SET property_lat = $1, property_lng = $2
+                            WHERE id = $3
+                        `, [enrichment.location.lat, enrichment.location.lng, lead_id]);
+                    }
+                } catch (enrichError) {
+                    console.error('[INTEL] Enrichment error (non-fatal):', enrichError.message);
+                }
+            }
+            
+            console.log(`[INTEL] Created project ${projectId} from lead ${lead_id}`);
+            
+            res.json({ 
+                success: true, 
+                project_id: projectId,
+                lead_id: lead_id,
+                enriched: !!enrichment?.location
+            });
+            
+        } catch (error) {
+            console.error('[INTEL] Create from lead error:', error);
+            res.status(500).json({ success: false, error: 'Failed to create project' });
+        }
+    });
+
     // Health check
     router.get('/health', (req, res) => {
         res.json({ status: 'healthy', module: 'INTEL', version: '2.0.0' });
