@@ -479,6 +479,71 @@ app.get('/lockout', (req, res) => {
     res.render('lockout', { reason: req.query.reason || 'suspended' });
 });
 
+// License Activation
+app.get('/activate', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/auth/login');
+    }
+    res.render('activate', { 
+        user: req.session.user,
+        error: req.query.error,
+        success: req.query.success
+    });
+});
+
+app.post('/activate', async (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/auth/login');
+    }
+    
+    const { license_key } = req.body;
+    const userId = req.session.user.id;
+    
+    try {
+        // Verify the license key matches what was assigned to this user
+        const userResult = await pool.query(
+            `SELECT license_key, license_status FROM users WHERE id = $1`,
+            [userId]
+        );
+        
+        if (userResult.rows.length === 0) {
+            return res.render('activate', { user: req.session.user, error: 'User not found' });
+        }
+        
+        const user = userResult.rows[0];
+        
+        // Check if key matches
+        if (user.license_key !== license_key.toUpperCase().trim()) {
+            return res.render('activate', { user: req.session.user, error: 'Invalid license key. Please check and try again.' });
+        }
+        
+        // Check if already activated
+        if (user.license_status === 'active') {
+            return res.redirect('/dashboard');
+        }
+        
+        // Activate the license
+        await pool.query(`
+            UPDATE users SET license_status = 'active', license_activated_at = NOW(), status = 'active' WHERE id = $1
+        `, [userId]);
+        
+        // Log the activation
+        await pool.query(`
+            INSERT INTO license_audit (user_id, license_key, action, performed_by, details)
+            VALUES ($1, $2, 'license.activated', $1, $3)
+        `, [userId, license_key, JSON.stringify({ activated_by: 'user' })]);
+        
+        // Update session
+        req.session.user.status = 'active';
+        
+        res.redirect('/dashboard?activated=true');
+        
+    } catch (error) {
+        console.error('[Activate] Error:', error);
+        res.render('activate', { user: req.session.user, error: 'Activation failed. Please try again.' });
+    }
+});
+
 // Under Review page (frozen accounts)
 app.get('/auth/under-review', (req, res) => {
     // If user is not frozen, redirect to dashboard
