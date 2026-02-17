@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings | Zenith OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+        
+        .settings-container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+        
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: #64748b; text-decoration: none; font-size: 0.9rem; margin-bottom: 24px; transition: color 0.2s; }
+        .back-link:hover { color: #10b981; }
+        
+        .page-header { margin-bottom: 40px; }
+        .page-header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+        .page-header p { color: #64748b; }
+        
+        .settings-card { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 32px; margin-bottom: 24px; }
+        .settings-card h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        .settings-card h2 i { color: #10b981; }
+        .settings-card .card-desc { color: #64748b; font-size: 0.85rem; margin-bottom: 24px; }
+        
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+        .form-row.single { grid-template-columns: 1fr; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 0.85rem; font-weight: 500; color: #94a3b8; margin-bottom: 8px; }
+        
+        .input-wrapper { position: relative; }
+        .form-input { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.8); color: #e2e8f0; font-size: 0.95rem; outline: none; transition: all 0.2s; }
+        .form-input:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+        .form-input:disabled { opacity: 0.6; cursor: not-allowed; }
+        .form-input::placeholder { color: #475569; }
+        
+        .password-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; padding: 4px; transition: color 0.2s; }
+        .password-toggle:hover { color: #10b981; }
+        
+        .btn { padding: 12px 24px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
+        .btn-primary { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn-secondary { background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+        
+        .alert { padding: 14px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; }
+        .alert-success { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #6ee7b7; }
+        .alert-error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; }
+        
+        .user-info-display { display: flex; align-items: center; gap: 20px; padding: 20px; background: rgba(15, 23, 42, 0.5); border-radius: 12px; margin-bottom: 24px; }
+        .user-avatar { width: 72px; height: 72px; border-radius: 16px; background: linear-gradient(135deg, #10b981, #06b6d4); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 700; color: white; }
+        .user-details h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 4px; }
+        .user-details p { color: #64748b; font-size: 0.9rem; }
+        .user-details .role-badge { display: inline-block; padding: 4px 10px; background: rgba(16, 185, 129, 0.15); color: #10b981; border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin-top: 8px; }
+        
+        .password-requirements { margin-top: 12px; padding: 12px; background: rgba(15, 23, 42, 0.5); border-radius: 8px; }
+        .password-requirements p { font-size: 0.75rem; color: #64748b; margin-bottom: 8px; }
+        .password-requirements ul { list-style: none; }
+        .password-requirements li { font-size: 0.75rem; color: #64748b; padding: 2px 0; display: flex; align-items: center; gap: 6px; }
+        .password-requirements li i { font-size: 0.7rem; }
+        .password-requirements li.valid { color: #10b981; }
+        .password-requirements li.valid i { color: #10b981; }
+        
+        .form-actions { display: flex; gap: 12px; margin-top: 24px; }
+    </style>
+</head>
+<body>
+    <div class="settings-container">
+        <a href="/dashboard" class="back-link">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+        
+        <div class="page-header">
+            <h1>Account Settings</h1>
+            <p>Manage your profile and security preferences</p>
+        </div>
+        
+        <% if (typeof success !== 'undefined' && success) { %>
+            <div class="alert alert-success">
+                <i class="bi bi-check-circle"></i> <%= success %>
+            </div>
+        <% } %>
+        
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-error">
+                <i class="bi bi-exclamation-circle"></i> <%= error %>
+            </div>
+        <% } %>
+        
+        <!-- Profile Section -->
+        <div class="settings-card">
+            <h2><i class="bi bi-person-circle"></i> Profile Information</h2>
+            <p class="card-desc">Update your account details</p>
+            
+            <div class="user-info-display">
+                <div class="user-avatar"><%= user.name ? user.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : '?' %></div>
+                <div class="user-details">
+                    <h3><%= user.name %></h3>
+                    <p><%= user.email %></p>
+                    <span class="role-badge"><%= user.role %></span>
+                </div>
+            </div>
+            
+            <form method="POST" action="/settings/profile">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" name="name" class="form-input" value="<%= user.name %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-input" value="<%= user.email %>" disabled>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Password Section -->
+        <div class="settings-card">
+            <h2><i class="bi bi-shield-lock"></i> Change Password</h2>
+            <p class="card-desc">Update your password to keep your account secure</p>
+            
+            <form method="POST" action="/settings/password" id="passwordForm">
+                <div class="form-group">
+                    <label class="form-label">Current Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" name="current_password" id="currentPassword" class="form-input" placeholder="Enter your current password" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('currentPassword', this)">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" name="new_password" id="newPassword" class="form-input" placeholder="Enter new password" required minlength="6" oninput="checkPasswordStrength()">
+                            <button type="button" class="password-toggle" onclick="togglePassword('newPassword', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm New Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" name="confirm_password" id="confirmPassword" class="form-input" placeholder="Confirm new password" required oninput="checkPasswordMatch()">
+                            <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="password-requirements">
+                    <p>Password must meet these requirements:</p>
+                    <ul>
+                        <li id="req-length"><i class="bi bi-circle"></i> At least 6 characters</li>
+                        <li id="req-match"><i class="bi bi-circle"></i> Passwords match</li>
+                    </ul>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="bi bi-key"></i> Update Password
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+        
+        function checkPasswordStrength() {
+            const password = document.getElementById('newPassword').value;
+            const reqLength = document.getElementById('req-length');
+            
+            if (password.length >= 6) {
+                reqLength.classList.add('valid');
+                reqLength.querySelector('i').classList.remove('bi-circle');
+                reqLength.querySelector('i').classList.add('bi-check-circle-fill');
+            } else {
+                reqLength.classList.remove('valid');
+                reqLength.querySelector('i').classList.remove('bi-check-circle-fill');
+                reqLength.querySelector('i').classList.add('bi-circle');
+            }
+            
+            checkPasswordMatch();
+        }
+        
+        function checkPasswordMatch() {
+            const password = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            const reqMatch = document.getElementById('req-match');
+            
+            if (confirm.length > 0 && password === confirm) {
+                reqMatch.classList.add('valid');
+                reqMatch.querySelector('i').classList.remove('bi-circle');
+                reqMatch.querySelector('i').classList.add('bi-check-circle-fill');
+            } else {
+                reqMatch.classList.remove('valid');
+                reqMatch.querySelector('i').classList.remove('bi-check-circle-fill');
+                reqMatch.querySelector('i').classList.add('bi-circle');
+            }
+        }
+        
+        document.getElementById('passwordForm').addEventListener('submit', function(e) {
+            const password = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            
+            if (password.length < 6) {
+                e.preventDefault();
+                alert('Password must be at least 6 characters');
+                return;
+            }
+            
+            if (password !== confirm) {
+                e.preventDefault();
+                alert('Passwords do not match');
+                return;
+            }
+        });
+    </script>
+</body>
+</html>

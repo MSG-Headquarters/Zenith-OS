@@ -26,3 +26,13 @@ Thumbs.db
 # Temp files
 *.tmp
 *.bak
+
+node_modules/
+data/
+dbpr-downloads/
+sunbiz-data/
+county-pa-downloads/
+*.zip
+*.tar
+marketing-output/
+.env

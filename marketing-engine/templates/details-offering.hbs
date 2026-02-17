@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  @page { size: 8.5in 11in; margin: 0; }
+
+  body {
+    width: 8.5in;
+    height: 11in;
+    font-family: {{brand_font_body}};
+    color: {{brand_text}};
+    background: {{brand_bg}};
+    overflow: hidden;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .page {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  /* ── THIN HEADER STRIP ──────────────────────────────────── */
+  .header-strip {
+    background: linear-gradient(135deg, {{brand_primary}} 0%, {{brand_primary_dark}} 100%);
+    height: 0.38in;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0.3in;
+  }
+
+  .strip-title {
+    font-family: {{brand_font_heading}};
+    font-size: 8pt;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .strip-address {
+    font-family: {{brand_font_body}};
+    font-size: 7pt;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 1px;
+  }
+
+  /* ── MAIN CONTENT AREA ──────────────────────────────────── */
+  .content-area {
+    flex: 1;
+    display: flex;
+    padding: 0.25in 0.3in;
+    gap: 0.25in;
+  }
+
+  .col-left, .col-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── OFFERING SUMMARY CARD ──────────────────────────────── */
+  .summary-card {
+    border: 1px solid {{brand_border}};
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.2in;
+  }
+
+  .card-header {
+    background: {{brand_primary}};
+    padding: 8px 14px;
+  }
+
+  .card-header-text {
+    font-family: {{brand_font_heading}};
+    font-size: 10pt;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .card-body {
+    padding: 12px 14px;
+  }
+
+  /* ── SUMMARY ROWS ──────────────────────────────────────── */
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 0;
+    border-bottom: 1px solid {{brand_border_light}};
+  }
+
+  .summary-row:last-child {
+    border-bottom: none;
+  }
+
+  .summary-label {
+    font-family: {{brand_font_heading}};
+    font-size: 7.5pt;
+    font-weight: 600;
+    color: {{brand_primary}};
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+
+  .summary-value {
+    font-family: {{brand_font_body}};
+    font-size: 9pt;
+    font-weight: 700;
+    color: {{brand_text}};
+    text-align: right;
+  }
+
+  .summary-value-large {
+    font-family: {{brand_font_heading}};
+    font-size: 15pt;
+    font-weight: 800;
+    color: {{brand_text}};
+    text-align: right;
+    letter-spacing: -0.3px;
+  }
+
+  /* ── DETAIL ROWS TABLE ──────────────────────────────────── */
+  .detail-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .detail-table tr {
+    border-bottom: 1px solid {{brand_border_light}};
+  }
+
+  .detail-table tr:last-child {
+    border-bottom: none;
+  }
+
+  .detail-table td {
+    padding: 7px 0;
+    vertical-align: top;
+  }
+
+  .detail-label {
+    font-family: {{brand_font_heading}};
+    font-size: 7.5pt;
+    font-weight: 600;
+    color: {{brand_primary}};
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    width: 35%;
+  }
+
+  .detail-value {
+    font-family: {{brand_font_body}};
+    font-size: 8.5pt;
+    font-weight: 400;
+    color: {{brand_text}};
+  }
+
+  /* ── PROPERTY OVERVIEW ──────────────────────────────────── */
+  .overview-card {
+    border: 1px solid {{brand_border}};
+    border-radius: 4px;
+    overflow: hidden;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .overview-text {
+    padding: 14px;
+    font-family: {{brand_font_body}};
+    font-size: 8.5pt;
+    font-weight: 400;
+    color: {{brand_text}};
+    line-height: 1.65;
+    flex: 1;
+  }
+
+  .ai-tag {
+    display: inline-block;
+    background: {{brand_highlight}};
+    border: 1px solid {{brand_border}};
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-size: 6pt;
+    font-weight: 600;
+    color: {{brand_text_muted}};
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  /* ── HIGHLIGHTS LIST ───────────────────────────────────── */
+  .highlights-section {
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid {{brand_border_light}};
+  }
+
+  .highlights-title {
+    font-family: {{brand_font_heading}};
+    font-size: 7pt;
+    font-weight: 700;
+    color: {{brand_primary}};
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .highlight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 3px 0;
+  }
+
+  .highlight-bullet {
+    width: 5px;
+    height: 5px;
+    background: {{brand_primary}};
+    margin-top: 3px;
+    flex-shrink: 0;
+  }
+
+  .highlight-label {
+    font-family: {{brand_font_body}};
+    font-size: 8pt;
+    color: {{brand_text}};
+    line-height: 1.4;
+  }
+
+  /* ── CONTACT SECTION ───────────────────────────────────── */
+  .contact-section {
+    margin-top: auto;
+    padding-top: 0.15in;
+    border-top: 2px solid {{brand_primary}};
+  }
+
+  .contact-row {
+    display: flex;
+    gap: 0.2in;
+    margin-bottom: 0.1in;
+  }
+
+  .contact-mini {
+    flex: 1;
+  }
+
+  .contact-mini-name {
+    font-family: {{brand_font_heading}};
+    font-size: 9pt;
+    font-weight: 700;
+    color: {{brand_text}};
+    margin-bottom: 1px;
+  }
+
+  .contact-mini-title {
+    font-family: {{brand_font_body}};
+    font-size: 7pt;
+    color: {{brand_primary}};
+    margin-bottom: 4px;
+  }
+
+  .contact-mini-detail {
+    font-family: {{brand_font_body}};
+    font-size: 7.5pt;
+    color: {{brand_text_muted}};
+    line-height: 1.5;
+  }
+
+  /* ── FOOTER ────────────────────────────────────────────── */
+  .page-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0.15in 0.3in;
+    border-top: 1px solid {{brand_border}};
+  }
+
+  .footer-disclaimer {
+    font-family: {{brand_font_body}};
+    font-size: 5.5pt;
+    color: {{brand_text_muted}};
+    line-height: 1.5;
+    max-width: 5in;
+    opacity: 0.7;
+  }
+
+  .footer-logo-small {
+    width: 1in;
+    height: auto;
+    opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <!-- ═══ THIN HEADER STRIP ═══ -->
+    <div class="header-strip">
+      <div class="strip-title">{{property_name}}</div>
+      <div class="strip-address">{{address_full}}</div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div class="content-area">
+
+      <!-- LEFT COLUMN: Offering Summary + Details -->
+      <div class="col-left">
+        <div class="summary-card">
+          <div class="card-header">
+            <div class="card-header-text">Offering Summary</div>
+          </div>
+          <div class="card-body">
+            {{#if price}}
+            <div class="summary-row">
+              <div class="summary-label">List Price</div>
+              <div class="summary-value-large">{{price}}</div>
+            </div>
+            {{/if}}
+            {{#if price_psf}}
+            <div class="summary-row">
+              <div class="summary-label">Price Per SF</div>
+              <div class="summary-value">{{price_psf}}</div>
+            </div>
+            {{/if}}
+            {{#if lease_rate}}
+            <div class="summary-row">
+              <div class="summary-label">Lease Rate</div>
+              <div class="summary-value-large">{{lease_rate}}</div>
+            </div>
+            {{/if}}
+            {{#if lease_type}}
+            <div class="summary-row">
+              <div class="summary-label">Lease Type</div>
+              <div class="summary-value">{{lease_type}}</div>
+            </div>
+            {{/if}}
+            {{#if cap_rate}}
+            <div class="summary-row">
+              <div class="summary-label">Cap Rate</div>
+              <div class="summary-value-large">{{cap_rate}}</div>
+            </div>
+            {{/if}}
+            {{#if cam}}
+            <div class="summary-row">
+              <div class="summary-label">CAM / Expenses</div>
+              <div class="summary-value">{{cam}}</div>
+            </div>
+            {{/if}}
+            {{#if monthly_total}}
+            <div class="summary-row">
+              <div class="summary-label">Monthly Total</div>
+              <div class="summary-value">{{monthly_total}}</div>
+            </div>
+            {{/if}}
+          </div>
+        </div>
+
+        <div class="summary-card" style="flex: 1;">
+          <div class="card-header">
+            <div class="card-header-text">Property Details</div>
+          </div>
+          <div class="card-body">
+            <table class="detail-table">
+              {{#if address_full}}
+              <tr>
+                <td class="detail-label">Location</td>
+                <td class="detail-value">{{address_full}}</td>
+              </tr>
+              {{/if}}
+              {{#if building_sf}}
+              <tr>
+                <td class="detail-label">Building Size</td>
+                <td class="detail-value">{{building_sf}}</td>
+              </tr>
+              {{/if}}
+              {{#if land_acres}}
+              <tr>
+                <td class="detail-label">Land Area</td>
+                <td class="detail-value">{{land_acres}}</td>
+              </tr>
+              {{/if}}
+              {{#if zoning}}
+              <tr>
+                <td class="detail-label">Zoning</td>
+                <td class="detail-value">{{zoning}}</td>
+              </tr>
+              {{/if}}
+              {{#if year_built}}
+              <tr>
+                <td class="detail-label">Year Built</td>
+                <td class="detail-value">{{year_built}}</td>
+              </tr>
+              {{/if}}
+              {{#if re_taxes}}
+              <tr>
+                <td class="detail-label">RE Taxes</td>
+                <td class="detail-value">{{re_taxes}}</td>
+              </tr>
+              {{/if}}
+              {{#if parcel_id}}
+              <tr>
+                <td class="detail-label">Parcel ID</td>
+                <td class="detail-value">{{parcel_id}}</td>
+              </tr>
+              {{/if}}
+              {{#if parking}}
+              <tr>
+                <td class="detail-label">Parking</td>
+                <td class="detail-value">{{parking}}</td>
+              </tr>
+              {{/if}}
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: Overview + Highlights + Contact -->
+      <div class="col-right">
+        <div class="overview-card">
+          <div class="card-header">
+            <div class="card-header-text">Property Overview</div>
+          </div>
+          <div class="overview-text">
+            <div class="ai-tag">🤖 AI-COMPOSED FROM CRM DATA</div>
+            <p>
+              {{#if overview}}
+                {{{overview}}}
+              {{else}}
+                {{property_name}} presents an exceptional {{listing_badge_lower}} opportunity located at {{address_full}}. 
+                {{#if building_sf}}The property features {{building_sf}} of {{property_type_desc}} space{{/if}}{{#if land_acres}}{{#if building_sf}} situated on {{else}}The property encompasses {{/if}}{{land_acres}} of land{{/if}}{{#if zoning}}, zoned {{zoning}}{{/if}}.
+                {{#if is_sale}}{{#if price}}Offered at {{price}}{{#if price_psf}} ({{price_psf}}){{/if}}, this {{/if}}{{else}}{{#if lease_rate}}Available for lease at {{lease_rate}}{{#if lease_type}} {{lease_type}}{{/if}}, this {{/if}}{{/if}}property benefits from excellent visibility and access within the {{city}} market.
+              {{/if}}
+            </p>
+
+            {{#if has_highlights}}
+            <div class="highlights-section">
+              <div class="highlights-title">Property Highlights</div>
+              {{#each highlights}}
+              <div class="highlight-item">
+                <div class="highlight-bullet"></div>
+                <div class="highlight-label">{{this}}</div>
+              </div>
+              {{/each}}
+            </div>
+            {{/if}}
+          </div>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="contact-section">
+          <div class="contact-row">
+            {{#if has_broker}}
+            <div class="contact-mini">
+              <div class="contact-mini-name">{{broker_name}}</div>
+              <div class="contact-mini-title">{{broker_title}}</div>
+              <div class="contact-mini-detail">
+                {{broker_phone}}<br>
+                {{broker_email}}
+              </div>
+            </div>
+            {{/if}}
+            {{#if has_broker2}}
+            <div class="contact-mini">
+              <div class="contact-mini-name">{{broker2_name}}</div>
+              <div class="contact-mini-title">{{broker2_title}}</div>
+              <div class="contact-mini-detail">
+                {{broker2_phone}}<br>
+                {{broker2_email}}
+              </div>
+            </div>
+            {{/if}}
+          </div>
+          <img class="footer-logo-small" src="{{{brand_logo_src}}}" alt="{{brand_name}}">
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FOOTER ═══ -->
+    <div class="page-footer">
+      <div class="footer-disclaimer">{{disclaimer}}</div>
+      <div class="footer-logo-small" style="font-family: {{brand_font_heading}}; font-size: 7pt; font-weight: 700; color: {{brand_primary}}; letter-spacing: 2px;">{{brand_website}}</div>
+    </div>
+  </div>
+</body>
+</html>

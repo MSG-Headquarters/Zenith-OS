@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  @page { size: 8.5in 11in; margin: 0; }
+
+  body {
+    width: 8.5in;
+    height: 11in;
+    font-family: {{brand_font_body}};
+    color: {{brand_text}};
+    background: {{brand_bg}};
+    overflow: hidden;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .page {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+  }
+
+  /* ── MAP AREA (70% left) ────────────────────────────────── */
+  .map-area {
+    width: 70%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .map-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(145deg, #2d3a3a 0%, #3d4f4f 20%, #4a5c5c 40%, #3d4f4f 60%, #354545 80%, #2d3a3a 100%);
+    position: relative;
+  }
+
+  /* Simulated satellite map texture */
+  .map-placeholder::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(45deg, transparent 40%, rgba(80,120,80,0.08) 40%, rgba(80,120,80,0.08) 60%, transparent 60%),
+      linear-gradient(-45deg, transparent 35%, rgba(60,100,60,0.06) 35%, rgba(60,100,60,0.06) 65%, transparent 65%),
+      linear-gradient(90deg, transparent 48%, rgba(160,160,140,0.1) 48%, rgba(160,160,140,0.1) 52%, transparent 52%),
+      linear-gradient(0deg, transparent 30%, rgba(160,160,140,0.08) 30%, rgba(160,160,140,0.08) 32%, transparent 32%),
+      linear-gradient(0deg, transparent 65%, rgba(160,160,140,0.08) 65%, rgba(160,160,140,0.08) 67%, transparent 67%);
+  }
+
+  /* Road lines */
+  .map-road {
+    position: absolute;
+    background: rgba(200, 200, 180, 0.2);
+  }
+
+  .map-road-h { height: 3px; }
+  .map-road-v { width: 3px; }
+  .map-road-major { background: rgba(220, 200, 140, 0.35); }
+
+  /* Subject property marker */
+  .subject-marker {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 10;
+  }
+
+  .subject-arrow {
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 10px solid {{brand_accent}};
+    margin-bottom: 2px;
+  }
+
+  .subject-label {
+    background: {{brand_accent}};
+    color: #FFFFFF;
+    font-family: {{brand_font_heading}};
+    font-size: 7pt;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    padding: 3px 10px;
+    border-radius: 2px;
+    white-space: nowrap;
+    border: 2px solid rgba(255,255,255,0.3);
+  }
+
+  .subject-boundary {
+    position: absolute;
+    border: 2.5px solid {{brand_accent}};
+    border-radius: 2px;
+    background: rgba(196, 30, 58, 0.08);
+  }
+
+  /* Road labels */
+  .road-label {
+    position: absolute;
+    background: {{brand_primary}};
+    color: #FFFFFF;
+    font-family: {{brand_font_heading}};
+    font-size: 6.5pt;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+    z-index: 5;
+  }
+
+  /* Highway shield */
+  .highway-shield {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    background: #FFFFFF;
+    border: 2px solid {{brand_text}};
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: {{brand_font_heading}};
+    font-size: 7pt;
+    font-weight: 800;
+    color: {{brand_text}};
+    z-index: 5;
+  }
+
+  /* Compass rose */
+  .compass {
+    position: absolute;
+    top: 0.2in;
+    left: 0.2in;
+    width: 0.5in;
+    height: 0.5in;
+    z-index: 5;
+  }
+
+  .compass-circle {
+    width: 100%;
+    height: 100%;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.35);
+  }
+
+  .compass-n {
+    font-family: {{brand_font_heading}};
+    font-size: 12pt;
+    font-weight: 800;
+    color: #FFFFFF;
+  }
+
+  /* Website bar at bottom of map area */
+  .map-website-bar {
+    position: absolute;
+    bottom: 0.35in;
+    left: 0;
+    right: 0;
+    background: {{brand_primary}};
+    padding: 6px 0.25in;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .map-website-text {
+    font-family: {{brand_font_heading}};
+    font-size: 9pt;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 4px;
+  }
+
+  /* Office addresses below website bar */
+  .map-offices-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: {{brand_bg_darker}};
+    padding: 4px 0.25in;
+    display: flex;
+    justify-content: center;
+    gap: 0.3in;
+  }
+
+  .map-office-text {
+    font-family: {{brand_font_body}};
+    font-size: 5.5pt;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.3px;
+  }
+
+  /* ── CONTACT SIDEBAR (30% right) ─────────────────────── */
+  .contact-sidebar {
+    width: 30%;
+    height: 100%;
+    background: {{brand_bg_dark}};
+    display: flex;
+    flex-direction: column;
+    padding: 0.3in 0.25in;
+  }
+
+  .sidebar-logo {
+    width: 1.6in;
+    height: auto;
+    margin-bottom: 0.3in;
+    align-self: center;
+  }
+
+  .sidebar-divider {
+    width: 100%;
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 0.15in 0;
+  }
+
+  .sidebar-section-label {
+    font-family: {{brand_font_heading}};
+    font-size: 7pt;
+    font-weight: 600;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 0.1in;
+  }
+
+  .sidebar-property-name {
+    font-family: {{brand_font_heading}};
+    font-size: 11pt;
+    font-weight: 700;
+    color: #FFFFFF;
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+
+  .sidebar-tagline {
+    font-family: {{brand_font_body}};
+    font-size: 8pt;
+    color: {{brand_primary_light}};
+    margin-bottom: 6px;
+  }
+
+  .sidebar-address {
+    font-family: {{brand_font_body}};
+    font-size: 7.5pt;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.5;
+    margin-bottom: 0.15in;
+  }
+
+  /* Contact cards in sidebar */
+  .sidebar-contact {
+    margin-bottom: 0.15in;
+  }
+
+  .sidebar-contact-name {
+    font-family: {{brand_font_heading}};
+    font-size: 10pt;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 2px;
+  }
+
+  .sidebar-contact-title {
+    font-family: {{brand_font_body}};
+    font-size: 7.5pt;
+    color: {{brand_primary_light}};
+    margin-bottom: 6px;
+  }
+
+  .sidebar-contact-detail {
+    font-family: {{brand_font_body}};
+    font-size: 7.5pt;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.6;
+  }
+
+  /* Key stats in sidebar */
+  .sidebar-stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .sidebar-stat-label {
+    font-family: {{brand_font_heading}};
+    font-size: 7pt;
+    font-weight: 600;
+    color: {{brand_primary_light}};
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .sidebar-stat-value {
+    font-family: {{brand_font_body}};
+    font-size: 8pt;
+    font-weight: 700;
+    color: #FFFFFF;
+  }
+
+  /* Disclaimer at bottom */
+  .sidebar-disclaimer {
+    margin-top: auto;
+    font-family: {{brand_font_body}};
+    font-size: 5pt;
+    color: rgba(255,255,255,0.3);
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <!-- ═══ MAP AREA (Left 70%) ═══ -->
+    <div class="map-area">
+      <div class="map-placeholder">
+        <!-- Compass Rose -->
+        <div class="compass">
+          <div class="compass-circle">
+            <span class="compass-n">N</span>
+          </div>
+        </div>
+
+        <!-- Simulated Road Lines -->
+        <div class="map-road map-road-h map-road-major" style="top: 35%; left: 0; right: 0;"></div>
+        <div class="map-road map-road-h" style="top: 55%; left: 10%; right: 20%;"></div>
+        <div class="map-road map-road-v map-road-major" style="left: 52%; top: 0; bottom: 0;"></div>
+        <div class="map-road map-road-v" style="left: 28%; top: 20%; bottom: 15%;"></div>
+        <div class="map-road map-road-h" style="top: 72%; left: 5%; right: 30%;"></div>
+
+        <!-- Subject Property Boundary -->
+        <div class="subject-boundary" style="top: 38%; left: 25%; width: 18%; height: 14%;"></div>
+
+        <!-- Subject Marker -->
+        <div class="subject-marker" style="top: 28%; left: 30%;">
+          <div class="subject-label">▶ SUBJECT PROPERTY</div>
+          <div class="subject-arrow"></div>
+        </div>
+
+        <!-- Road Labels -->
+        {{#each road_labels}}
+        <div class="road-label" style="top: {{this.top}}; left: {{this.left}};">{{this.name}}</div>
+        {{/each}}
+
+        <!-- Highway Shields -->
+        {{#each highway_shields}}
+        <div class="highway-shield" style="top: {{this.top}}; left: {{this.left}};">{{this.number}}</div>
+        {{/each}}
+
+        <!-- Website Bar -->
+        <div class="map-website-bar">
+          <div class="map-website-text">{{brand_website}}</div>
+        </div>
+
+        <!-- Office Addresses -->
+        <div class="map-offices-bar">
+          {{#each office_addresses}}
+          <div class="map-office-text">{{this.city}}: {{this.phone}}</div>
+          {{/each}}
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CONTACT SIDEBAR (Right 30%) ═══ -->
+    <div class="contact-sidebar">
+      <!-- Brand Logo -->
+      <img class="sidebar-logo" src="{{{brand_logo_src}}}" alt="{{brand_name}}">
+
+      <div class="sidebar-divider"></div>
+
+      <!-- Property Info -->
+      <div class="sidebar-section-label">Property</div>
+      <div class="sidebar-property-name">{{property_name}}</div>
+      {{#if tagline}}
+      <div class="sidebar-tagline">{{tagline}}</div>
+      {{/if}}
+      <div class="sidebar-address">{{{address_full}}}</div>
+
+      <div class="sidebar-divider"></div>
+
+      <!-- Key Stats -->
+      <div class="sidebar-section-label">Details</div>
+      {{#if price}}
+      <div class="sidebar-stat-row">
+        <div class="sidebar-stat-label">Price</div>
+        <div class="sidebar-stat-value">{{price}}</div>
+      </div>
+      {{/if}}
+      {{#if lease_rate}}
+      <div class="sidebar-stat-row">
+        <div class="sidebar-stat-label">Lease Rate</div>
+        <div class="sidebar-stat-value">{{lease_rate}}</div>
+      </div>
+      {{/if}}
+      {{#if building_sf}}
+      <div class="sidebar-stat-row">
+        <div class="sidebar-stat-label">Building</div>
+        <div class="sidebar-stat-value">{{building_sf}}</div>
+      </div>
+      {{/if}}
+      {{#if land_acres}}
+      <div class="sidebar-stat-row">
+        <div class="sidebar-stat-label">Land</div>
+        <div class="sidebar-stat-value">{{land_acres}}</div>
+      </div>
+      {{/if}}
+      {{#if zoning}}
+      <div class="sidebar-stat-row">
+        <div class="sidebar-stat-label">Zoning</div>
+        <div class="sidebar-stat-value">{{zoning}}</div>
+      </div>
+      {{/if}}
+
+      <div class="sidebar-divider"></div>
+
+      <!-- Broker Contacts -->
+      <div class="sidebar-section-label">Contact</div>
+      {{#if has_broker}}
+      <div class="sidebar-contact">
+        <div class="sidebar-contact-name">{{broker_name}}</div>
+        <div class="sidebar-contact-title">{{broker_title}}</div>
+        <div class="sidebar-contact-detail">
+          {{broker_phone}}<br>
+          {{broker_email}}
+        </div>
+      </div>
+      {{/if}}
+
+      {{#if has_broker2}}
+      <div class="sidebar-contact">
+        <div class="sidebar-contact-name">{{broker2_name}}</div>
+        <div class="sidebar-contact-title">{{broker2_title}}</div>
+        <div class="sidebar-contact-detail">
+          {{broker2_phone}}<br>
+          {{broker2_email}}
+        </div>
+      </div>
+      {{/if}}
+
+      <!-- Disclaimer -->
+      <div class="sidebar-disclaimer">{{disclaimer}}</div>
+    </div>
+  </div>
+</body>
+</html>

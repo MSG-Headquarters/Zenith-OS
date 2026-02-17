@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AXIS | Your Command Center</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         :root {
             --bg-white: #FFFFFF; --bg-light: #F8FAFC; --bg-gray: #F1F5F9; --bg-card: #FFFFFF;
@@ -111,7 +112,7 @@
                 <div class="avatar"><%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %></div>
                 <div class="user-info">
                     <h3><%= user.name %></h3>
-                    <span class="user-role"><%= user.role %> • <%= org.name %></span>
+                    <span class="user-role"><%= user.role %> � <%= org.name %></span>
                 </div>
             </div>
         </div>
@@ -120,29 +121,32 @@
             <div class="nav-section">
                 <div class="nav-section-label">Dashboard</div>
                 <a href="/dashboard" class="nav-item active">
-                    <span class="nav-icon">🏠</span> AXIS Home
+                    <span class="nav-icon"><i class="bi bi-house"></i></span> AXIS Home
                 </a>
             </div>
 
             <div class="nav-section">
                 <div class="nav-section-label">Work Modules</div>
                 <a href="/crm" class="nav-item">
-                    <span class="nav-icon">📊</span> CRM Pipeline
+                    <span class="nav-icon"><i class="bi bi-kanban"></i></span> CRM Pipeline
                     <span class="nav-badge"><%= stats.leads || 0 %></span>
                 </a>
+                <a href="/inventory" class="nav-item">
+                    <span class="nav-icon"><i class="bi bi-box-seam"></i></span> Inventory
+                </a>
                 <a href="/huddle" class="nav-item">
-                    <span class="nav-icon">💬</span> The Huddle
+                    <span class="nav-icon"><i class="bi bi-chat-dots"></i></span> The Huddle
                 </a>
                 <a href="/mailer" class="nav-item">
-                    <span class="nav-icon">📧</span> Mailer
+                    <span class="nav-icon"><i class="bi bi-envelope"></i></span> Mailer
                 </a>
                 <a href="/pm" class="nav-item">
-                    <span class="nav-icon">🏢</span> Property Mgmt
+                    <span class="nav-icon"><i class="bi bi-building"></i></span> Property Mgmt
                 </a>
-                <a href="/danimal" class="nav-item"><span class="nav-icon">🦖</span> Danimal Data</a>
+                <a href="/danimal" class="nav-item"><span class="nav-icon"><i class="bi bi-database"></i></span> Danimal Data</a>
                 <a href="/intel" class="nav-item"><span class="nav-icon"><i class="bi bi-lightbulb"></i></span> INTEL</a>
                 <a href="/vault" class="nav-item">
-                    <span class="nav-icon">🔐</span> The Vault
+                    <span class="nav-icon"><i class="bi bi-safe"></i></span> The Vault
                 </a>
             </div>
 
@@ -150,10 +154,10 @@
             <div class="nav-section">
                 <div class="nav-section-label">C-Suite Access</div>
                 <a href="/command" class="nav-item csuite">
-                    <span class="nav-icon">🎯</span> Command Center
+                    <span class="nav-icon"><i class="bi bi-bullseye"></i></span> Command Center
                 </a>
                 <a href="/cfo" class="nav-item csuite">
-                    <span class="nav-icon">💰</span> CFO Dashboard
+                    <span class="nav-icon"><i class="bi bi-graph-up"></i></span> CFO Dashboard
                 </a>
             </div>
             <% } %>
@@ -162,11 +166,11 @@
             <div class="nav-section">
                 <div class="nav-section-label">Administration</div>
                 <a href="/admin" class="nav-item">
-                    <span class="nav-icon">⚙️</span> Admin Settings
+                    <span class="nav-icon"><i class="bi bi-gear"></i></span> Admin Settings
                 </a>
                 <% if (user.email === 'koda@mainstgroup.com') { %>
                 <a href="/superadmin" class="nav-item" style="border: 1px solid rgba(244, 63, 94, 0.3); background: rgba(244, 63, 94, 0.05);">
-                    <span class="nav-icon">🛡️</span> Super Admin
+                    <span class="nav-icon"><i class="bi bi-shield-lock"></i></span> Super Admin
                 </a>
                 <% } %>
             </div>
@@ -178,7 +182,8 @@
                 <div class="status-dot"></div>
                 <span>All systems operational</span>
             </div>
-            <a href="/auth/logout" class="logout-btn">🚪 Sign Out</a>
+            <a href="/settings" class="logout-btn" style="background: rgba(16, 185, 129, 0.1); color: #10b981; margin-bottom: 8px;"><i class="bi bi-gear"></i> Settings</a>
+            <a href="/auth/logout" class="logout-btn"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
         </div>
     </aside>
 
@@ -186,7 +191,7 @@
         <header class="topbar">
             <h1 class="topbar-title">Welcome back, <%= user.name.split(' ')[0] %></h1>
             <div class="topbar-actions">
-                <button class="btn btn-ghost">⚙️ Settings</button>
+                <a href="/settings" class="btn btn-ghost"><i class="bi bi-gear"></i> Settings</a>
                 <a href="/crm" class="btn btn-primary">+ New Lead</a>
             </div>
         </header>
@@ -199,28 +204,28 @@
 
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon blue">📊</div>
+                    <div class="stat-icon blue"><i class="bi bi-people"></i></div>
                     <div>
                         <div class="stat-value"><%= stats.leads || 0 %></div>
                         <div class="stat-label">Active Leads</div>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon emerald">✉️</div>
+                    <div class="stat-icon emerald"><i class="bi bi-chat-dots"></i></div>
                     <div>
                         <div class="stat-value"><%= stats.messages || 0 %></div>
                         <div class="stat-label">Messages</div>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon violet">💬</div>
+                    <div class="stat-icon violet"><i class="bi bi-bell"></i></div>
                     <div>
                         <div class="stat-value">0</div>
                         <div class="stat-label">Unread Messages</div>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon amber">💰</div>
+                    <div class="stat-icon amber"><i class="bi bi-currency-dollar"></i></div>
                     <div>
                         <div class="stat-value">$<%= Math.round((stats.pipelineValue || 0) / 1000) %>K</div>
                         <div class="stat-label">Pipeline Value</div>
@@ -232,7 +237,7 @@
             <div class="modules-grid">
                 <a href="/crm" class="module-card card-crm">
                     <div class="module-header">
-                        <div class="module-icon">📊</div>
+                        <div class="module-icon"><i class="bi bi-box"></i></div>
                         <div class="module-info">
                             <h3>CRM Pipeline</h3>
                             <p>Lead & Deal Management</p>
@@ -243,7 +248,7 @@
 
                 <a href="/huddle" class="module-card card-huddle">
                     <div class="module-header">
-                        <div class="module-icon">💬</div>
+                        <div class="module-icon"><i class="bi bi-box"></i></div>
                         <div class="module-info">
                             <h3>The Huddle</h3>
                             <p>Team Communication</p>
@@ -254,7 +259,7 @@
 
                 <a href="/mailer" class="module-card card-mailer">
                     <div class="module-header">
-                        <div class="module-icon">📧</div>
+                        <div class="module-icon"><i class="bi bi-box"></i></div>
                         <div class="module-info">
                             <h3>Mailer</h3>
                             <p>Email Automation</p>
@@ -265,7 +270,7 @@
 
                 <a href="/vault" class="module-card card-vault">
                     <div class="module-header">
-                        <div class="module-icon">🔐</div>
+                        <div class="module-icon"><i class="bi bi-box"></i></div>
                         <div class="module-info">
                             <h3>The Vault</h3>
                             <p>Secure Documents</p>
@@ -286,7 +291,7 @@
                             <% activities.forEach(activity => { %>
                             <div class="activity-item">
                                 <div class="activity-icon <%= activity.type || 'lead' %>">
-                                    <%= activity.type === 'email' ? '📧' : activity.type === 'message' ? '💬' : activity.type === 'deal' ? '💰' : '📊' %>
+                                    <%= activity.type === 'email' ? '<i class="bi bi-envelope"></i>' : activity.type === 'message' ? '<i class="bi bi-chat"></i>' : activity.type === 'deal' ? '<i class="bi bi-trophy"></i>' : '<i class="bi bi-bell"></i>' %>
                                 </div>
                                 <div class="activity-content">
                                     <h4><%= activity.action %></h4>
@@ -297,7 +302,7 @@
                             <% }); %>
                         <% } else { %>
                             <div class="activity-item">
-                                <div class="activity-icon lead">📊</div>
+                                <div class="activity-icon lead"><i class="bi bi-person-plus"></i></div>
                                 <div class="activity-content">
                                     <h4>Welcome to Zenith OS!</h4>
                                     <p>Get started by adding your first lead or exploring the modules.</p>
@@ -314,25 +319,22 @@
                     </div>
                     <div class="card-body">
                         <a href="/crm" class="quick-action" style="text-decoration: none; color: inherit;">
-                            <div class="quick-action-icon">➕</div>
+                            <div class="quick-action-icon">?</div>
                             <span class="quick-action-text">Add New Lead</span>
                         </a>
                         <a href="/huddle" class="quick-action" style="text-decoration: none; color: inherit;">
-                            <div class="quick-action-icon">💬</div>
-                            <span class="quick-action-text">Start a Huddle</span>
+                            <div class="quick-action-icon"><i class="bi bi-chat-square-text"></i></div><span class="quick-action-text">Start a Huddle</span>
                         </a>
                         <a href="/mailer" class="quick-action" style="text-decoration: none; color: inherit;">
-                            <div class="quick-action-icon">📧</div>
-                            <span class="quick-action-text">Send Campaign</span>
+                            <div class="quick-action-icon"><i class="bi bi-send"></i></div><span class="quick-action-text">Send Campaign</span>
                         </a>
                         <a href="/vault" class="quick-action" style="text-decoration: none; color: inherit;">
-                            <div class="quick-action-icon">📁</div>
+                            <div class="quick-action-icon"><i class="bi bi-lightning"></i></div>
                             <span class="quick-action-text">Upload Document</span>
                         </a>
                         <% if (['Admin', 'Principal'].includes(user.role)) { %>
                         <a href="/command" class="quick-action" style="text-decoration: none; color: inherit;">
-                            <div class="quick-action-icon">🎯</div>
-                            <span class="quick-action-text">View Command Center</span>
+                            <div class="quick-action-icon"><i class="bi bi-bullseye"></i></div><span class="quick-action-text">View Command Center</span>
                         </a>
                         <% } %>
                     </div>
@@ -344,7 +346,8 @@
     <script>
         const now = new Date();
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-US', options) + ' • <%= org.name %>';
+        document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-US', options) + ' � <%= org.name %>';
     </script>
+<%- include('partials/notification-bubble') %>
 </body>
 </html>

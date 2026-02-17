@@ -17,6 +17,8 @@ const huddleApi = require('./routes/huddle-api');
 const huddlePortalApi = require('./routes/huddle-portal-api');
 const sundayMailRoutes = require('./routes/sunday-mail-routes');
 const intelApi = require('./routes/intel-api');
+const { registerIntelAIRoutes } = require('./routes/intel-ai-chat');
+const marketingApi = require('./routes/marketing-api');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
@@ -205,6 +207,26 @@ function initDatabase() {
 
 initDatabase();
 
+// Auto-create inventory/listings table
+pool.query(`CREATE TABLE IF NOT EXISTS listings (
+    id SERIAL PRIMARY KEY, org_id INTEGER, lead_id INTEGER, intel_project_id INTEGER,
+    listing_agent_id INTEGER, listing_agent_name VARCHAR(255),
+    property_name VARCHAR(255), property_address VARCHAR(500), property_city VARCHAR(100),
+    property_state VARCHAR(10) DEFAULT 'FL', property_zip VARCHAR(20), property_county VARCHAR(100),
+    property_type VARCHAR(50), property_subtype VARCHAR(100),
+    listing_type VARCHAR(50) NOT NULL DEFAULT 'For Sale',
+    price DECIMAL(14,2), price_per_sf DECIMAL(10,2), lease_rate DECIMAL(10,2), lease_type VARCHAR(50),
+    building_sf INTEGER, lot_sf INTEGER, lot_acres DECIMAL(10,4), year_built INTEGER, zoning VARCHAR(50),
+    cap_rate DECIMAL(5,2), noi DECIMAL(14,2), occupancy DECIMAL(5,2),
+    status VARCHAR(50) NOT NULL DEFAULT 'pending_marketing', status_changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    approved_by INTEGER, approved_at TIMESTAMP,
+    flyer_url VARCHAR(500), flyer_approved BOOLEAN DEFAULT false, thumbnail_url VARCHAR(500),
+    description TEXT, highlights TEXT,
+    listed_at TIMESTAMP, under_contract_at TIMESTAMP, closed_at TIMESTAMP, close_price DECIMAL(14,2),
+    is_featured BOOLEAN DEFAULT false, notes TEXT, metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)`).then(() => console.log('[DB] Listings table ready')).catch(err => console.error('[DB] Listings table error:', err.message));
+
 // ============================================
 // MIDDLEWARE
 // ============================================
@@ -286,6 +308,64 @@ app.use((req, res, next) => {
 app.use('/system', adminRoutes(pool));
 app.use('/api/danimal', danimalApi);
 app.use('/api/intel', intelApi(pool));
+app.use('/api/marketing', marketingApi(pool));
+registerIntelAIRoutes(app, pool);
+const adminApiRoutes = require('./routes/admin-api');
+app.use('/api/admin', adminApiRoutes);
+
+// ============================================
+// USER SETTINGS
+// ============================================
+
+app.get('/settings', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/auth/login');
+    }
+    res.render('settings', {
+        user: req.session.user,
+        org: req.session.org,
+        success: req.query.success,
+        error: req.query.error
+    });
+});
+
+app.post('/settings/profile', async (req, res) => {
+    if (!req.session.user) return res.redirect('/auth/login');
+    const { name } = req.body;
+    try {
+        await pool.query('UPDATE users SET name = $1 WHERE id = $2', [name, req.session.user.id]);
+        req.session.user.name = name;
+        res.redirect('/settings?success=Profile updated successfully');
+    } catch (error) {
+        console.error('[SETTINGS] Profile update error:', error);
+        res.redirect('/settings?error=Failed to update profile');
+    }
+});
+
+app.post('/settings/password', async (req, res) => {
+    if (!req.session.user) return res.redirect('/auth/login');
+    const { current_password, new_password, confirm_password } = req.body;
+    try {
+        if (!new_password || new_password.length < 6) {
+            return res.redirect('/settings?error=New password must be at least 6 characters');
+        }
+        if (new_password !== confirm_password) {
+            return res.redirect('/settings?error=New passwords do not match');
+        }
+        const userResult = await pool.query('SELECT password_hash FROM users WHERE id = $1', [req.session.user.id]);
+        if (userResult.rows.length === 0) return res.redirect('/settings?error=User not found');
+        const bcrypt = require('bcryptjs');
+        const validPassword = await bcrypt.compare(current_password, userResult.rows[0].password_hash);
+        if (!validPassword) return res.redirect('/settings?error=Current password is incorrect');
+        const hashedPassword = await bcrypt.hash(new_password, 10);
+        await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hashedPassword, req.session.user.id]);
+        console.log(`[SETTINGS] Password changed for user ${req.session.user.email}`);
+        res.redirect('/settings?success=Password changed successfully');
+    } catch (error) {
+        console.error('[SETTINGS] Password change error:', error);
+        res.redirect('/settings?error=Failed to change password');
+    }
+});
 
 // ============================================
 // LICENSE CHECK MIDDLEWARE
@@ -351,6 +431,123 @@ app.get('/health', (req, res) => {
 });
 
 // Auth routes
+
+// ============================================
+// USER LICENSE ACTIVATION
+// ============================================
+
+// GET - Show activation page
+app.get('/auth/activate', (req, res) => {
+    res.render('activate-license', { 
+        error: req.query.error,
+        success: req.query.success,
+        email: req.query.email || ''
+    });
+});
+
+// POST - Validate license and set password
+app.post('/auth/activate', async (req, res) => {
+    const { email, license_key, password, confirm_password } = req.body;
+    
+    try {
+        // Validate inputs
+        if (!email || !license_key) {
+            return res.render('activate-license', { 
+                error: 'Email and license key are required',
+                email 
+            });
+        }
+        
+        if (!password || password.length < 6) {
+            return res.render('activate-license', { 
+                error: 'Password must be at least 6 characters',
+                email 
+            });
+        }
+        
+        if (password !== confirm_password) {
+            return res.render('activate-license', { 
+                error: 'Passwords do not match',
+                email 
+            });
+        }
+        
+        // Find user by email and license key
+        const userResult = await pool.query(`
+            SELECT u.*, o.id as org_id, o.name as org_name, o.license_status as org_license_status
+            FROM users u
+            JOIN organizations o ON u.organization_id = o.id
+            WHERE LOWER(u.email) = LOWER($1) AND u.license_key = $2
+        `, [email, license_key.toUpperCase().trim()]);
+        
+        if (userResult.rows.length === 0) {
+            return res.render('activate-license', { 
+                error: 'Invalid email or license key. Please check and try again.',
+                email 
+            });
+        }
+        
+        const user = userResult.rows[0];
+        
+        // Check if license has expired
+        if (user.license_expires && new Date(user.license_expires) < new Date()) {
+            return res.render('activate-license', { 
+                error: 'This license key has expired. Please contact your administrator for a new one.',
+                email 
+            });
+        }
+        
+        // Check if user is already active
+        if (user.status === 'active') {
+            return res.render('activate-license', { 
+                error: 'This account is already activated. Please log in instead.',
+                email 
+            });
+        }
+        
+        // Hash the password
+        const bcrypt = require('bcryptjs');
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        // Activate the user
+        await pool.query(`
+            UPDATE users 
+            SET password_hash = $1, 
+                status = 'active', 
+                activated_at = NOW(),
+                license_key = NULL,
+                license_expires = NULL
+            WHERE id = $2
+        `, [hashedPassword, user.id]);
+        
+        console.log(`[AUTH] User ${user.email} activated successfully`);
+        
+        // Auto-login the user
+        req.session.user = {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role
+        };
+        req.session.org = {
+            id: user.org_id,
+            name: user.org_name
+        };
+        
+        // Update last login
+        await pool.query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]);
+        
+        res.redirect('/dashboard?welcome=true');
+        
+    } catch (error) {
+        console.error('[AUTH] Activation error:', error);
+        res.render('activate-license', { 
+            error: 'An error occurred. Please try again.',
+            email 
+        });
+    }
+});
+
 app.get('/auth/login', (req, res) => {
     if (req.session.user) {
         return res.redirect('/dashboard');
@@ -668,6 +865,77 @@ app.get('/crm', async (req, res) => {
         res.render('crm', { stages: [], stats: {} });
     }
 });
+
+// ── INVENTORY ──
+app.get('/inventory', async (req, res) => {
+    if (!req.session.user) return res.redirect('/auth/login');
+    try {
+        const orgId = req.session.org?.id;
+        const userId = req.session.user.id;
+        
+        const listingsResult = await pool.query(
+            `SELECT l.*, u.name as listing_agent_name 
+             FROM listings l 
+             LEFT JOIN users u ON l.listing_agent_id = u.id 
+             WHERE l.org_id = $1 
+             ORDER BY l.created_at DESC`,
+            [orgId]
+        );
+        
+        const statsResult = await pool.query(
+            `SELECT 
+                COUNT(*) as total,
+                COUNT(*) FILTER (WHERE status = 'active') as active,
+                COUNT(*) FILTER (WHERE status IN ('pending_marketing','in_production','pending_approval')) as in_production,
+                COUNT(*) FILTER (WHERE status = 'under_contract') as under_contract,
+                COALESCE(SUM(price) FILTER (WHERE status = 'active'), 0) as total_value
+             FROM listings WHERE org_id = $1`,
+            [orgId]
+        );
+        
+        const stats = statsResult.rows[0] || {};
+        
+        res.render('inventory', {
+            user: req.session.user,
+            org: req.session.org,
+            listings: listingsResult.rows,
+            stats: {
+                total: parseInt(stats.total) || 0,
+                active: parseInt(stats.active) || 0,
+                inProduction: parseInt(stats.in_production) || 0,
+                underContract: parseInt(stats.under_contract) || 0,
+                totalValue: parseFloat(stats.total_value) || 0
+            }
+        });
+    } catch (err) {
+        console.error('[INVENTORY] Error:', err);
+        res.render('inventory', { user: req.session.user, org: req.session.org, listings: [], stats: {} });
+    }
+});
+
+// Inventory status update API
+app.put('/api/inventory/:id/status', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ success: false });
+    try {
+        const { status } = req.body;
+        const validStatuses = ['pending_marketing', 'in_production', 'pending_approval', 'active', 'under_contract', 'closed'];
+        if (!validStatuses.includes(status)) return res.status(400).json({ success: false, error: 'Invalid status' });
+        
+        const updates = { status, status_changed_at: new Date() };
+        if (status === 'active') { updates.listed_at = new Date(); updates.approved_by = req.session.user.id; updates.approved_at = new Date(); }
+        if (status === 'under_contract') updates.under_contract_at = new Date();
+        if (status === 'closed') updates.closed_at = new Date();
+        
+        const setClauses = Object.keys(updates).map((k, i) => `${k} = $${i + 2}`).join(', ');
+        const values = [req.params.id, ...Object.values(updates)];
+        
+        await pool.query(`UPDATE listings SET ${setClauses} WHERE id = $1`, values);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 
 // The Huddle (Team Messaging)
 app.get('/huddle', async (req, res) => {
@@ -1598,7 +1866,88 @@ app.get('/command', async (req, res) => {
 
 // Admin
 // Old /admin route - redirect to new system
-app.get('/admin', (req, res) => res.redirect('/system'));
+// ============================================
+// ADMIN MODULE
+// ============================================
+app.get('/admin', async (req, res) => {
+    if (!req.session.user) return res.redirect('/auth/login');
+    try {
+        const orgId = req.session.org?.id;
+        const statsResult = await pool.query(`SELECT 
+            COUNT(*) FILTER (WHERE status = 'active' OR status IS NULL) as active_count,
+            COUNT(*) FILTER (WHERE status = 'pending') as pending_count,
+            COUNT(*) FILTER (WHERE status = 'review') as review_count,
+            COUNT(*) FILTER (WHERE status = 'terminated') as terminated_count
+            FROM users WHERE org_id = $1`, [orgId]);
+        const rolesResult = await pool.query(`SELECT role as name, COUNT(*) as user_count FROM users WHERE org_id = $1 GROUP BY role ORDER BY role`, [orgId]);
+        res.render('admin/dashboard', { user: req.session.user, org: req.session.org, stats: statsResult.rows[0] || {}, recentAudit: [], roleCounts: rolesResult.rows || [] });
+    } catch (err) {
+        console.error('[ADMIN] Dashboard error:', err);
+        res.render('admin/dashboard', { user: req.session.user, org: req.session.org, stats: {}, recentAudit: [], roleCounts: [] });
+    }
+});
+
+app.get('/admin/roles', async (req, res) => {
+    if (!req.session.user) return res.redirect('/auth/login');
+    try {
+        const orgId = req.session.org?.id;
+        const rolesResult = await pool.query(`
+            SELECT 
+                role as name,
+                role as id,
+                CASE WHEN role IN ('Super Admin', 'Admin', 'Owner') THEN true ELSE false END as is_admin,
+                COUNT(*) as user_count,
+                COALESCE(
+                    CASE role
+                        WHEN 'Super Admin' THEN 'Full platform access with cross-tenant management'
+                        WHEN 'Admin' THEN 'Organization administration and user management'
+                        WHEN 'Owner' THEN 'Organization owner with billing access'
+                        WHEN 'Director' THEN 'Department leadership with module management'
+                        WHEN 'Manager' THEN 'Team management and reporting access'
+                        WHEN 'Agent' THEN 'Standard broker access to CRM, INTEL, and listings'
+                        WHEN 'Associate' THEN 'Junior broker with guided access'
+                        ELSE 'Custom role'
+                    END
+                ) as description,
+                0 as permission_count
+            FROM users 
+            WHERE org_id = $1
+            GROUP BY role
+            ORDER BY 
+                CASE role 
+                    WHEN 'Super Admin' THEN 1 WHEN 'Admin' THEN 2 WHEN 'Owner' THEN 3 
+                    WHEN 'Director' THEN 4 WHEN 'Manager' THEN 5 ELSE 6 
+                END
+        `, [orgId]);
+
+        const roles = rolesResult.rows.map(r => ({
+            ...r,
+            user_count: parseInt(r.user_count),
+            permissions: []
+        }));
+
+        res.render('admin/roles', { user: req.session.user, org: req.session.org, activeTab: 'roles', roles });
+    } catch (err) {
+        console.error('[ADMIN] Roles error:', err);
+        res.render('admin/roles', { user: req.session.user, org: req.session.org, activeTab: 'roles', roles: [] });
+    }
+});
+
+app.get('/admin/users', async (req, res) => {
+    if (!req.session.user) return res.redirect('/auth/login');
+    try {
+        const users = await pool.query('SELECT * FROM users WHERE org_id = $1 ORDER BY name', [req.session.org?.id]);
+        res.render('admin/users', { user: req.session.user, org: req.session.org, activeTab: 'users', users: users.rows });
+    } catch (err) {
+        console.error('[ADMIN] Users error:', err);
+        res.render('admin/users', { user: req.session.user, org: req.session.org, activeTab: 'users', users: [] });
+    }
+});
+
+app.get('/admin/audit', async (req, res) => {
+    if (!req.session.user) return res.redirect('/auth/login');
+    res.render('admin/audit', { user: req.session.user, org: req.session.org, activeTab: 'audit' });
+});
 
 
 
@@ -1696,6 +2045,31 @@ app.post('/api/leads/capture', async (req, res) => {
 // ============================================
 // CRM LEAD MANAGEMENT API
 // ============================================
+
+// Create new lead
+app.post('/api/crm/leads', async (req, res) => {
+    try {
+        const orgId = req.session.org?.id || 1;
+        const userId = req.session.user?.id;
+        const { name, company, email, phone, property_address, property_city, property_state, property_zip, property_type, property_sqft, value, stage, source, notes } = req.body;
+        
+        if (!name || !company) {
+            return res.status(400).json({ success: false, error: 'Name and company are required' });
+        }
+        
+        const result = await pool.query(`
+            INSERT INTO leads (organization_id, name, company, email, phone, property_address, property_city, property_state, property_zip, property_type, property_sqft, value, stage, source, notes, assigned_to, created_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW())
+            RETURNING *
+        `, [orgId, name, company, email, phone, property_address, property_city, property_state || 'FL', property_zip, property_type, property_sqft, value, stage || 'New Lead', source, notes, userId]);
+        
+        console.log('[CRM] New lead created:', company);
+        res.json({ success: true, lead: result.rows[0] });
+    } catch (err) {
+        console.error('Create lead error:', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
 
 // Update lead stage (for drag-and-drop)
 app.put('/api/leads/:id/stage', async (req, res) => {
@@ -2648,7 +3022,7 @@ app.use('/intel/exports', express.static(path.join(__dirname, 'public', 'intel',
 // ============================================
 // START SERVER
 // ============================================
-app.listen(PORT, async () => {
+const server = app.listen(PORT, async () => {
     console.log(`
 ╔══════════════════════════════════════════════════════════╗
 ║                    ZENITH OS v2.8.0                      ║
@@ -2662,5 +3036,5 @@ app.listen(PORT, async () => {
     
     await initializeDatabase();
 });
-
+server.timeout = 900000; // 5 minutes
 

@@ -81,7 +81,7 @@
         .tool-btn:hover { background: rgba(255,255,255,0.05); color: #e2e8f0; }
         .tool-btn.active { background: rgba(16,185,129,0.12); color: #10b981; border-color: rgba(16,185,129,0.3); }
         .tool-sep { width: 1px; height: 28px; background: rgba(255,255,255,0.06); margin: 0 4px; }
-        .canvas-area { flex: 1; display: flex; gap: 16px; min-height: 500px; }
+        .canvas-area { flex: 1; display: flex; gap: 16px; min-height: 500px; position: relative; }
         .canvas-main { flex: 1; background: #1a2332; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
         .canvas-main canvas { border: 1px solid rgba(255,255,255,0.1); }
 
@@ -101,6 +101,79 @@
         .logo-item img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .logo-upload-btn { margin: 8px 12px 12px; padding: 8px; border-radius: 8px; border: 1px dashed rgba(255,255,255,0.15); background: transparent; color: #64748b; cursor: pointer; font-size: 0.8rem; text-align: center; transition: all 0.15s; }
         .logo-upload-btn:hover { border-color: #10b981; color: #10b981; }
+        
+        /* -- Floating Property Panel -- */
+        .property-panel { 
+            position: absolute; 
+            left: 16px; 
+            top: 16px; 
+            width: 300px; 
+            background: rgba(15, 23, 42, 0.92); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 16px; 
+            border: 1px solid rgba(16,185,129,0.2); 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            display: flex; 
+            flex-direction: column; 
+            max-height: calc(100vh - 300px); 
+            overflow: hidden;
+            z-index: 50;
+            transition: all 0.3s ease;
+        }
+        .property-panel.collapsed { width: 52px; height: 52px; border-radius: 14px; }
+        .property-panel.collapsed .property-panel-body { display: none; }
+        .property-panel.collapsed .property-panel-header h3 span { display: none; }
+        .property-panel.collapsed .property-panel-header .enrichment-status { display: none; }
+        .property-panel-header { 
+            padding: 14px 16px; 
+            border-bottom: 1px solid rgba(255,255,255,0.06); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            cursor: pointer;
+            background: rgba(16, 185, 129, 0.08);
+            border-radius: 16px 16px 0 0;
+        }
+        .property-panel.collapsed .property-panel-header { border-radius: 14px; }
+        .property-panel-header:hover { background: rgba(16, 185, 129, 0.15); }
+        .property-panel-header h3 { font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: #10b981; margin: 0; }
+        .property-panel-body { overflow-y: auto; flex: 1; }
+        .property-panel-section { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .property-panel-section h4 { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; font-weight: 600; }
+        .property-info-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.8rem; }
+        .property-info-label { color: #64748b; }
+        .property-info-value { color: #e2e8f0; font-weight: 500; text-align: right; max-width: 60%; }
+        .property-address { font-size: 0.95rem; color: #fff; font-weight: 600; margin-bottom: 2px; }
+        .property-city { font-size: 0.8rem; color: #94a3b8; }
+        .photo-upload-zone { border: 2px dashed rgba(139,92,246,0.3); border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s; background: rgba(139,92,246,0.05); }
+        .photo-upload-zone:hover { border-color: #8b5cf6; background: rgba(139,92,246,0.1); }
+        .photo-upload-zone i { font-size: 1.2rem; color: #8b5cf6; }
+        .photo-upload-zone p { font-size: 0.75rem; color: #94a3b8; margin: 4px 0 0; }
+        .photo-upload-zone span { font-size: 0.65rem; color: #64748b; }
+        .photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
+        .photo-thumb { aspect-ratio: 1; border-radius: 8px; overflow: hidden; position: relative; cursor: pointer; border: 2px solid transparent; }
+        .photo-thumb:hover { border-color: #8b5cf6; }
+        .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .api-asset-btn { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); background: transparent; color: #94a3b8; cursor: pointer; font-size: 0.75rem; width: 100%; margin-bottom: 6px; transition: all 0.15s; }
+        .api-asset-btn:hover { background: rgba(255,255,255,0.05); color: #e2e8f0; }
+        .api-asset-btn.loaded { border-color: rgba(16,185,129,0.3); color: #10b981; }
+        .enrichment-status { font-size: 0.65rem; padding: 2px 8px; border-radius: 100px; background: rgba(16,185,129,0.15); color: #10b981; }
+        .chat-section { padding: 12px 16px; }
+        .chat-section h4 { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .chat-messages { max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+        .chat-msg { padding: 6px 10px; border-radius: 8px; font-size: 0.75rem; max-width: 90%; }
+        .chat-msg.broker { background: rgba(139,92,246,0.15); color: #c4b5fd; align-self: flex-end; }
+        .chat-msg.marketing { background: rgba(16,185,129,0.15); color: #6ee7b7; align-self: flex-start; }
+        .chat-msg .chat-meta { font-size: 0.6rem; color: #64748b; margin-top: 2px; }
+        .chat-empty { text-align: center; color: #475569; font-size: 0.7rem; padding: 12px 0; }
+        .chat-input-wrap { display: flex; gap: 6px; }
+        .chat-input { flex: 1; padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); background: #0f1724; color: #e2e8f0; font-size: 0.75rem; outline: none; }
+        .chat-input:focus { border-color: #10b981; }
+        .chat-send { padding: 8px 10px; border-radius: 8px; background: #10b981; color: white; border: none; cursor: pointer; }
+        .chat-send:hover { background: #059669; }
+        .collapse-icon { transition: transform 0.3s; font-size: 0.8rem; color: #64748b; }
+        .property-panel.collapsed .collapse-icon { transform: rotate(180deg); }
 
         /* ── Page Tabs within a Project ── */
         .page-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
@@ -231,8 +304,82 @@
                     <button class="tool-btn" onclick="shareLinkedIn()" title="Share to LinkedIn" style="color:#0a66c2;"><i class="bi bi-linkedin"></i></button>
                 </div>
 
-                <!-- Canvas + Logo Panel -->
+                <!-- Canvas + Panels -->
                 <div class="canvas-area">
+                    <!-- Property Info Panel (Left) -->
+                    <div class="property-panel" id="propertyPanel">
+                        <div class="property-panel-header" onclick="togglePropertyPanel()">
+                            <h3><i class="bi bi-building"></i> <span>Property Info</span></h3>
+                            <span class="enrichment-status ready" id="enrichmentStatus">Ready</span>
+                            <i class="bi bi-chevron-down collapse-icon"></i>
+                        </div>
+                        <div class="property-panel-body">
+                        <div class="property-panel-section">
+                            <div class="property-address" id="propAddress">Loading...</div>
+                            <div class="property-city" id="propCity"></div>
+                        </div>
+                        
+                        <div class="property-panel-section">
+                            <h4><i class="bi bi-info-circle"></i> Details</h4>
+                            <div class="property-info-row">
+                                <span class="property-info-label">Type</span>
+                                <span class="property-info-value" id="propType">--</span>
+                            </div>
+                            <div class="property-info-row">
+                                <span class="property-info-label">Size</span>
+                                <span class="property-info-value" id="propSize">--</span>
+                            </div>
+                            <div class="property-info-row">
+                                <span class="property-info-label">Price</span>
+                                <span class="property-info-value" id="propPrice">--</span>
+                            </div>
+                            <div class="property-info-row">
+                                <span class="property-info-label">Transaction</span>
+                                <span class="property-info-value" id="propTransaction">--</span>
+                            </div>
+                        </div>
+                        
+                        <div class="property-panel-section">
+                            <h4><i class="bi bi-cloud-download"></i> API Assets</h4>
+                            <button class="api-asset-btn" onclick="fetchAerial()" id="btnAerial">
+                                <i class="bi bi-camera"></i> Fetch Aerial Image
+                            </button>
+                            <button class="api-asset-btn" onclick="fetchDemographics()" id="btnDemo">
+                                <i class="bi bi-people"></i> Demographics (1/3/5 mi)
+                            </button>
+                            <button class="api-asset-btn" onclick="fetchTraffic()" id="btnTraffic">
+                                <i class="bi bi-signpost-2"></i> Traffic Counts
+                            </button>
+                            <button class="api-asset-btn" onclick="fetchTenants()" id="btnTenants">
+                                <i class="bi bi-shop"></i> Nearby Tenants
+                            </button>
+                        </div>
+                        
+                        <div class="property-panel-section">
+                            <h4><i class="bi bi-images"></i> Broker Photos</h4>
+                            <div class="photo-upload-zone" onclick="document.getElementById('photoUpload').click()">
+                                <i class="bi bi-cloud-arrow-up"></i>
+                                <p>Drop photos here</p>
+                                <span>or click to browse</span>
+                            </div>
+                            <input type="file" id="photoUpload" multiple accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+                            <div class="photo-grid" id="photoGrid"></div>
+                        </div>
+                        
+                        <div class="chat-section">
+                            <h4><i class="bi bi-chat-dots"></i> Broker ? Marketing <span class="unread-badge" id="unreadBadge" style="display:none">0</span></h4>
+                            <div class="chat-messages" id="chatMessages">
+                                <div class="chat-empty">No messages yet. Start the conversation!</div>
+                            </div>
+                            <div class="chat-input-wrap">
+                                <input type="text" class="chat-input" id="chatInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter')sendChatMessage()">
+                                <button class="chat-send" onclick="sendChatMessage()"><i class="bi bi-send"></i></button>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Canvas Main -->
                     <div class="canvas-main">
                         <canvas id="fabricCanvas"></canvas>
                     </div>
@@ -398,9 +545,229 @@
                     }
                 }
             } catch (e) { console.error('[INTEL] Load pages error:', e); }
+            
+            // Load project property info
+            await loadPropertyInfo(id);
+            await loadChatMessages();
+            startChatPolling();
+        }
+
+        // ---------------------------------------------------
+        // PROPERTY INFO & PHOTOS
+        // ---------------------------------------------------
+        let currentProjectData = null;
+        
+        function togglePropertyPanel() {
+            const panel = document.getElementById('propertyPanel');
+            panel.classList.toggle('collapsed');
+        }
+        let brokerPhotos = [];
+
+        async function loadPropertyInfo(projectId) {
+            try {
+                const res = await fetch('/api/intel/projects/' + projectId);
+                if (res.ok) {
+                    const data = await res.json();
+                    currentProjectData = data.project;
+                    
+                    document.getElementById('propAddress').textContent = data.project.property_address || 'No address';
+                    document.getElementById('propCity').textContent = [
+                        data.project.property_city, data.project.property_state, data.project.property_zip
+                    ].filter(Boolean).join(', ') || '';
+                    
+                    document.getElementById('propType').textContent = data.project.property_type || '--';
+                    document.getElementById('propSize').textContent = data.project.property_size ? 
+                        data.project.property_size.toLocaleString() + ' ' + (data.project.size_unit || 'SF') : '--';
+                    document.getElementById('propPrice').textContent = data.project.price ? 
+                        '$' + data.project.price.toLocaleString() : '--';
+                    document.getElementById('propTransaction').textContent = data.project.transaction_type || '--';
+                    
+                    if (data.project.enrichment_data) {
+                        document.getElementById('enrichmentStatus').textContent = 'Enriched';
+                    }
+                    if (data.project.photos) {
+                        brokerPhotos = data.project.photos;
+                        renderPhotoGrid();
+                    }
+                }
+            } catch (e) { console.error('[INTEL] Load property info error:', e); }
+        }
+
+        function handlePhotoUpload(event) {
+            const files = event.target.files;
+            if (!files.length) return;
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    brokerPhotos.push({ id: Date.now(), name: file.name, data: e.target.result });
+                    renderPhotoGrid();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function renderPhotoGrid() {
+            const grid = document.getElementById('photoGrid');
+            grid.innerHTML = brokerPhotos.map((photo, idx) => 
+                '<div class="photo-thumb" onclick="addPhotoToCanvas(' + idx + ')">' +
+                '<img src="' + photo.data + '" alt="' + photo.name + '">' +
+                '<button class="photo-delete" onclick="event.stopPropagation(); deletePhoto(' + idx + ')"><i class="bi bi-x"></i></button></div>'
+            ).join('');
+        }
+
+        function addPhotoToCanvas(idx) {
+            const photo = brokerPhotos[idx];
+            if (!photo) return;
+            fabric.Image.fromURL(photo.data, function(img) {
+                img.scaleToWidth(Math.min(400, canvas.width * 0.5));
+                img.set({ left: 50, top: 50 });
+                canvas.add(img);
+                canvas.setActiveObject(img);
+                canvas.renderAll();
+            });
+        }
+
+        function deletePhoto(idx) {
+            brokerPhotos.splice(idx, 1);
+            renderPhotoGrid();
+        }
+
+        async function fetchAerial() {
+            if (!currentProjectData || !currentProjectData.lat) {
+                alert('Property coordinates not available.');
+                return;
+            }
+            var btn = document.getElementById('btnAerial');
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Fetching...';
+            try {
+                var res = await fetch('/api/intel/aerial/image?lat=' + currentProjectData.lat + '&lon=' + currentProjectData.lng);
+                if (res.ok) {
+                    var blob = await res.blob();
+                    var url = URL.createObjectURL(blob);
+                    fabric.Image.fromURL(url, function(img) {
+                        img.scaleToWidth(canvas.width);
+                        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
+                    });
+                    btn.innerHTML = '<i class="bi bi-check-lg"></i> Aerial Loaded';
+                    btn.classList.add('loaded');
+                }
+            } catch (e) {
+                btn.innerHTML = '<i class="bi bi-camera"></i> Fetch Aerial';
+                alert('Could not fetch aerial. EagleView pending.');
+            }
+        }
+
+        async function fetchDemographics() {
+            alert('Demographics API coming soon! (ArcGIS pending)');
+        }
+
+        async function fetchTraffic() {
+            if (!currentProjectData || !currentProjectData.lat) { alert('No coordinates'); return; }
+            var btn = document.getElementById('btnTraffic');
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Fetching...';
+            try {
+                var res = await fetch('/api/danimal/traffic/nearby?lat=' + currentProjectData.lat + '&lng=' + currentProjectData.lng + '&radius=2');
+                if (res.ok) {
+                    var data = await res.json();
+                    if (data.results && data.results.length > 0) {
+                        var txt = data.results.slice(0,5).map(function(t) { return t.road_name + ': ' + (t.aadt || 'N/A') + ' AADT'; }).join('\n');
+                        var text = new fabric.Textbox(txt, { left:50, top:50, width:300, fontFamily:'Arial', fontSize:16, fill:'#fff', backgroundColor:'rgba(0,0,0,0.7)', padding:10 });
+                        canvas.add(text);
+                        canvas.renderAll();
+                        btn.innerHTML = '<i class="bi bi-check-lg"></i> Traffic Added';
+                        btn.classList.add('loaded');
+                    } else { alert('No traffic data nearby.'); btn.innerHTML = '<i class="bi bi-signpost-2"></i> Traffic Counts'; }
+                }
+            } catch(e) { btn.innerHTML = '<i class="bi bi-signpost-2"></i> Traffic Counts'; }
+        }
+
+        async function fetchTenants() {
+            if (!currentProjectData || !currentProjectData.lat) { alert('No coordinates'); return; }
+            var btn = document.getElementById('btnTenants');
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Fetching...';
+            try {
+                var res = await fetch('/api/intel/places/search?query=retail+restaurant&lat=' + currentProjectData.lat + '&lng=' + currentProjectData.lng + '&radius=1000');
+                if (res.ok) {
+                    var data = await res.json();
+                    if (data.results && data.results.length > 0) {
+                        var txt = 'NEARBY TENANTS:\n' + data.results.slice(0,10).map(function(t) { return '� ' + t.name; }).join('\n');
+                        var text = new fabric.Textbox(txt, { left:400, top:50, width:250, fontFamily:'Arial', fontSize:14, fill:'#fff', backgroundColor:'rgba(0,0,0,0.7)', padding:10 });
+                        canvas.add(text);
+                        canvas.renderAll();
+                        btn.innerHTML = '<i class="bi bi-check-lg"></i> Tenants Added';
+                        btn.classList.add('loaded');
+                    } else { alert('No tenants found.'); btn.innerHTML = '<i class="bi bi-shop"></i> Nearby Tenants'; }
+                }
+            } catch(e) { btn.innerHTML = '<i class="bi bi-shop"></i> Nearby Tenants'; }
+        }
+
+        // ---------------------------------------------------
+        // BROKER ? MARKETING CHAT
+        // ---------------------------------------------------
+        let chatMessages = [];
+        let chatPollInterval = null;
+
+        async function loadChatMessages() {
+            if (!currentProject) return;
+            try {
+                const res = await fetch('/api/intel/projects/' + currentProject + '/comments');
+                if (res.ok) {
+                    const data = await res.json();
+                    chatMessages = data.comments || [];
+                    renderChatMessages();
+                }
+            } catch (e) { console.error('Load chat error:', e); }
+        }
+
+        function renderChatMessages() {
+            const container = document.getElementById('chatMessages');
+            if (chatMessages.length === 0) {
+                container.innerHTML = '<div class="chat-empty">No messages yet. Start the conversation!</div>';
+                return;
+            }
+            container.innerHTML = chatMessages.map(function(msg) {
+                var msgClass = msg.is_from_broker ? 'broker' : 'marketing';
+                var time = new Date(msg.created_at).toLocaleString();
+                return '<div class="chat-msg ' + msgClass + '">' +
+                    '<div>' + msg.message + '</div>' +
+                    '<div class="chat-meta">' + (msg.user_name || 'User') + ' � ' + time + '</div>' +
+                '</div>';
+            }).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function sendChatMessage() {
+            var input = document.getElementById('chatInput');
+            var message = input.value.trim();
+            if (!message || !currentProject) return;
+            
+            input.value = '';
+            try {
+                var res = await fetch('/api/intel/projects/' + currentProject + '/comments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+                if (res.ok) {
+                    loadChatMessages();
+                }
+            } catch (e) { console.error('Send message error:', e); }
+        }
+
+        function startChatPolling() {
+            if (chatPollInterval) clearInterval(chatPollInterval);
+            chatPollInterval = setInterval(loadChatMessages, 10000);
+        }
+
+        function stopChatPolling() {
+            if (chatPollInterval) {
+                clearInterval(chatPollInterval);
+                chatPollInterval = null;
+            }
         }
 
         function backToProjects() {
+            stopChatPolling();
             currentProject = null;
             document.getElementById('projectListView').style.display = '';
             document.getElementById('canvasView').classList.remove('active');
@@ -537,5 +904,6 @@
             }
         });
     </script>
+<%- include('../partials/notification-bubble') %>
 </body>
 </html>

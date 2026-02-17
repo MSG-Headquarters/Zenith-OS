@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory | Zenith OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-white: #FFFFFF; --bg-light: #F8FAFC; --bg-gray: #F1F5F9;
+            --accent-blue: #3B82F6; --accent-emerald: #10B981; --accent-cyan: #06B6D4;
+            --accent-violet: #8B5CF6; --accent-amber: #F59E0B; --accent-rose: #F43F5E;
+            --accent-orange: #f97316;
+            --text-primary: #1E293B; --text-secondary: #475569; --text-muted: #64748B;
+            --border: #E2E8F0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-primary); min-height: 100vh; display: flex; }
+
+        /* Sidebar */
+        .sidebar { width: 260px; background: var(--bg-white); border-right: 1px solid var(--border); position: fixed; height: 100vh; display: flex; flex-direction: column; box-shadow: 2px 0 8px rgba(0,0,0,0.04); z-index: 100; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent-emerald), #059669); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; }
+        .logo-text h1 { font-size: 16px; font-weight: 700; }
+        .logo-text p { font-size: 11px; color: var(--text-muted); }
+        .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+        .nav-section { margin-bottom: 20px; }
+        .nav-section-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; padding: 0 12px; margin-bottom: 8px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: var(--text-secondary); text-decoration: none; font-size: 14px; transition: all 0.15s ease; margin-bottom: 2px; }
+        .nav-item:hover { background: var(--bg-gray); color: var(--text-primary); }
+        .nav-item.active { background: rgba(16, 185, 129, 0.1); color: var(--accent-emerald); }
+        .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+        .sidebar-footer { padding: 16px; border-top: 1px solid var(--border); }
+        .back-link { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); text-decoration: none; font-size: 13px; padding: 10px 12px; border-radius: 8px; }
+        .back-link:hover { background: var(--bg-gray); color: var(--accent-emerald); }
+
+        /* Main Content */
+        .main-content { flex: 1; margin-left: 260px; }
+        .topbar { height: 64px; background: var(--bg-white); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        .topbar-title { font-size: 20px; font-weight: 700; }
+        .topbar-actions { display: flex; gap: 12px; align-items: center; }
+
+        .btn { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: all 0.2s; }
+        .btn-primary { background: var(--accent-emerald); color: white; }
+        .btn-primary:hover { background: #059669; }
+        .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+        .btn-ghost:hover { background: var(--bg-gray); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+        /* View Toggle */
+        .view-toggle { display: flex; background: var(--bg-gray); border-radius: 10px; padding: 3px; }
+        .view-toggle-btn {
+            padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
+            cursor: pointer; border: none; background: transparent; color: var(--text-muted);
+            transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+        }
+        .view-toggle-btn.active { background: var(--bg-white); color: var(--text-primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .view-toggle-btn:hover:not(.active) { color: var(--text-secondary); }
+
+        .content-area { padding: 32px; }
+
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 28px; }
+        .stat-card { background: var(--bg-white); border: 1px solid var(--border); border-radius: 12px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        .stat-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-value { font-size: 24px; font-weight: 700; }
+        .stat-change { font-size: 11px; color: var(--accent-emerald); margin-top: 4px; }
+
+        /* Filters */
+        .filters-bar { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; flex-wrap: wrap; }
+        .filter-chip {
+            padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 600;
+            cursor: pointer; border: 1px solid var(--border); background: var(--bg-white);
+            color: var(--text-secondary); transition: all 0.15s;
+        }
+        .filter-chip:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+        .filter-chip.active { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
+        .filter-chip.active-sale { background: var(--accent-emerald); color: white; border-color: var(--accent-emerald); }
+        .filter-chip.active-lease { background: var(--accent-violet); color: white; border-color: var(--accent-violet); }
+
+        /* Listing Cards Grid */
+        .listings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+
+        .listing-card {
+            background: var(--bg-white); border: 1px solid var(--border); border-radius: 14px;
+            overflow: hidden; cursor: pointer; transition: all 0.25s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .listing-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.1); border-color: var(--accent-blue); }
+
+        .listing-thumbnail {
+            height: 180px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+            position: relative; display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        .listing-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+        .listing-thumbnail-placeholder { font-size: 48px; color: #94a3b8; }
+
+        .listing-type-badge {
+            position: absolute; top: 12px; left: 12px; padding: 4px 12px;
+            border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-sale { background: rgba(16,185,129,0.9); color: white; }
+        .badge-lease { background: rgba(139,92,246,0.9); color: white; }
+        .badge-sale-leaseback { background: rgba(59,130,246,0.9); color: white; }
+        .badge-auction { background: rgba(244,63,94,0.9); color: white; }
+
+        .listing-status-badge {
+            position: absolute; top: 12px; right: 12px; padding: 4px 10px;
+            border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase;
+        }
+        .status-pending_marketing { background: rgba(245,158,11,0.15); color: #d97706; }
+        .status-in_production { background: rgba(59,130,246,0.15); color: #2563eb; }
+        .status-pending_approval { background: rgba(139,92,246,0.15); color: #7c3aed; }
+        .status-active { background: rgba(16,185,129,0.15); color: #059669; }
+        .status-under_contract { background: rgba(6,182,212,0.15); color: #0891b2; }
+        .status-closed { background: rgba(100,116,139,0.15); color: #475569; }
+
+        .listing-body { padding: 18px; }
+        .listing-address { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+        .listing-city { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+
+        .listing-details { display: flex; gap: 16px; margin-bottom: 12px; }
+        .listing-detail { display: flex; flex-direction: column; }
+        .listing-detail-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; }
+        .listing-detail-value { font-size: 14px; font-weight: 600; }
+
+        .listing-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--border); }
+        .listing-agent { display: flex; align-items: center; gap: 8px; }
+        .listing-agent-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; color: white;
+        }
+        .listing-agent-name { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+        .listing-property-type { font-size: 11px; color: var(--text-muted); background: var(--bg-gray); padding: 3px 10px; border-radius: 100px; }
+
+        /* Detail Panel (overlay) */
+        .detail-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 500; display: none;
+            justify-content: flex-end;
+        }
+        .detail-overlay.active { display: flex; }
+
+        .detail-panel {
+            width: 680px; max-width: 90vw; height: 100vh; background: var(--bg-white);
+            overflow-y: auto; box-shadow: -8px 0 30px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        .detail-header {
+            padding: 24px 28px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; background: var(--bg-white); z-index: 10;
+        }
+        .detail-header-left { display: flex; align-items: center; gap: 12px; }
+        .detail-close { width: 36px; height: 36px; border-radius: 8px; border: none; background: var(--bg-gray); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+        .detail-close:hover { background: var(--border); }
+
+        .detail-hero {
+            height: 240px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+            position: relative; display: flex; align-items: center; justify-content: center;
+        }
+        .detail-hero-placeholder { font-size: 64px; color: #94a3b8; }
+
+        .detail-body { padding: 28px; }
+
+        .detail-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+        .detail-subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+
+        .detail-badges { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .detail-badge { padding: 5px 14px; border-radius: 100px; font-size: 12px; font-weight: 600; }
+
+        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+        .detail-field { }
+        .detail-field-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .detail-field-value { font-size: 15px; font-weight: 600; }
+
+        .detail-section { margin-bottom: 28px; }
+        .detail-section-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: var(--text-primary); }
+
+        .detail-description { font-size: 14px; line-height: 1.7; color: var(--text-secondary); }
+
+        .detail-timeline { }
+        .timeline-item {
+            display: flex; gap: 12px; padding: 10px 0;
+            border-bottom: 1px solid var(--bg-gray);
+        }
+        .timeline-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+        .timeline-content { }
+        .timeline-text { font-size: 13px; color: var(--text-secondary); }
+        .timeline-date { font-size: 11px; color: var(--text-muted); }
+
+        .detail-actions { display: flex; gap: 10px; padding: 20px 28px; border-top: 1px solid var(--border); position: sticky; bottom: 0; background: var(--bg-white); }
+
+        /* Empty State */
+        .empty-state { text-align: center; padding: 80px 20px; }
+        .empty-state i { font-size: 56px; color: #cbd5e1; margin-bottom: 16px; display: block; }
+        .empty-state h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+        .empty-state p { font-size: 14px; color: var(--text-muted); max-width: 400px; margin: 0 auto 20px; }
+
+        /* Toast */
+        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 600; }
+        .toast { background: var(--bg-white); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-top: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; animation: toastIn 0.3s ease; }
+        .toast.success { border-left: 4px solid var(--accent-emerald); }
+        .toast.error { border-left: 4px solid var(--accent-rose); }
+        @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon"><i class="bi bi-box-seam"></i></div>
+            <div class="logo-text"><h1>Inventory</h1><p>Active Listings</p></div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-label">Views</div>
+                <a href="#" class="nav-item active" onclick="setView('mine')"><span class="nav-icon"><i class="bi bi-person"></i></span> My Inventory</a>
+                <a href="#" class="nav-item" onclick="setView('company')"><span class="nav-icon"><i class="bi bi-building"></i></span> Company Inventory</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-label">By Status</div>
+                <a href="#" class="nav-item" onclick="filterByStatus('active')"><span class="nav-icon"><i class="bi bi-check-circle"></i></span> Active</a>
+                <a href="#" class="nav-item" onclick="filterByStatus('in_production')"><span class="nav-icon"><i class="bi bi-gear"></i></span> In Production</a>
+                <a href="#" class="nav-item" onclick="filterByStatus('pending_approval')"><span class="nav-icon"><i class="bi bi-clock"></i></span> Pending Approval</a>
+                <a href="#" class="nav-item" onclick="filterByStatus('under_contract')"><span class="nav-icon"><i class="bi bi-file-earmark-check"></i></span> Under Contract</a>
+                <a href="#" class="nav-item" onclick="filterByStatus('closed')"><span class="nav-icon"><i class="bi bi-archive"></i></span> Closed</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-label">Navigate</div>
+                <a href="/dashboard" class="nav-item"><span class="nav-icon"><i class="bi bi-house"></i></span> AXIS Home</a>
+                <a href="/crm" class="nav-item"><span class="nav-icon"><i class="bi bi-kanban"></i></span> CRM Pipeline</a>
+                <a href="/intel" class="nav-item"><span class="nav-icon"><i class="bi bi-broadcast"></i></span> INTEL</a>
+                <a href="/huddle" class="nav-item"><span class="nav-icon"><i class="bi bi-chat-dots"></i></span> Huddle</a>
+            </div>
+        </nav>
+        <div class="sidebar-footer"><a href="/dashboard" class="back-link"><i class="bi bi-arrow-left"></i> Back to AXIS</a></div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <h1 class="topbar-title">Inventory</h1>
+            <div class="topbar-actions">
+                <div class="view-toggle">
+                    <button class="view-toggle-btn active" id="toggleMine" onclick="setView('mine')"><i class="bi bi-person"></i> My Inventory</button>
+                    <button class="view-toggle-btn" id="toggleCompany" onclick="setView('company')"><i class="bi bi-building"></i> Company Inventory</button>
+                </div>
+                <a href="/crm" class="btn btn-ghost btn-sm"><i class="bi bi-kanban"></i> CRM</a>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Listings</div>
+                    <div class="stat-value" id="statTotal"><%= typeof stats !== 'undefined' ? (stats.total || 0) : 0 %></div>
+                    <div class="stat-change" id="statTotalLabel">In inventory</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Active</div>
+                    <div class="stat-value" id="statActive" style="color: var(--accent-emerald);"><%= typeof stats !== 'undefined' ? (stats.active || 0) : 0 %></div>
+                    <div class="stat-change">On market</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">In Production</div>
+                    <div class="stat-value" id="statProduction" style="color: var(--accent-blue);"><%= typeof stats !== 'undefined' ? (stats.inProduction || 0) : 0 %></div>
+                    <div class="stat-change">Marketing working</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Under Contract</div>
+                    <div class="stat-value" id="statContract" style="color: var(--accent-cyan);"><%= typeof stats !== 'undefined' ? (stats.underContract || 0) : 0 %></div>
+                    <div class="stat-change">Pending close</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Portfolio Value</div>
+                    <div class="stat-value" id="statValue">$<%= typeof stats !== 'undefined' && stats.totalValue ? (stats.totalValue >= 1000000 ? (stats.totalValue / 1000000).toFixed(1) + 'M' : Math.round(stats.totalValue / 1000) + 'K') : '0' %></div>
+                    <div class="stat-change">Total asking</div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-bar">
+                <span style="font-size: 12px; font-weight: 600; color: var(--text-muted);">Filter:</span>
+                <button class="filter-chip active" onclick="filterByType('all', this)">All</button>
+                <button class="filter-chip" onclick="filterByType('For Sale', this)"><i class="bi bi-tag"></i> For Sale</button>
+                <button class="filter-chip" onclick="filterByType('For Lease', this)"><i class="bi bi-key"></i> For Lease</button>
+                <button class="filter-chip" onclick="filterByType('Sale-Leaseback', this)"><i class="bi bi-arrow-left-right"></i> Sale-Leaseback</button>
+                <button class="filter-chip" onclick="filterByType('Auction', this)"><i class="bi bi-hammer"></i> Auction</button>
+            </div>
+
+            <!-- Listings Grid -->
+            <div class="listings-grid" id="listingsGrid">
+                <% if (typeof listings !== 'undefined' && listings.length > 0) { %>
+                    <% listings.forEach(listing => { %>
+                    <div class="listing-card"
+                         data-id="<%= listing.id %>"
+                         data-type="<%= listing.listing_type %>"
+                         data-status="<%= listing.status %>"
+                         data-agent="<%= listing.listing_agent_id %>"
+                         onclick="openListingDetail(<%= listing.id %>)">
+                        <div class="listing-thumbnail">
+                            <% if (listing.thumbnail_url) { %>
+                                <img src="<%= listing.thumbnail_url %>" alt="<%= listing.property_name || listing.property_address %>">
+                            <% } else { %>
+                                <i class="bi bi-building listing-thumbnail-placeholder"></i>
+                            <% } %>
+                            <span class="listing-type-badge badge-<%= listing.listing_type === 'For Sale' ? 'sale' : listing.listing_type === 'For Lease' ? 'lease' : listing.listing_type === 'Sale-Leaseback' ? 'sale-leaseback' : 'auction' %>">
+                                <%= listing.listing_type %>
+                            </span>
+                            <span class="listing-status-badge status-<%= listing.status %>">
+                                <%= listing.status.replace(/_/g, ' ') %>
+                            </span>
+                        </div>
+                        <div class="listing-body">
+                            <div class="listing-address"><%= listing.property_name || listing.property_address || 'Untitled Listing' %></div>
+                            <div class="listing-city"><%= [listing.property_city, listing.property_state, listing.property_zip].filter(Boolean).join(', ') || 'Location TBD' %></div>
+                            <div class="listing-details">
+                                <% if (listing.listing_type === 'For Lease' && listing.lease_rate) { %>
+                                <div class="listing-detail">
+                                    <span class="listing-detail-label">Lease Rate</span>
+                                    <span class="listing-detail-value">$<%= Number(listing.lease_rate).toLocaleString() %>/SF</span>
+                                </div>
+                                <% } else if (listing.price) { %>
+                                <div class="listing-detail">
+                                    <span class="listing-detail-label">Price</span>
+                                    <span class="listing-detail-value">$<%= Number(listing.price).toLocaleString() %></span>
+                                </div>
+                                <% } %>
+                                <% if (listing.building_sf) { %>
+                                <div class="listing-detail">
+                                    <span class="listing-detail-label">Size</span>
+                                    <span class="listing-detail-value"><%= Number(listing.building_sf).toLocaleString() %> SF</span>
+                                </div>
+                                <% } %>
+                                <% if (listing.cap_rate) { %>
+                                <div class="listing-detail">
+                                    <span class="listing-detail-label">Cap Rate</span>
+                                    <span class="listing-detail-value"><%= listing.cap_rate %>%</span>
+                                </div>
+                                <% } %>
+                            </div>
+                            <div class="listing-footer">
+                                <div class="listing-agent">
+                                    <div class="listing-agent-avatar"><%= listing.listing_agent_name ? listing.listing_agent_name.charAt(0) : '?' %></div>
+                                    <span class="listing-agent-name"><%= listing.listing_agent_name || 'Unassigned' %></span>
+                                </div>
+                                <% if (listing.property_type) { %>
+                                <span class="listing-property-type"><%= listing.property_type %></span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <i class="bi bi-box-seam"></i>
+                        <h3>No Listings Yet</h3>
+                        <p>Listings appear here when deals are closed in the CRM and flyers are approved by the listing broker.</p>
+                        <a href="/crm" class="btn btn-primary"><i class="bi bi-kanban"></i> Go to CRM Pipeline</a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </main>
+
+    <!-- Detail Panel -->
+    <div class="detail-overlay" id="detailOverlay" onclick="closeDetail(event)">
+        <div class="detail-panel" onclick="event.stopPropagation();">
+            <div class="detail-header">
+                <div class="detail-header-left">
+                    <button class="detail-close" onclick="closeDetailPanel()"><i class="bi bi-x-lg"></i></button>
+                    <span style="font-size: 14px; font-weight: 600;" id="detailHeaderTitle">Listing Details</span>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-ghost btn-sm" id="detailEditBtn" onclick="editListing()"><i class="bi bi-pencil"></i> Edit</button>
+                    <span class="listing-status-badge" id="detailStatusBadge" style="position: static;"></span>
+                </div>
+            </div>
+
+            <div class="detail-hero" id="detailHero">
+                <i class="bi bi-building detail-hero-placeholder"></i>
+            </div>
+
+            <div class="detail-body">
+                <div id="detailBadges" class="detail-badges"></div>
+                <h2 class="detail-title" id="detailTitle">-</h2>
+                <p class="detail-subtitle" id="detailSubtitle">-</p>
+
+                <div class="detail-grid" id="detailGrid">
+                    <!-- Populated by JS -->
+                </div>
+
+                <div class="detail-section" id="detailDescriptionSection" style="display:none;">
+                    <div class="detail-section-title"><i class="bi bi-text-paragraph"></i> Description</div>
+                    <div class="detail-description" id="detailDescription"></div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="detail-section-title"><i class="bi bi-clock-history"></i> Timeline</div>
+                    <div class="detail-timeline" id="detailTimeline">
+                        <div style="color: var(--text-muted); font-size: 13px;">No activity yet</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-actions" id="detailActions">
+                <!-- Populated by JS based on status -->
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <%- typeof partials !== 'undefined' && partials.notificationBubble ? partials.notificationBubble : '' %>
+
+    <script>
+        // State
+        let currentView = 'mine';
+        let currentTypeFilter = 'all';
+        let currentStatusFilter = null;
+        const currentUserId = <%= typeof user !== 'undefined' && user ? user.id : 'null' %>;
+        const allListings = <%- typeof listings !== 'undefined' ? JSON.stringify(listings) : '[]' %>;
+
+        // View Toggle
+        function setView(view) {
+            currentView = view;
+            document.getElementById('toggleMine').classList.toggle('active', view === 'mine');
+            document.getElementById('toggleCompany').classList.toggle('active', view === 'company');
+
+            // Update sidebar active states
+            document.querySelectorAll('.nav-section:first-child .nav-item').forEach(item => item.classList.remove('active'));
+            const sidebarItems = document.querySelectorAll('.nav-section:first-child .nav-item');
+            if (sidebarItems[0]) sidebarItems[0].classList.toggle('active', view === 'mine');
+            if (sidebarItems[1]) sidebarItems[1].classList.toggle('active', view === 'company');
+
+            applyFilters();
+        }
+
+        // Type Filter
+        function filterByType(type, el) {
+            currentTypeFilter = type;
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active', 'active-sale', 'active-lease'));
+            if (el) {
+                if (type === 'For Sale') el.classList.add('active-sale');
+                else if (type === 'For Lease') el.classList.add('active-lease');
+                else el.classList.add('active');
+            }
+            applyFilters();
+        }
+
+        // Status Filter
+        function filterByStatus(status) {
+            currentStatusFilter = currentStatusFilter === status ? null : status;
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const cards = document.querySelectorAll('.listing-card');
+            cards.forEach(card => {
+                const type = card.dataset.type;
+                const status = card.dataset.status;
+                const agentId = parseInt(card.dataset.agent);
+
+                let show = true;
+
+                // View filter
+                if (currentView === 'mine' && agentId !== currentUserId) show = false;
+
+                // Type filter
+                if (currentTypeFilter !== 'all' && type !== currentTypeFilter) show = false;
+
+                // Status filter
+                if (currentStatusFilter && status !== currentStatusFilter) show = false;
+
+                card.style.display = show ? '' : 'none';
+            });
+
+            // Show empty state if nothing visible
+            const visibleCards = document.querySelectorAll('.listing-card:not([style*="display: none"])');
+            const emptyState = document.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.style.display = visibleCards.length === 0 ? '' : 'none';
+            }
+        }
+
+        // Detail Panel
+        function openListingDetail(listingId) {
+            const listing = allListings.find(l => l.id === listingId);
+            if (!listing) return;
+
+            // Header
+            document.getElementById('detailHeaderTitle').textContent = listing.property_name || 'Listing Details';
+            const statusBadge = document.getElementById('detailStatusBadge');
+            statusBadge.className = `listing-status-badge status-${listing.status}`;
+            statusBadge.textContent = listing.status.replace(/_/g, ' ');
+
+            // Hero
+            const hero = document.getElementById('detailHero');
+            if (listing.thumbnail_url) {
+                hero.innerHTML = `<img src="${listing.thumbnail_url}" style="width:100%;height:100%;object-fit:cover;">`;
+            } else {
+                hero.innerHTML = '<i class="bi bi-building detail-hero-placeholder"></i>';
+            }
+
+            // Badges
+            const badgeColors = { 'For Sale': 'var(--accent-emerald)', 'For Lease': 'var(--accent-violet)', 'Sale-Leaseback': 'var(--accent-blue)', 'Auction': 'var(--accent-rose)' };
+            document.getElementById('detailBadges').innerHTML = `
+                <span class="detail-badge" style="background: ${badgeColors[listing.listing_type] || 'var(--accent-blue)'}22; color: ${badgeColors[listing.listing_type] || 'var(--accent-blue)'};">${listing.listing_type}</span>
+                ${listing.property_type ? `<span class="detail-badge" style="background: var(--bg-gray); color: var(--text-secondary);">${listing.property_type}</span>` : ''}
+                ${listing.listing_agent_name ? `<span class="detail-badge" style="background: rgba(59,130,246,0.1); color: var(--accent-blue);"><i class="bi bi-person"></i> ${listing.listing_agent_name}</span>` : ''}
+            `;
+
+            // Title
+            document.getElementById('detailTitle').textContent = listing.property_name || listing.property_address || 'Untitled';
+            document.getElementById('detailSubtitle').textContent = [listing.property_address, listing.property_city, listing.property_state, listing.property_zip].filter(Boolean).join(', ');
+
+            // Grid fields
+            const fields = [];
+            if (listing.price) fields.push({ label: 'Asking Price', value: '$' + Number(listing.price).toLocaleString() });
+            if (listing.lease_rate) fields.push({ label: 'Lease Rate', value: '$' + Number(listing.lease_rate).toLocaleString() + '/SF' });
+            if (listing.lease_type) fields.push({ label: 'Lease Type', value: listing.lease_type });
+            if (listing.building_sf) fields.push({ label: 'Building Size', value: Number(listing.building_sf).toLocaleString() + ' SF' });
+            if (listing.lot_acres) fields.push({ label: 'Lot Size', value: listing.lot_acres + ' Acres' });
+            if (listing.year_built) fields.push({ label: 'Year Built', value: listing.year_built });
+            if (listing.zoning) fields.push({ label: 'Zoning', value: listing.zoning });
+            if (listing.cap_rate) fields.push({ label: 'Cap Rate', value: listing.cap_rate + '%' });
+            if (listing.noi) fields.push({ label: 'NOI', value: '$' + Number(listing.noi).toLocaleString() });
+            if (listing.occupancy) fields.push({ label: 'Occupancy', value: listing.occupancy + '%' });
+            if (listing.price_per_sf) fields.push({ label: 'Price/SF', value: '$' + Number(listing.price_per_sf).toLocaleString() });
+            if (listing.property_county) fields.push({ label: 'County', value: listing.property_county });
+
+            document.getElementById('detailGrid').innerHTML = fields.map(f => `
+                <div class="detail-field">
+                    <div class="detail-field-label">${f.label}</div>
+                    <div class="detail-field-value">${f.value}</div>
+                </div>
+            `).join('');
+
+            // Description
+            const descSection = document.getElementById('detailDescriptionSection');
+            if (listing.description) {
+                descSection.style.display = '';
+                document.getElementById('detailDescription').textContent = listing.description;
+            } else {
+                descSection.style.display = 'none';
+            }
+
+            // Timeline
+            const timeline = [];
+            if (listing.created_at) timeline.push({ date: listing.created_at, text: 'Listing created from CRM', color: 'var(--accent-blue)' });
+            if (listing.status !== 'pending_marketing') timeline.push({ date: listing.status_changed_at, text: 'Marketing began production', color: 'var(--accent-amber)' });
+            if (listing.approved_at) timeline.push({ date: listing.approved_at, text: `Flyer approved by ${listing.listing_agent_name || 'broker'}`, color: 'var(--accent-emerald)' });
+            if (listing.listed_at) timeline.push({ date: listing.listed_at, text: 'Listing went active on market', color: 'var(--accent-emerald)' });
+            if (listing.under_contract_at) timeline.push({ date: listing.under_contract_at, text: 'Under contract', color: 'var(--accent-cyan)' });
+            if (listing.closed_at) timeline.push({ date: listing.closed_at, text: `Closed at $${listing.close_price ? Number(listing.close_price).toLocaleString() : 'N/A'}`, color: 'var(--text-muted)' });
+
+            document.getElementById('detailTimeline').innerHTML = timeline.length > 0 ? timeline.map(t => `
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background: ${t.color};"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-text">${t.text}</div>
+                        <div class="timeline-date">${new Date(t.date).toLocaleDateString()} ${new Date(t.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                    </div>
+                </div>
+            `).join('') : '<div style="color:var(--text-muted);font-size:13px;">No activity yet</div>';
+
+            // Actions based on status
+            const actions = document.getElementById('detailActions');
+            let actionsHtml = '';
+            if (listing.status === 'pending_approval') {
+                actionsHtml = `
+                    <button class="btn btn-primary" onclick="updateListingStatus(${listing.id}, 'active')"><i class="bi bi-check-circle"></i> Approve & Activate</button>
+                    <button class="btn btn-ghost" onclick="updateListingStatus(${listing.id}, 'in_production')"><i class="bi bi-arrow-counterclockwise"></i> Send Back to Marketing</button>
+                `;
+            } else if (listing.status === 'active') {
+                actionsHtml = `
+                    <button class="btn btn-primary" style="background: var(--accent-cyan);" onclick="updateListingStatus(${listing.id}, 'under_contract')"><i class="bi bi-file-earmark-check"></i> Mark Under Contract</button>
+                `;
+            } else if (listing.status === 'under_contract') {
+                actionsHtml = `
+                    <button class="btn btn-primary" onclick="updateListingStatus(${listing.id}, 'closed')"><i class="bi bi-trophy"></i> Mark Closed</button>
+                    <button class="btn btn-ghost" onclick="updateListingStatus(${listing.id}, 'active')"><i class="bi bi-arrow-counterclockwise"></i> Back to Active</button>
+                `;
+            }
+            if (listing.intel_project_id) {
+                actionsHtml += `<a href="/intel/create?project=${listing.intel_project_id}" class="btn btn-ghost"><i class="bi bi-brush"></i> View Flyer</a>`;
+            }
+            actions.innerHTML = actionsHtml || '<span style="color:var(--text-muted);font-size:13px;">No actions available</span>';
+
+            document.getElementById('detailOverlay').classList.add('active');
+        }
+
+        function closeDetail(event) {
+            if (event.target === document.getElementById('detailOverlay')) {
+                closeDetailPanel();
+            }
+        }
+
+        function closeDetailPanel() {
+            document.getElementById('detailOverlay').classList.remove('active');
+        }
+
+        async function updateListingStatus(id, newStatus) {
+            try {
+                const res = await fetch(`/api/inventory/${id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`Listing ${newStatus.replace(/_/g, ' ')}!`, 'success');
+                    setTimeout(() => window.location.reload(), 600);
+                } else {
+                    showToast(data.error || 'Failed to update', 'error');
+                }
+            } catch (err) {
+                showToast('Error: ' + err.message, 'error');
+            }
+        }
+
+        function editListing() {
+            showToast('Edit listing coming soon!', 'success');
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${type === 'success' ? '<i class="bi bi-check-circle"></i>' : '<i class="bi bi-x-circle"></i>'}</span><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        // Keyboard shortcut
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeDetailPanel();
+        });
+    </script>
+</body>
+</html>

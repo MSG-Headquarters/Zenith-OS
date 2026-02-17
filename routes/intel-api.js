@@ -37,7 +37,7 @@ module.exports = function(pool) {
             const tenantId = req.session.org.id;
             const status = req.query.status || null;
             let query = `
-                SELECT p.*, u.first_name, u.last_name,
+                SELECT p.*, u.name as creator_name,
                     (SELECT COUNT(*) FROM intel_pages WHERE project_id = p.id) as page_count,
                     (SELECT COUNT(*) FROM intel_exports WHERE project_id = p.id) as export_count
                 FROM intel_projects p
@@ -107,7 +107,7 @@ module.exports = function(pool) {
         try {
             const tenantId = req.session.org.id;
             const projectResult = await pool.query(
-                `SELECT p.*, u.first_name, u.last_name 
+                `SELECT p.*, u.name as creator_name 
                  FROM intel_projects p 
                  LEFT JOIN users u ON p.created_by = u.id
                  WHERE p.id = $1 AND p.tenant_id = $2`,
@@ -893,6 +893,77 @@ module.exports = function(pool) {
         } catch (error) {
             console.error('[INTEL] Create from lead error:', error);
             res.status(500).json({ success: false, error: 'Failed to create project' });
+        }
+    });
+
+    // ============================================
+    // BROKER ? MARKETING CHAT
+    // ============================================
+    
+    // Get comments for a project
+    router.get('/projects/:id/comments', async (req, res) => {
+        try {
+            const projectId = req.params.id;
+            const result = await pool.query(`
+                SELECT c.*,
+                       u.name as user_name
+                FROM intel_comments c
+                LEFT JOIN users u ON c.user_id = u.id
+                WHERE c.project_id = $1
+                ORDER BY c.created_at ASC
+            `, [projectId]);
+            
+            res.json({ success: true, comments: result.rows });
+        } catch (error) {
+            console.error('[INTEL] Get comments error:', error);
+            res.status(500).json({ success: false, error: 'Failed to load comments' });
+        }
+    });
+    
+    // Add comment to a project
+    router.post('/projects/:id/comments', async (req, res) => {
+        try {
+            const projectId = req.params.id;
+            const userId = req.session.user.id;
+            const { message } = req.body;
+            
+            if (!message || !message.trim()) {
+                return res.status(400).json({ success: false, error: 'Message required' });
+            }
+            
+            // Determine if user is broker or marketing based on role
+            const userRole = req.session.user.role || '';
+            const isBroker = ['broker', 'agent', 'admin'].includes(userRole.toLowerCase());
+            const isMarketing = ['marketing', 'designer'].includes(userRole.toLowerCase());
+            
+            const result = await pool.query(`
+                INSERT INTO intel_comments (project_id, user_id, message, is_from_broker, is_from_marketing)
+                VALUES ($1, $2, $3, $4, $5)
+                RETURNING *
+            `, [projectId, userId, message.trim(), isBroker || !isMarketing, isMarketing]);
+            
+            res.json({ success: true, comment: result.rows[0] });
+        } catch (error) {
+            console.error('[INTEL] Add comment error:', error);
+            res.status(500).json({ success: false, error: 'Failed to add comment' });
+        }
+    });
+    
+    // Mark comments as read
+    router.put('/projects/:id/comments/read', async (req, res) => {
+        try {
+            const projectId = req.params.id;
+            const userId = req.session.user.id;
+            
+            await pool.query(`
+                UPDATE intel_comments 
+                SET read_at = NOW() 
+                WHERE project_id = $1 AND user_id != $2 AND read_at IS NULL
+            `, [projectId, userId]);
+            
+            res.json({ success: true });
+        } catch (error) {
+            res.status(500).json({ success: false, error: 'Failed to mark as read' });
         }
     });
 

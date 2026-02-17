@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  /* ═══════════════════════════════════════════════════════════════════
+     ZENITH OS — STANDARD COVER PAGE TEMPLATE
+     Based on: CRE Consultants flyer analysis (Kushner, Mercantile, Corporation)
+     Print-ready: 8.5" × 11" @ 300 DPI = 2550 × 3300px
+     ═══════════════════════════════════════════════════════════════════ */
+
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @page {
+    size: 8.5in 11in;
+    margin: 0;
+  }
+
+  body {
+    width: 8.5in;
+    height: 11in;
+    font-family: {{brand_font_body}};
+    color: {{brand_text}};
+    background: {{brand_bg}};
+    overflow: hidden;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .page {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER BAND ──────────────────────────────────────────── */
+  .header-band {
+    background: linear-gradient(135deg, {{brand_primary}} 0%, {{brand_primary_dark}} 100%);
+    padding: 0.28in 0.35in;
+    position: relative;
+    min-height: 1.1in;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .header-content {
+    flex: 1;
+  }
+
+  .header-suptext {
+    font-family: {{brand_font_heading}};
+    font-size: 9.5pt;
+    font-weight: 500;
+    color: rgba(255,255,255,0.75);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .header-title {
+    font-family: {{brand_font_heading}};
+    font-size: 22pt;
+    font-weight: 800;
+    color: #FFFFFF;
+    letter-spacing: 0.5px;
+    line-height: 1.15;
+    text-transform: uppercase;
+    max-width: 5.5in;
+  }
+
+  .header-address {
+    font-family: {{brand_font_body}};
+    font-size: 8pt;
+    font-weight: 400;
+    color: rgba(255,255,255,0.8);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  .header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    padding-top: 2px;
+  }
+
+  .brand-logo-header {
+    width: 1.45in;
+    height: auto;
+    opacity: 0.95;
+  }
+
+  .listing-badge {
+    display: inline-block;
+    background: #FFFFFF;
+    color: {{brand_primary}};
+    font-family: {{brand_font_heading}};
+    font-size: 11pt;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    padding: 5px 16px;
+    border-radius: 3px;
+  }
+
+  /* ── HERO PHOTO ZONE ──────────────────────────────────────── */
+  .hero-zone {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #1a2332 0%, #2c3e50 30%, #34495e 60%, #2c3e50 100%);
+  }
+
+  .hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Photo placeholder — shows when no image available */
+  .hero-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #1a2332 0%, #2c3e50 30%, #34495e 60%, #2c3e50 100%);
+    position: relative;
+  }
+
+  .hero-placeholder::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      linear-gradient(90deg, transparent 49.5%, rgba(255,255,255,0.015) 49.5%, rgba(255,255,255,0.015) 50.5%, transparent 50.5%),
+      linear-gradient(0deg, transparent 49.5%, rgba(255,255,255,0.015) 49.5%, rgba(255,255,255,0.015) 50.5%, transparent 50.5%);
+    background-size: 40px 40px;
+  }
+
+  .hero-placeholder-icon {
+    font-size: 48pt;
+    opacity: 0.15;
+    margin-bottom: 8px;
+  }
+
+  .hero-placeholder-text {
+    font-family: {{brand_font_heading}};
+    font-size: 10pt;
+    font-weight: 600;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .hero-placeholder-sub {
+    font-family: {{brand_font_body}};
+    font-size: 8pt;
+    color: rgba(255,255,255,0.15);
+    margin-top: 4px;
+  }
+
+  /* ── BOTTOM OVERLAY BAR (Address + Badge) ──────────────── */
+  .bottom-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: stretch;
+    height: 0.65in;
+  }
+
+  .address-overlay {
+    flex: 1;
+    background: rgba(45, 45, 45, 0.92);
+    display: flex;
+    align-items: center;
+    padding: 0 0.3in;
+  }
+
+  .address-overlay-text {
+    font-family: {{brand_font_heading}};
+    font-size: 10pt;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .badge-overlay {
+    background: {{brand_primary}};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.35in;
+    min-width: 2.8in;
+  }
+
+  .badge-overlay-text {
+    font-family: {{brand_font_heading}};
+    font-size: 13pt;
+    font-weight: 800;
+    color: #FFFFFF;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+  }
+
+  /* ── CONTACT FOOTER ──────────────────────────────────────── */
+  .contact-footer {
+    background: {{brand_bg_dark}};
+    min-height: 2.35in;
+    padding: 0.25in 0.35in;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .contact-grid {
+    display: flex;
+    gap: 0.4in;
+    margin-bottom: 0.15in;
+  }
+
+  .contact-card {
+    flex: 1;
+  }
+
+  .contact-name {
+    font-family: {{brand_font_heading}};
+    font-size: 12pt;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+
+  .contact-title {
+    font-family: {{brand_font_body}};
+    font-size: 8.5pt;
+    font-weight: 400;
+    color: {{brand_primary_light}};
+    margin-bottom: 8px;
+  }
+
+  .contact-detail {
+    font-family: {{brand_font_body}};
+    font-size: 8.5pt;
+    font-weight: 400;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.65;
+  }
+
+  .contact-detail a {
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+  }
+
+  .contact-divider {
+    width: 1px;
+    background: rgba(255,255,255,0.12);
+    align-self: stretch;
+  }
+
+  /* ── Property highlights in footer ── */
+  .footer-highlights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 0.12in;
+    padding-bottom: 0.12in;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .highlight-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 3px;
+  }
+
+  .highlight-dot {
+    width: 5px;
+    height: 5px;
+    background: {{brand_primary_light}};
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .highlight-text {
+    font-family: {{brand_font_body}};
+    font-size: 7.5pt;
+    color: rgba(255,255,255,0.75);
+    white-space: nowrap;
+  }
+
+  /* ── Footer brand bar ── */
+  .footer-brand-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .footer-logo {
+    width: 1.3in;
+    height: auto;
+    opacity: 0.8;
+  }
+
+  .footer-offices {
+    text-align: right;
+  }
+
+  .footer-office-line {
+    font-family: {{brand_font_body}};
+    font-size: 6.5pt;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.6;
+    letter-spacing: 0.3px;
+  }
+
+  .footer-website {
+    font-family: {{brand_font_heading}};
+    font-size: 8pt;
+    font-weight: 700;
+    color: {{brand_primary_light}};
+    letter-spacing: 2px;
+    margin-top: 3px;
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <!-- ═══ HEADER BAND ═══ -->
+    <div class="header-band">
+      <div class="header-content">
+        {{#if tagline}}
+        <div class="header-suptext">{{{tagline_prefix}}}</div>
+        {{/if}}
+        <div class="header-title">{{{header_display_name}}}</div>
+        <div class="header-address">{{{address_full}}}</div>
+      </div>
+      <div class="header-right">
+        <img class="brand-logo-header" src="{{{brand_logo_src}}}" alt="{{brand_name}}">
+        <div class="listing-badge">{{listing_badge}}</div>
+      </div>
+    </div>
+
+    <!-- ═══ HERO PHOTO ZONE ═══ -->
+    <div class="hero-zone">
+      {{#if hero_image_src}}
+        <img class="hero-image" src="{{{hero_image_src}}}" alt="{{property_name}}">
+      {{else}}
+        <div class="hero-placeholder">
+          <div class="hero-placeholder-icon">📸</div>
+          <div class="hero-placeholder-text">Exterior Photography</div>
+          <div class="hero-placeholder-sub">Upload listing photos — AI auto-classifies and places them</div>
+        </div>
+      {{/if}}
+
+      <!-- Bottom overlay bar -->
+      <div class="bottom-overlay">
+        <div class="address-overlay">
+          <div class="address-overlay-text">{{{address_line1}}} — {{city}}, {{state}}</div>
+        </div>
+        <div class="badge-overlay">
+          <div class="badge-overlay-text">{{listing_badge}}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CONTACT FOOTER ═══ -->
+    <div class="contact-footer">
+      <!-- Property Highlights -->
+      {{#if has_highlights}}
+      <div class="footer-highlights">
+        {{#each highlights}}
+        <div class="highlight-chip">
+          <div class="highlight-dot"></div>
+          <div class="highlight-text">{{this}}</div>
+        </div>
+        {{/each}}
+      </div>
+      {{/if}}
+
+      <!-- Broker Contacts -->
+      <div class="contact-grid">
+        {{#if has_broker}}
+        <div class="contact-card">
+          <div class="contact-name">{{broker_name}}</div>
+          <div class="contact-title">{{broker_title}}</div>
+          <div class="contact-detail">
+            {{broker_phone}}<br>
+            {{broker_email}}
+          </div>
+        </div>
+        {{/if}}
+
+        {{#if has_broker2}}
+        <div class="contact-divider"></div>
+        <div class="contact-card">
+          <div class="contact-name">{{broker2_name}}</div>
+          <div class="contact-title">{{broker2_title}}</div>
+          <div class="contact-detail">
+            {{broker2_phone}}<br>
+            {{broker2_email}}
+          </div>
+        </div>
+        {{/if}}
+
+        <!-- Key Property Stats -->
+        <div class="contact-divider"></div>
+        <div class="contact-card">
+          <div class="contact-name" style="color: {{brand_primary_light}};">KEY DETAILS</div>
+          <div class="contact-detail" style="margin-top: 4px;">
+            {{#if price}}<strong>Price:</strong> {{price}}<br>{{/if}}
+            {{#if price_psf}}<strong>Price/SF:</strong> {{price_psf}}<br>{{/if}}
+            {{#if lease_rate}}<strong>Lease Rate:</strong> {{lease_rate}} {{lease_type}}<br>{{/if}}
+            {{#if cap_rate}}<strong>Cap Rate:</strong> {{cap_rate}}<br>{{/if}}
+            {{#if building_sf}}<strong>Size:</strong> {{building_sf}}<br>{{/if}}
+            {{#if land_acres}}<strong>Land:</strong> {{land_acres}}<br>{{/if}}
+            {{#if zoning}}<strong>Zoning:</strong> {{zoning}}<br>{{/if}}
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Brand Bar -->
+      <div class="footer-brand-bar">
+        <img class="footer-logo" src="{{{brand_logo_src}}}" alt="{{brand_name}}">
+        <div class="footer-offices">
+          {{#each office_addresses}}
+          <div class="footer-office-line">{{this.city}}: {{this.address}} · {{this.phone}}</div>
+          {{/each}}
+          <div class="footer-website">{{brand_website}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

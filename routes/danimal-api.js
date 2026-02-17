@@ -723,4 +723,44 @@ router.get('/api/economic/:geoId', async (req, res) => {
     }
 });
 
+// Traffic counts near a lat/lng location
+router.get('/traffic/nearby', async (req, res) => {
+    try {
+        const { lat, lng, radius } = req.query;
+        
+        if (!lat || !lng) {
+            return res.status(400).json({ success: false, error: 'lat and lng required' });
+        }
+        
+        const radiusMiles = parseFloat(radius) || 2;
+        const latFloat = parseFloat(lat);
+        const lngFloat = parseFloat(lng);
+        
+        // Approximate degrees per mile at this latitude
+        const latDegPerMile = 1 / 69;
+        const lngDegPerMile = 1 / (69 * Math.cos(latFloat * Math.PI / 180));
+        
+        const latMin = latFloat - (radiusMiles * latDegPerMile);
+        const latMax = latFloat + (radiusMiles * latDegPerMile);
+        const lngMin = lngFloat - (radiusMiles * lngDegPerMile);
+        const lngMax = lngFloat + (radiusMiles * lngDegPerMile);
+        
+        const result = await pool.query(`
+            SELECT road_name, from_road, to_road, aadt, year, lat, lng,
+                   SQRT(POW((lat - $1) * 69, 2) + POW((lng - $2) * 69 * COS($1 * PI() / 180), 2)) as distance_miles
+            FROM fdot_traffic 
+            WHERE lat BETWEEN $3 AND $4 
+              AND lng BETWEEN $5 AND $6
+              AND aadt IS NOT NULL
+            ORDER BY distance_miles ASC
+            LIMIT 20
+        `, [latFloat, lngFloat, latMin, latMax, lngMin, lngMax]);
+        
+        res.json({ success: true, results: result.rows });
+    } catch (error) {
+        console.error('[Danimal] Traffic nearby error:', error);
+        res.status(500).json({ success: false, error: 'Failed to load nearby traffic' });
+    }
+});
+
 module.exports = router;
