@@ -1,29 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="<%= typeof theme !== 'undefined' ? theme : 'light' %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sunday-Mail | Zenith OS</title>
+    <title>Sunday-Mail | CRE OS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="/css/theme.css">
+    <script src="/js/theme.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/theme.css">
+    <script src="/js/theme.js"></script>
     <style>
         /* ═══════════════════════════════════════════════════════════════
-           SUNDAY-MAIL — Zenith OS Email Marketing Platform
+           SUNDAY-MAIL — CRE OS Email Marketing Platform
            CRE Consultants / CIBB / Main Street Group
            ═══════════════════════════════════════════════════════════ */
 
         :root {
             --bg-body: #f8f9fb;
-            --bg-white: #ffffff;
+            --bg-white: var(--bg-surface);
             --bg-sidebar: #1a1f2e;
             --bg-sidebar-hover: #252b3d;
             --bg-sidebar-active: #2d3548;
             --bg-gray: #f3f4f6;
             --bg-input: #f9fafb;
 
-            --text-primary: #111827;
+            --text-primary: var(--text-primary);
             --text-secondary: #4b5563;
-            --text-muted: #9ca3af;
+            --text-muted: var(--text-muted);
             --text-sidebar: #94a3b8;
             --text-sidebar-active: #ffffff;
 
@@ -38,7 +42,7 @@
             --accent-purple: #8b5cf6;
             --accent-purple-bg: rgba(139, 92, 246, 0.08);
 
-            --border: #e5e7eb;
+            --border: var(--border);
             --border-light: #f3f4f6;
             --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
@@ -847,6 +851,7 @@
             .segments-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
+<%- include("partials/security") %>
 </head>
 <body>
 
@@ -894,14 +899,14 @@
 
         <div class="sidebar-section">
             <div class="sidebar-section-label">Navigate</div>
-            <a href="/dashboard" class="sidebar-item"><span class="icon">🏠</span> AXIS Home</a>
+            <a href="/dashboard" class="sidebar-item"><span class="icon">🏠</span> CRE Home</a>
             <a href="/crm" class="sidebar-item"><span class="icon">📊</span> CRM</a>
             <a href="/huddle" class="sidebar-item"><span class="icon">💬</span> The Huddle</a>
             <a href="/vault" class="sidebar-item"><span class="icon">🔐</span> The Vault</a>
         </div>
 
         <div class="sidebar-footer">
-            <a href="/dashboard">← Back to AXIS</a>
+            <a href="/dashboard">← Back to CRE Home</a>
         </div>
     </aside>
 

@@ -1,11 +1,13 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" data-theme="<%= typeof theme !== 'undefined' ? theme : 'light' %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AXIS | Your Command Center</title>
+    <title>CRE OS | Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/theme.css">
+    <script src="/js/theme.js"></script>
     <style>
         :root {
             --bg-white: #FFFFFF; --bg-light: #F8FAFC; --bg-gray: #F1F5F9; --bg-card: #FFFFFF;
@@ -17,7 +19,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-light); color: var(--text-primary); min-height: 100vh; display: flex; }
         
-        .sidebar { width: 280px; background: var(--bg-white); border-right: 1px solid var(--border); position: fixed; height: 100vh; z-index: 100; display: flex; flex-direction: column; box-shadow: 2px 0 8px rgba(0,0,0,0.04); }
+        .sidebar { width: 280px; background: var(--sidebar-bg); border-right: 1px solid var(--border); position: fixed; height: 100vh; z-index: 100; display: flex; flex-direction: column; box-shadow: 2px 0 8px rgba(0,0,0,0.04); }
         .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border); }
         .user-profile { display: flex; align-items: center; gap: 14px; }
         .avatar { width: 48px; height: 48px; background: linear-gradient(135deg, var(--accent-emerald), var(--accent-cyan)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: white; }
@@ -33,12 +35,14 @@
         .nav-badge { margin-left: auto; background: var(--accent-rose); color: white; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 100px; }
         .nav-item.csuite { border: 1px solid rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.05); }
         .sidebar-footer { padding: 16px; border-top: 1px solid var(--border); }
+        .sidebar-footer a, .sidebar-footer button { color: var(--text-secondary) !important; display: block; padding: 8px 12px; border-radius: 8px; text-decoration: none; font-size: 13px; }
+        .sidebar-footer a:hover, .sidebar-footer button:hover { background: var(--sidebar-hover); color: var(--text-primary) !important; }
         .system-status { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
         .status-dot { width: 8px; height: 8px; background: var(--accent-emerald); border-radius: 50%; animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         
         .main-content { flex: 1; margin-left: 280px; }
-        .topbar { height: 72px; background: var(--bg-white); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        .topbar { height: 72px; background: var(--bg-surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
         .topbar-title { font-size: 24px; font-weight: 700; }
         .topbar-actions { display: flex; gap: 12px; }
         .btn { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
@@ -100,10 +104,12 @@
         .quick-action:hover { padding-left: 8px; }
         .quick-action:last-child { border-bottom: none; }
         .quick-action-icon { width: 36px; height: 36px; background: var(--bg-gray); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-        .quick-action-text { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+        .quick-action-text { font-size: 14px; font-weight: 500; color: var(--text-primary) !important; }
+        .quick-action-icon { color: var(--text-muted) !important; }
         
         .logout-btn { display: block; width: 100%; padding: 10px; background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.2); border-radius: 8px; color: var(--accent-rose); font-size: 13px; font-weight: 500; cursor: pointer; text-align: center; text-decoration: none; margin-top: 12px; }
     </style>
+<%- include("partials/security") %>
 </head>
 <body>
     <aside class="sidebar">
@@ -112,7 +118,7 @@
                 <div class="avatar"><%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %></div>
                 <div class="user-info">
                     <h3><%= user.name %></h3>
-                    <span class="user-role"><%= user.role %> � <%= org.name %></span>
+                    <span class="user-role"><%= user.role %> | <%= org.name %></span>
                 </div>
             </div>
         </div>
@@ -121,43 +127,67 @@
             <div class="nav-section">
                 <div class="nav-section-label">Dashboard</div>
                 <a href="/dashboard" class="nav-item active">
-                    <span class="nav-icon"><i class="bi bi-house"></i></span> AXIS Home
+                    <span class="nav-icon"><i class="bi bi-house"></i></span> CRE Home
                 </a>
             </div>
 
             <div class="nav-section">
                 <div class="nav-section-label">Work Modules</div>
+                <% if (features.crm !== false) { %>
                 <a href="/crm" class="nav-item">
                     <span class="nav-icon"><i class="bi bi-kanban"></i></span> CRM Pipeline
                     <span class="nav-badge"><%= stats.leads || 0 %></span>
                 </a>
+                <% } %>
+                <% if (features.inventory !== false) { %>
                 <a href="/inventory" class="nav-item">
                     <span class="nav-icon"><i class="bi bi-box-seam"></i></span> Inventory
                 </a>
+                <% } %>
+                <% if (features.huddle !== false) { %>
                 <a href="/huddle" class="nav-item">
                     <span class="nav-icon"><i class="bi bi-chat-dots"></i></span> The Huddle
                 </a>
+                <% } %>
+                <% if (features.mailer !== false) { %>
                 <a href="/mailer" class="nav-item">
                     <span class="nav-icon"><i class="bi bi-envelope"></i></span> Mailer
                 </a>
+                <% } %>
+                <% if (features.pm !== false) { %>
                 <a href="/pm" class="nav-item">
                     <span class="nav-icon"><i class="bi bi-building"></i></span> Property Mgmt
                 </a>
+                <% } %>
+                <% if (features.danimal !== false) { %>
                 <a href="/danimal" class="nav-item"><span class="nav-icon"><i class="bi bi-database"></i></span> Danimal Data</a>
+                <% } %>
+                <% if (features.intel !== false) { %>
                 <a href="/intel" class="nav-item"><span class="nav-icon"><i class="bi bi-lightbulb"></i></span> INTEL</a>
+                <% } %>
+                <% if (features.marketing !== false) { %>
+                <a href="/marketing" class="nav-item"><span class="nav-icon"><i class="bi bi-megaphone"></i></span> Marketing</a>
+                <% } %>
+                <% if (features.vault !== false) { %>
                 <a href="/vault" class="nav-item">
                     <span class="nav-icon"><i class="bi bi-safe"></i></span> The Vault
                 </a>
+                <% } %>
             </div>
 
             <% if (['Admin', 'Principal'].includes(user.role)) { %>
             <div class="nav-section">
                 <div class="nav-section-label">C-Suite Access</div>
+               <% if (features.command !== false) { %>
                 <a href="/command" class="nav-item csuite">
                     <span class="nav-icon"><i class="bi bi-bullseye"></i></span> Command Center
                 </a>
+                <% } %>
+                <% if (features.cfo !== false) { %>
                 <a href="/cfo" class="nav-item csuite">
                     <span class="nav-icon"><i class="bi bi-graph-up"></i></span> CFO Dashboard
+                </a>
+                <% } %>
                 </a>
             </div>
             <% } %>
@@ -189,7 +219,7 @@
 
     <main class="main-content">
         <header class="topbar">
-            <h1 class="topbar-title">Welcome back, <%= user.name.split(' ')[0] %></h1>
+            <h1 class="topbar-title">Welcome Back, <%= user.name.split(' ')[0] %></h1>
             <div class="topbar-actions">
                 <a href="/settings" class="btn btn-ghost"><i class="bi bi-gear"></i> Settings</a>
                 <a href="/crm" class="btn btn-primary">+ New Lead</a>
@@ -198,7 +228,7 @@
 
         <div class="content-area">
             <div class="welcome-section">
-                <h2 class="welcome-title">Your AXIS Dashboard</h2>
+                <h2 class="welcome-title">Your CRE Dashboard</h2>
                 <p class="welcome-subtitle" id="dateDisplay"></p>
             </div>
 
@@ -304,7 +334,7 @@
                             <div class="activity-item">
                                 <div class="activity-icon lead"><i class="bi bi-person-plus"></i></div>
                                 <div class="activity-content">
-                                    <h4>Welcome to Zenith OS!</h4>
+                                    <h4>Welcome to CRE OS!</h4>
                                     <p>Get started by adding your first lead or exploring the modules.</p>
                                 </div>
                                 <span class="activity-time">Now</span>
@@ -319,7 +349,7 @@
                     </div>
                     <div class="card-body">
                         <a href="/crm" class="quick-action" style="text-decoration: none; color: inherit;">
-                            <div class="quick-action-icon">?</div>
+                            <div class="quick-action-icon"><i class="bi bi-plus-circle"></i></div>
                             <span class="quick-action-text">Add New Lead</span>
                         </a>
                         <a href="/huddle" class="quick-action" style="text-decoration: none; color: inherit;">
@@ -346,7 +376,7 @@
     <script>
         const now = new Date();
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-US', options) + ' � <%= org.name %>';
+        document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-US', options) + ' | <%= org.name %>';
     </script>
 <%- include('partials/notification-bubble') %>
 </body>

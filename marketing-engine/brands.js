@@ -103,10 +103,12 @@ function getBrand(brandId) {
 }
 
 function renderBrandLogo(brand) {
-  let svg = brand.logoSvg;
-  svg = svg.replace(/\{\{primary\}\}/g, brand.colors.primary);
-  svg = svg.replace(/\{\{primaryDark\}\}/g, brand.colors.primaryDark);
-  svg = svg.replace(/\{\{text\}\}/g, brand.colors.text);
+  let svg = brand.logoSvg || brand.logo_svg || BRANDS.cre_consultants.logoSvg;
+  if (!svg) return '';
+  const colors = brand.colors || {};
+  svg = svg.replace(/\{\{primary\}\}/g, colors.primary || '#1B6B3A');
+  svg = svg.replace(/\{\{primaryDark\}\}/g, colors.primaryDark || '#145A2E');
+  svg = svg.replace(/\{\{text\}\}/g, colors.text || '#333333');
   const encoded = Buffer.from(svg).toString('base64');
   return `data:image/svg+xml;base64,${encoded}`;
 }

@@ -36,7 +36,7 @@ module.exports = function(pool) {
     if (!req.session?.user) return res.status(401).json({ error: 'Authentication required' });
     next();
   }
-  function getTenantId(req) { return req.session?.tenant?.id; }
+  function getTenantId(req) { return req.session?.org?.id || req.session?.tenant?.id || 1; }
   function getUserId(req) { return req.session?.user?.id; }
   function getUserRole(req) {
     const role = req.session?.user?.role || req.session?.user?.access_level;
@@ -142,6 +142,172 @@ module.exports = function(pool) {
   router.get('/templates', async (req, res) => {
     try { const r = await pool.query('SELECT id, name, description, category, tags, sort_order FROM marketing_templates WHERE is_active = TRUE ORDER BY sort_order'); res.json(r.rows); }
     catch (err) { res.status(500).json({ error: 'Failed to fetch templates' }); }
+  });
+
+// POST /api/marketing/create-from-crm/:leadId
+  // Called from CRM "Create Flyer" button
+  router.post('/create-from-crm/:leadId', requireAuth, async (req, res) => {
+    try {
+      const tenantId = getTenantId(req);
+      const leadId = parseInt(req.params.leadId);
+
+      // Check if draft already exists for this lead
+      const existing = await pool.query(
+        'SELECT id, status FROM marketing_drafts WHERE listing_id = $1 AND tenant_id = $2 ORDER BY created_at DESC LIMIT 1',
+        [leadId, tenantId]
+      );
+      if (existing.rows.length > 0) {
+        return res.json({ success: true, draft_id: existing.rows[0].id, message: 'Draft already exists' });
+      }
+
+      // Get lead data
+      const leadResult = await pool.query('SELECT * FROM leads WHERE id = $1', [leadId]);
+      if (leadResult.rows.length === 0) return res.status(404).json({ error: 'Lead not found' });
+      const lead = leadResult.rows[0];
+
+      // Get default brand
+      const brandR = await pool.query(
+        'SELECT id FROM marketing_brands WHERE tenant_id = $1 AND is_default = TRUE LIMIT 1',
+        [tenantId]
+      );
+
+      // Get template sequence
+      const ruleR = await pool.query(
+        'SELECT template_sequence FROM marketing_template_rules WHERE listing_type = $1 AND is_active = TRUE ORDER BY priority DESC LIMIT 1',
+        [lead.property_type || 'for_sale']
+      );
+
+      const { v4: uuidv4 } = require('uuid');
+      const draftId = uuidv4();
+      const templateSeq = ruleR.rows[0]?.template_sequence || ['cover-standard', 'details-offering', 'location-map'];
+
+      await pool.query(
+        `INSERT INTO marketing_drafts (id, tenant_id, listing_id, brand_id, status, template_sequence, generated_by)
+         VALUES ($1, $2, $3, $4, 'pending', $5, $6)`,
+        [draftId, tenantId, leadId, brandR.rows[0]?.id || null, templateSeq, getUserId(req)]
+      );
+
+      await pool.query(
+        `INSERT INTO marketing_draft_history (draft_id, from_status, to_status, actor_role, comments, metadata)
+         VALUES ($1, NULL, 'pending', 'marketing', 'Created from CRM - Create Flyer button', $2)`,
+        [draftId, JSON.stringify({ lead_id: leadId, lead_name: lead.name || lead.company })]
+      );
+
+      console.log('[Marketing] Draft created from CRM button: ' + draftId + ' for lead ' + leadId);
+      res.json({ success: true, draft_id: draftId, message: 'Marketing package created' });
+    } catch (err) {
+      console.error('[Marketing] Create from CRM error:', err);
+      res.status(500).json({ error: 'Failed to create marketing package' });
+    }
+  });
+
+// ══════════════════════════════════════════════════════════════════════
+  // PHOTOS — Upload, serve, delete
+  // ══════════════════════════════════════════════════════════════════════
+
+  const multer = require('multer');
+  const fs = require('fs');
+  const photoStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      const dir = path.join(__dirname, '..', 'marketing-output', 'photos');
+      fs.mkdirSync(dir, { recursive: true });
+      cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname) || '.jpg';
+      cb(null, `${req.params.draftId}_${Date.now()}${ext}`);
+    }
+  });
+  const photoUpload = multer({
+    storage: photoStorage,
+    limits: { fileSize: 25 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype.startsWith('image/')) cb(null, true);
+      else cb(new Error('Only image files allowed'));
+    }
+  });
+
+  // POST /api/marketing/drafts/:draftId/photos — Upload photos to a draft
+  router.post('/drafts/:draftId/photos', requireAuth, photoUpload.array('photos', 20), async (req, res) => {
+    try {
+      const tenantId = getTenantId(req);
+      const draftId = req.params.draftId;
+
+      // Verify draft belongs to tenant
+      const draftCheck = await pool.query(
+        'SELECT id, listing_id FROM marketing_drafts WHERE id = $1 AND tenant_id = $2',
+        [draftId, tenantId]
+      );
+      if (draftCheck.rows.length === 0) return res.status(404).json({ error: 'Draft not found' });
+      const listingId = draftCheck.rows[0].listing_id;
+
+      // Get current max sort_order
+      const maxSort = await pool.query(
+        'SELECT COALESCE(MAX(sort_order), -1) as max_sort FROM marketing_photos WHERE draft_id = $1',
+        [draftId]
+      );
+      let sortOrder = maxSort.rows[0].max_sort + 1;
+
+      const inserted = [];
+      for (const file of req.files) {
+        const photoUrl = `/marketing/photos/${file.filename}`;
+        const result = await pool.query(
+          `INSERT INTO marketing_photos (draft_id, listing_id, original_url, original_format, sort_order)
+           VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+          [draftId, listingId, photoUrl, path.extname(file.originalname).replace('.', ''), sortOrder++]
+        );
+        inserted.push(result.rows[0]);
+      }
+
+      console.log(`[Marketing] ${inserted.length} photos uploaded for draft ${draftId}`);
+      res.json({ success: true, photos: inserted, count: inserted.length });
+    } catch (err) {
+      console.error('[Marketing] Photo upload error:', err);
+      res.status(500).json({ error: 'Failed to upload photos' });
+    }
+  });
+
+  // GET /api/marketing/drafts/:draftId/photos — List photos for a draft
+  router.get('/drafts/:draftId/photos', requireAuth, async (req, res) => {
+    try {
+      const result = await pool.query(
+        'SELECT * FROM marketing_photos WHERE draft_id = $1 ORDER BY sort_order',
+        [req.params.draftId]
+      );
+      res.json({ photos: result.rows });
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to fetch photos' });
+    }
+  });
+
+  // DELETE /api/marketing/photos/:photoId — Delete a single photo
+  router.delete('/photos/:photoId', requireAuth, async (req, res) => {
+    try {
+      const result = await pool.query(
+        'DELETE FROM marketing_photos WHERE id = $1 RETURNING original_url',
+        [req.params.photoId]
+      );
+      if (result.rows.length === 0) return res.status(404).json({ error: 'Photo not found' });
+
+      // Delete file from disk
+      const filename = path.basename(result.rows[0].original_url);
+      const filePath = path.join(__dirname, '..', 'marketing-output', 'photos', filename);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to delete photo' });
+    }
+  });
+
+  // Serve photo files
+  router.get('/photo-file/:filename', (req, res) => {
+    const filePath = path.join(__dirname, '..', 'marketing-output', 'photos', req.params.filename);
+    if (fs.existsSync(filePath)) {
+      res.sendFile(filePath);
+    } else {
+      res.status(404).send('Photo not found');
+    }
   });
 
   // GET /api/marketing/health

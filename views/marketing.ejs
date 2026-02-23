@@ -1,0 +1,453 @@
+<!-- ============================================
+     CRE OS — Marketing Suite Dashboard
+     views/marketing.ejs
+     ============================================ -->
+<!DOCTYPE html>
+<html lang="en" data-theme="<%= typeof theme !== 'undefined' ? theme : 'light' %>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing Suite - CRE OS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/theme.css">
+    <script src="/js/theme.js"></script>
+    <style>
+        :root {
+            --bg-dark: var(--bg-surface);
+            --bg-sidebar: var(--sidebar-bg);
+            --bg-main: var(--bg-page);
+            --bg-white: var(--bg-surface);
+            --bg-light: var(--bg-page);
+            --text-primary: var(--text-primary);
+            --text-muted: #6c757d;
+            --text-light: #adb5bd;
+            --border: #e2e8f0;
+            --accent-green: #1B6B3A;
+            --accent-green-light: #2A8B4A;
+            --accent-red: #C41E3A;
+            --accent-blue: #3b82f6;
+            --accent-amber: #f59e0b;
+            --accent-emerald: #10b981;
+            --accent-purple: #8b5cf6;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', -apple-system, sans-serif; background: var(--bg-main); color: var(--text-primary); }
+
+        .layout { display: flex; min-height: 100vh; }
+
+        /* Sidebar — matches existing CRE OS */
+        .sidebar { width: 260px; background: var(--bg-dark); color: white; padding: 24px 16px; flex-shrink: 0; }
+        .sidebar-brand { font-size: 20px; font-weight: 700; padding: 0 8px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px; letter-spacing: -0.5px; }
+        .sidebar-brand span { color: var(--accent-green-light); }
+        .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; color: rgba(255,255,255,0.6); text-decoration: none; border-radius: 8px; font-size: 14px; margin-bottom: 2px; transition: all 0.2s; }
+        .sidebar-nav a:hover { color: white; background: rgba(255,255,255,0.08); }
+        .sidebar-nav a.active { color: white; background: rgba(27,107,58,0.3); }
+        .sidebar-nav a i { width: 20px; font-size: 16px; }
+        .sidebar-section { font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 16px 12px 8px; letter-spacing: 0.5px; }
+
+        /* Main content */
+        .main { flex: 1; overflow-y: auto; }
+        .top-bar { background: var(--bg-white); border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+        .top-bar h1 { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .top-bar h1 i { color: var(--accent-green); }
+        .content { padding: 28px 32px; }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 28px; }
+        .stat-card { background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow-sm); }
+        .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 6px; }
+        .stat-value { font-size: 26px; font-weight: 700; line-height: 1; }
+        .stat-value.green { color: var(--accent-emerald); }
+        .stat-value.blue { color: var(--accent-blue); }
+        .stat-value.amber { color: var(--accent-amber); }
+        .stat-value.purple { color: var(--accent-purple); }
+        .stat-value.red { color: var(--accent-red); }
+        .stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+        /* Filter bar */
+        .filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: 20px; background: var(--bg-white); font-size: 13px; cursor: pointer; color: var(--text-muted); transition: all 0.2s; }
+        .filter-btn:hover { border-color: var(--accent-green); color: var(--accent-green); }
+        .filter-btn.active { background: var(--accent-green); color: white; border-color: var(--accent-green); }
+        .filter-count { background: rgba(0,0,0,0.1); padding: 1px 7px; border-radius: 10px; font-size: 11px; margin-left: 4px; }
+        .filter-btn.active .filter-count { background: rgba(255,255,255,0.25); }
+
+        /* Drafts Table */
+        .drafts-table-wrap { background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
+        .drafts-table { width: 100%; border-collapse: collapse; }
+        .drafts-table th { padding: 12px 16px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px; color: var(--text-muted); border-bottom: 1px solid var(--border); background: var(--bg-light); }
+        .drafts-table td { padding: 14px 16px; border-bottom: 1px solid #f0f0f0; font-size: 14px; vertical-align: middle; }
+        .drafts-table tr:last-child td { border-bottom: none; }
+        .drafts-table tr:hover { background: #fafbfc; }
+
+        .draft-property { font-weight: 600; color: var(--text-primary); }
+        .draft-address { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+        /* Status badges */
+        .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-ready { background: #dbeafe; color: #1e40af; }
+        .badge-generating { background: #ede9fe; color: #5b21b6; }
+        .badge-review { background: #fce7f3; color: #9d174d; }
+        .badge-revision { background: #fde68a; color: #78350f; }
+        .badge-approval { background: #fed7aa; color: #9a3412; }
+        .badge-approved { background: #d1fae5; color: #065f46; }
+        .badge-distributed { background: #a7f3d0; color: #064e3b; }
+        .badge-failed { background: #fee2e2; color: #991b1b; }
+        .badge i { font-size: 10px; }
+
+        /* Quality score */
+        .quality-bar { width: 60px; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 6px; }
+        .quality-fill { height: 100%; border-radius: 3px; }
+        .quality-high { background: var(--accent-emerald); }
+        .quality-medium { background: var(--accent-amber); }
+        .quality-low { background: var(--accent-red); }
+
+        /* Action buttons */
+        .btn { padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-primary { background: var(--accent-green); color: white; }
+        .btn-primary:hover { background: var(--accent-green-light); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-primary); }
+        .btn-outline:hover { border-color: var(--accent-green); color: var(--accent-green); }
+        .btn-sm { padding: 4px 10px; font-size: 12px; }
+        .btn-danger { background: #fee2e2; color: #991b1b; }
+        .btn-danger:hover { background: #fecaca; }
+
+        /* Empty state */
+        .empty-state { text-align: center; padding: 60px 20px; }
+        .empty-state i { font-size: 48px; color: var(--text-light); margin-bottom: 16px; }
+        .empty-state h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+        .empty-state p { font-size: 14px; color: var(--text-muted); max-width: 400px; margin: 0 auto; }
+
+        /* Toast notification */
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; }
+        .toast { padding: 12px 20px; border-radius: 10px; color: white; font-size: 14px; margin-bottom: 8px; box-shadow: var(--shadow-md); animation: slideIn 0.3s ease; }
+        .toast-success { background: var(--accent-emerald); }
+        .toast-error { background: var(--accent-red); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* Responsive */
+        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .content { padding: 16px; }
+        }
+    </style>
+<%- include("partials/security") %>
+</head>
+<body>
+<div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">CRE <span>OS</span></div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard"><i class="bi bi-grid-1x2"></i> Dashboard</a>
+            <% if (features.crm !== false) { %>
+            <a href="/crm"><i class="bi bi-funnel"></i> CRM</a>
+            <% } %>
+            <% if (features.intel !== false) { %>
+            <a href="/intel"><i class="bi bi-easel"></i> INTEL</a>
+            <% } %>
+            <a href="/marketing" class="active"><i class="bi bi-megaphone"></i> Marketing</a>
+            <% if (features.huddle !== false) { %>
+            <a href="/huddle"><i class="bi bi-chat-dots"></i> Huddle</a>
+            <% } %>
+            <% if (features.vault !== false) { %>
+            <a href="/vault"><i class="bi bi-safe"></i> Vault</a>
+            <% } %>
+            <% if (features.cfo !== false) { %>
+            <a href="/cfo"><i class="bi bi-graph-up-arrow"></i> CFO</a>
+            <% } %>
+
+            <div class="sidebar-section">Data</div>
+            <% if (features.danimal !== false) { %>
+            <a href="/danimal"><i class="bi bi-database"></i> Danimal Data</a>
+            <% } %>
+            <% if (features.command !== false) { %>
+            <a href="/command"><i class="bi bi-terminal"></i> Command</a>
+            <% } %>
+            <div class="sidebar-section">Account</div>
+            <a href="/settings"><i class="bi bi-gear"></i> Settings</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main">
+        <div class="top-bar">
+            <h1><i class="bi bi-megaphone"></i> Marketing Suite</h1>
+            <div style="display:flex;gap:8px;">
+                <button class="btn btn-outline" onclick="refreshDrafts()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+                <button class="btn btn-primary" onclick="window.location.href='/crm'"><i class="bi bi-plus-lg"></i> New from CRM</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Stats -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Drafts</div>
+                    <div class="stat-value" id="statTotal">-</div>
+                    <div class="stat-sub">All marketing packages</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Awaiting Review</div>
+                    <div class="stat-value amber" id="statReview">-</div>
+                    <div class="stat-sub">Needs marketing team action</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Pending Approval</div>
+                    <div class="stat-value purple" id="statApproval">-</div>
+                    <div class="stat-sub">Waiting on broker sign-off</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Approved</div>
+                    <div class="stat-value green" id="statApproved">-</div>
+                    <div class="stat-sub">Ready for distribution</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Distributed</div>
+                    <div class="stat-value blue" id="statDistributed">-</div>
+                    <div class="stat-sub">Live on channels</div>
+                </div>
+            </div>
+
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <button class="filter-btn active" data-filter="all" onclick="filterDrafts('all', this)">All</button>
+                <button class="filter-btn" data-filter="pending" onclick="filterDrafts('pending', this)">Pending</button>
+                <button class="filter-btn" data-filter="ready" onclick="filterDrafts('ready', this)">Ready</button>
+                <button class="filter-btn" data-filter="generating" onclick="filterDrafts('generating', this)">Generating</button>
+                <button class="filter-btn" data-filter="review" onclick="filterDrafts('review', this)">In Review</button>
+                <button class="filter-btn" data-filter="approval" onclick="filterDrafts('approval', this)">Approval</button>
+                <button class="filter-btn" data-filter="approved" onclick="filterDrafts('approved', this)">Approved</button>
+                <button class="filter-btn" data-filter="distributed" onclick="filterDrafts('distributed', this)">Distributed</button>
+                <button class="filter-btn" data-filter="failed" onclick="filterDrafts('failed', this)">Failed</button>
+            </div>
+
+            <!-- Drafts Table -->
+            <div class="drafts-table-wrap">
+                <table class="drafts-table">
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Status</th>
+                            <th>Quality</th>
+                            <th>AI Model</th>
+                            <th>Pages</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="draftsBody">
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <i class="bi bi-megaphone"></i>
+                                    <h3>No marketing drafts yet</h3>
+                                    <p>When CRM deals move to "Closed Won," marketing packages are auto-generated here. You can also create drafts from the CRM.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+    let allDrafts = [];
+    let currentFilter = 'all';
+
+    // ── Load Drafts ─────────────────────────────────────────────
+    async function loadDrafts() {
+        try {
+            const res = await fetch('/api/marketing/drafts?limit=100');
+            const data = await res.json();
+            allDrafts = data.drafts || [];
+            updateStats();
+            renderDrafts();
+        } catch (err) {
+            console.error('Failed to load drafts:', err);
+        }
+    }
+
+    function updateStats() {
+        const counts = { total: allDrafts.length, review: 0, approval: 0, approved: 0, distributed: 0 };
+        allDrafts.forEach(d => {
+            if (d.status === 'review' || d.status === 'revision') counts.review++;
+            if (d.status === 'approval') counts.approval++;
+            if (d.status === 'approved') counts.approved++;
+            if (d.status === 'distributed') counts.distributed++;
+        });
+        document.getElementById('statTotal').textContent = counts.total;
+        document.getElementById('statReview').textContent = counts.review;
+        document.getElementById('statApproval').textContent = counts.approval;
+        document.getElementById('statApproved').textContent = counts.approved;
+        document.getElementById('statDistributed').textContent = counts.distributed;
+    }
+
+    function filterDrafts(filter, btn) {
+        currentFilter = filter;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        renderDrafts();
+    }
+
+    function renderDrafts() {
+        const filtered = currentFilter === 'all' ? allDrafts : allDrafts.filter(d => d.status === currentFilter);
+        const tbody = document.getElementById('draftsBody');
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7">
+                <div class="empty-state">
+                    <i class="bi bi-megaphone"></i>
+                    <h3>${currentFilter === 'all' ? 'No marketing drafts yet' : 'No drafts with status "' + currentFilter + '"'}</h3>
+                    <p>When CRM deals move to "Closed Won," marketing packages are auto-generated here.</p>
+                </div></td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(d => {
+            const created = new Date(d.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const pages = (d.template_sequence || []).length;
+            const qs = d.quality_score;
+            const qClass = qs >= 70 ? 'quality-high' : qs >= 40 ? 'quality-medium' : 'quality-low';
+
+            return `<tr>
+                <td>
+                    <div class="draft-property">Listing #${d.listing_id}</div>
+                    <div class="draft-address">${d.id.slice(0, 8)}...</div>
+                </td>
+                <td>${statusBadge(d.status)}</td>
+                <td>${qs !== null ? `<span class="quality-bar"><span class="quality-fill ${qClass}" style="width:${qs}%"></span></span>${qs}%` : '<span style="color:var(--text-light)">—</span>'}</td>
+                <td style="font-size:12px;color:var(--text-muted)">${d.ai_model || '—'}</td>
+                <td>${pages > 0 ? pages + 'p' : '—'}</td>
+                <td style="font-size:13px;color:var(--text-muted)">${created}</td>
+                <td>${actionButtons(d)}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    function statusBadge(status) {
+        const icons = {
+            pending: 'bi-hourglass-split', ready: 'bi-check-circle', generating: 'bi-cpu',
+            review: 'bi-eye', revision: 'bi-pencil', approval: 'bi-person-check',
+            approved: 'bi-check2-all', distributed: 'bi-broadcast', failed: 'bi-exclamation-triangle'
+        };
+        return `<span class="badge badge-${status}"><i class="bi ${icons[status] || 'bi-circle'}"></i> ${status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
+    }
+
+    function actionButtons(draft) {
+        const btns = [];
+        switch (draft.status) {
+            case 'pending':
+            case 'ready':
+                btns.push(`<button class="btn btn-primary btn-sm" onclick="generateDraft('${draft.id}')"><i class="bi bi-cpu"></i> Generate</button>`);
+                break;
+            case 'review':
+                btns.push(`<button class="btn btn-primary btn-sm" onclick="transitionDraft('${draft.id}', 'submit_for_approval')"><i class="bi bi-send"></i> Send to Broker</button>`);
+                if (draft.pdf_url) btns.push(`<a class="btn btn-outline btn-sm" href="${draft.pdf_url}" target="_blank"><i class="bi bi-file-pdf"></i> PDF</a>`);
+                break;
+            case 'approval':
+                btns.push(`<button class="btn btn-primary btn-sm" onclick="transitionDraft('${draft.id}', 'approve')"><i class="bi bi-check-lg"></i> Approve</button>`);
+                btns.push(`<button class="btn btn-outline btn-sm" onclick="requestRevisions('${draft.id}')"><i class="bi bi-pencil"></i> Revise</button>`);
+                break;
+            case 'approved':
+                btns.push(`<button class="btn btn-primary btn-sm" onclick="transitionDraft('${draft.id}', 'distribute')"><i class="bi bi-broadcast"></i> Distribute</button>`);
+                break;
+            case 'failed':
+                btns.push(`<button class="btn btn-danger btn-sm" onclick="transitionDraft('${draft.id}', 'retry')"><i class="bi bi-arrow-clockwise"></i> Retry</button>`);
+                break;
+            case 'distributed':
+                if (draft.pdf_url) btns.push(`<a class="btn btn-outline btn-sm" href="${draft.pdf_url}" target="_blank"><i class="bi bi-file-pdf"></i> PDF</a>`);
+                break;
+        }
+        return btns.join(' ');
+    }
+
+    // ── Workflow Actions ────────────────────────────────────────
+    async function generateDraft(id) {
+        try {
+            // First validate if pending
+            const draft = allDrafts.find(d => d.id === id);
+            if (draft && draft.status === 'pending') {
+                await fetch(`/api/marketing/drafts/${id}/transition`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ transition: 'validate', listing: { address: 'From CRM', listing_type: 'for_sale', broker: 'CRE Consultants', photo_count: 1 } })
+                });
+            }
+            const res = await fetch(`/api/marketing/drafts/${id}/generate`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                showToast('Generation started — AI pipeline running...', 'success');
+                startGenerationPolling();
+            } else {
+                showToast(data.error || 'Generation failed', 'error');
+            }
+        } catch (err) { showToast('Error: ' + err.message, 'error'); }
+    }
+
+    async function transitionDraft(id, transition, params = {}) {
+        try {
+            const res = await fetch(`/api/marketing/drafts/${id}/transition`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ transition, ...params })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast(`Draft moved to "${data.draft.status}"`, 'success');
+                loadDrafts();
+            } else {
+                showToast(data.error || 'Transition failed', 'error');
+            }
+        } catch (err) { showToast('Error: ' + err.message, 'error'); }
+    }
+
+    async function requestRevisions(id) {
+        const comments = prompt('Enter revision comments for the marketing team:');
+        if (comments && comments.trim()) {
+            transitionDraft(id, 'request_revisions', { comments });
+        }
+    }
+
+    function refreshDrafts() { loadDrafts(); showToast('Refreshed', 'success'); }
+
+    function showToast(msg, type) {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = msg;
+        document.getElementById('toastContainer').appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+
+// Auto-poll while any draft is generating
+    let pollingInterval = null;
+    function startGenerationPolling() {
+        if (pollingInterval) return;
+        pollingInterval = setInterval(async () => {
+            await loadDrafts();
+            const stillGenerating = allDrafts.some(d => d.status === 'generating');
+            if (!stillGenerating) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+                const reviewDraft = allDrafts.find(d => d.status === 'review');
+                if (reviewDraft) showToast('Flyer generated — ready for review!', 'success');
+            }
+        }, 3000);
+    }
+
+    // Load on page ready
+    loadDrafts().then(() => {
+        if (allDrafts.some(d => d.status === 'generating')) startGenerationPolling();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<script>
+// CRE OS Security Layer v2 ? Danimal Data LLC
+(function(){
+    var _t = Date.now();
+    var _w = false;
+    
+    // Disable right-click
+    document.addEventListener('contextmenu', function(e){ e.preventDefault(); _caught(); });
+    
+    // Disable dev tools shortcuts
+    document.addEventListener('keydown', function(e){
+        if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'u')){
+            e.preventDefault(); _caught(); return false;
+        }
+    });
+
+    // Dev tools detection via window size differential
+    var _checkDevTools = setInterval(function(){
+        var w = window.outerWidth - window.innerWidth > 160;
+        var h = window.outerHeight - window.innerHeight > 160;
+        if(w || h){ _caught(); }
+    }, 2000);
+
+    // Console styling
+    var _s1 = 'color:#ff0000;font-size:64px;font-weight:900;text-shadow:2px 2px #000;';
+    var _s2 = 'color:#ff4444;font-size:20px;font-weight:700;background:#1a1a1a;padding:8px 16px;border-radius:4px;';
+    var _s3 = 'color:#ff6b6b;font-size:14px;';
+    var _s4 = 'color:#888;font-size:12px;';
+    
+    try {
+        console.log('%c\u26A0 STOP', _s1);
+        console.log('%cNice try FUCKERS!!! GOT YA GOOD!!!', _s2);
+        console.log('%cAND YOU DON\'T EVEN KNOW HOW GOOD YOU\'RE GOT YET!!!', _s2);
+        console.log('%c\nThis is a proprietary system owned by Danimal Data LLC.\nUnauthorized access, copying, or reverse engineering of this software\nis strictly prohibited and will result in legal action.\nAll activity is monitored and logged.', _s3);
+        console.log('%cSession ID: ' + Math.random().toString(36).substr(2,12).toUpperCase() + ' | IP logged | Timestamp: ' + new Date().toISOString(), _s4);
+    } catch(e){}
+    
+    function _caught(){
+        if(_w) return;
+        _w = true;
+        // Create fullscreen warning overlay
+        var d = document.createElement('div');
+        d.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:#0a0a0a;z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:monospace;';
+        d.innerHTML = '<div style="text-align:center;animation:pulse 0.5s ease-in-out infinite alternate;">'
+            + '<div style="font-size:80px;margin-bottom:20px;">\u26A0\uFE0F</div>'
+            + '<h1 style="color:#ff0000;font-size:42px;margin:0 0 16px;text-transform:uppercase;letter-spacing:4px;">ACCESS DETECTED</h1>'
+            + '<p style="color:#ff4444;font-size:24px;margin:0 0 24px;font-weight:700;">Nice try FUCKERS!!!</p>'
+            + '<p style="color:#ff6b6b;font-size:20px;margin:0 0 8px;">GOT YA GOOD</p>'
+            + '<p style="color:#ff4444;font-size:18px;margin:0 0 40px;">AND YOU DON\'T EVEN KNOW HOW GOOD YOU\'RE GOT YET!!!</p>'
+            + '<div style="border:1px solid #333;padding:20px 40px;border-radius:8px;background:#111;">'
+            + '<p style="color:#888;font-size:13px;margin:0 0 8px;">\u{1F6E1}\uFE0F Proprietary System ? Danimal Data LLC</p>'
+            + '<p style="color:#666;font-size:12px;margin:0 0 8px;">Unauthorized access, copying, or reverse engineering is prohibited.</p>'
+            + '<p style="color:#555;font-size:11px;margin:0;">Session logged. IP recorded. Incident reported.</p>'
+            + '<p style="color:#ff4444;font-size:11px;margin:8px 0 0;font-family:monospace;">REF: ' + Math.random().toString(36).substr(2,10).toUpperCase() + '-' + Date.now().toString(36).toUpperCase() + '</p>'
+            + '</div>'
+            + '</div>'
+            + '<style>@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.02)}}</style>';
+        document.body.innerHTML = '';
+        document.body.appendChild(d);
+        
+        // Log the attempt
+        try {
+            fetch('/api/security/incident', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({type:'devtools',ts:Date.now(),ua:navigator.userAgent})
+            }).catch(function(){});
+        } catch(e){}
+    }
+
+    // Debugger trap
+    (function _loop(){
+        var s = Date.now();
+        debugger;
+        if(Date.now() - s > 100){ _caught(); }
+        setTimeout(_loop, 3000);
+    })();
+})();
+</script>

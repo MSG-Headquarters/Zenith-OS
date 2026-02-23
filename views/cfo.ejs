@@ -1,17 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="<%= typeof theme !== 'undefined' ? theme : 'light' %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CFO Dashboard | Zenith OS</title>
+    <title>CFO Dashboard | CRE OS</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/theme.css">
+    <script src="/js/theme.js"></script>
     <style>
         :root {
-            --bg-white: #FFFFFF; --bg-light: #F8FAFC; --bg-gray: #F1F5F9;
+            --bg-white: var(--bg-surface); --bg-light: var(--bg-page); --bg-gray: var(--bg-surface-alt);
             --accent-amber: #F59E0B; --accent-emerald: #10B981; --accent-cyan: #06B6D4;
             --accent-blue: #3B82F6; --accent-violet: #8B5CF6; --accent-rose: #F43F5E;
-            --text-primary: #1E293B; --text-secondary: #475569; --text-muted: #64748B;
-            --border: #E2E8F0;
+            --text-primary: var(--text-primary); --text-secondary: var(--text-secondary); --text-muted: var(--text-muted);
+            --border: var(--border);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-primary); min-height: 100vh; display: flex; }
@@ -61,6 +63,7 @@
         .amount-fee { font-size: 11px; color: var(--text-muted); }
         .chart-placeholder { height: 200px; background: var(--bg-gray); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
     </style>
+<%- include("partials/security") %>
 </head>
 <body>
     <aside class="sidebar">
@@ -81,11 +84,11 @@
             </div>
             <div class="nav-section">
                 <div class="nav-section-label">Navigate</div>
-                <a href="/dashboard" class="nav-item"><span>🏠</span> AXIS Home</a>
+                <a href="/dashboard" class="nav-item"><span>🏠</span> CRE Home</a>
                 <a href="/crm" class="nav-item"><span>📊</span> CRM</a>
             </div>
         </nav>
-        <div class="sidebar-footer"><a href="/dashboard" class="back-link">← Back to AXIS</a></div>
+        <div class="sidebar-footer"><a href="/dashboard" class="back-link">← Back to CRE Home</a></div>
     </aside>
 
     <main class="main-content">

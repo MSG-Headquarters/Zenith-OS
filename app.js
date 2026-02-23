@@ -291,7 +291,9 @@ app.use(loadPermissions(pool));
 // Make permissions available to all views
 app.use((req, res, next) => {
     res.locals.permissions = req.permissions || null;
-    res.locals.sidebarModules = req.permissions ? getSidebarModules(req.permissions) : [];
+    const allModules = req.permissions ? getSidebarModules(req.permissions) : [];
+    const ft = req.session.features || {};
+    res.locals.sidebarModules = allModules.filter(m => ft[m.slug] !== false);
     res.locals.hasModuleAccess = req.hasModuleAccess || (() => false);
     next();
     });
@@ -301,6 +303,12 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
     res.locals.org = req.session.org || null;
+    res.locals.theme = req.session.theme || 'light';
+    res.locals.features = req.session.features || {
+        crm: true, intel: true, marketing: true, huddle: true,
+        vault: true, cfo: true, danimal: true, inventory: true,
+        mailer: true, pm: true, command: true
+    };
     next();
 });
 
@@ -309,6 +317,26 @@ app.use('/system', adminRoutes(pool));
 app.use('/api/danimal', danimalApi);
 app.use('/api/intel', intelApi(pool));
 app.use('/api/marketing', marketingApi(pool));
+app.get('/marketing/files/:tenantId/:filename', (req, res) => {
+  const filePath = require('path').join(__dirname, 'marketing-output', req.params.tenantId, req.params.filename);
+  if (require('fs').existsSync(filePath)) {
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${req.params.filename}"`);
+    res.sendFile(filePath);
+  } else {
+    res.status(404).send('PDF not found — it may need to be regenerated.');
+  }
+});
+
+// Serve marketing photos
+app.get('/marketing/photos/:filename', (req, res) => {
+  const filePath = require('path').join(__dirname, 'marketing-output', 'photos', req.params.filename);
+  if (require('fs').existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).send('Photo not found');
+  }
+});
 registerIntelAIRoutes(app, pool);
 const adminApiRoutes = require('./routes/admin-api');
 app.use('/api/admin', adminApiRoutes);
@@ -372,7 +400,7 @@ app.post('/settings/password', async (req, res) => {
 // ============================================
 async function checkLicense(req, res, next) {
     // Skip license check for public routes
-    const publicRoutes = ['/auth/login', '/auth/logout', '/auth/under-review', '/lockout', '/health', '/api/leads/capture'];
+    const publicRoutes = ['/auth/login', '/auth/logout', '/auth/activate', '/auth/under-review', '/lockout', '/health', '/api/leads/capture'];
     if (publicRoutes.some(route => req.path.startsWith(route))) {
         return next();
     }
@@ -514,9 +542,9 @@ app.post('/auth/activate', async (req, res) => {
             UPDATE users 
             SET password_hash = $1, 
                 status = 'active', 
-                activated_at = NOW(),
-                license_key = NULL,
-                license_expires = NULL
+                license_status = 'active',
+                license_activated_at = NOW(),
+                password_set = true
             WHERE id = $2
         `, [hashedPassword, user.id]);
         
@@ -654,10 +682,19 @@ app.post('/auth/login', async (req, res) => {
             status: user.status || 'active'
         };
         req.session.org = org;
-        
+        // Load feature toggles
+        try {
+            const ftResult = await pool.query('SELECT feature_toggles FROM organizations WHERE id = $1', [org.id]);
+            const orgFeatures = ftResult.rows[0]?.feature_toggles || {};
+            const userOverrides = user.feature_overrides || {};
+            const merged = { ...orgFeatures };
+            for (const key of Object.keys(userOverrides)) {
+                if (userOverrides[key] !== null) merged[key] = userOverrides[key];
+            }
+            req.session.features = merged;
+        } catch (e) { req.session.features = {}; }
         // Update last login
         await pool.query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]);
-        
         res.redirect('/dashboard');
         
     } catch (err) {
@@ -1936,20 +1973,216 @@ app.get('/admin/roles', async (req, res) => {
 app.get('/admin/users', async (req, res) => {
     if (!req.session.user) return res.redirect('/auth/login');
     try {
-        const users = await pool.query('SELECT * FROM users WHERE org_id = $1 ORDER BY name', [req.session.org?.id]);
-        res.render('admin/users', { user: req.session.user, org: req.session.org, activeTab: 'users', users: users.rows });
+        const users = await pool.query('SELECT * FROM users WHERE organization_id = $1 ORDER BY name', [req.session.org?.id]);
+        const roles = [
+            { id: 'Super Admin', name: 'Super Admin' },
+            { id: 'Admin', name: 'Admin' },
+            { id: 'Principal', name: 'Principal' },
+            { id: 'Broker', name: 'Broker' },
+            { id: 'Associate', name: 'Associate' },
+            { id: 'Marketing', name: 'Marketing' },
+            { id: 'Agent', name: 'Agent' },
+            { id: 'User', name: 'User' }
+        ];
+        res.render('admin/users', { user: req.session.user, org: req.session.org, activeTab: 'users', users: users.rows, roles });
     } catch (err) {
         console.error('[ADMIN] Users error:', err);
-        res.render('admin/users', { user: req.session.user, org: req.session.org, activeTab: 'users', users: [] });
+        res.render('admin/users', { user: req.session.user, org: req.session.org, activeTab: 'users', users: [], roles: [] });
     }
 });
 
 app.get('/admin/audit', async (req, res) => {
     if (!req.session.user) return res.redirect('/auth/login');
-    res.render('admin/audit', { user: req.session.user, org: req.session.org, activeTab: 'audit' });
+    try {
+        const users = await pool.query('SELECT id, name FROM users WHERE organization_id = $1 ORDER BY name', [req.session.org?.id]);
+        res.render('admin/audit', { user: req.session.user, org: req.session.org, activeTab: 'audit', users: users.rows });
+    } catch (err) {
+        console.error('[ADMIN] Audit error:', err);
+        res.render('admin/audit', { user: req.session.user, org: req.session.org, activeTab: 'audit', users: [] });
+    }
+});
+
+// ── Feature Toggles ─────────────────────────────────────────
+app.get('/admin/features', async (req, res) => {
+    if (!req.session.user) return res.redirect('/auth/login');
+    if (!['Admin', 'Principal', 'Super Admin'].includes(req.session.user.role)) return res.redirect('/dashboard');
+    try {
+        const orgResult = await pool.query('SELECT feature_toggles FROM organizations WHERE id = $1', [req.session.org?.id]);
+        const features = orgResult.rows[0]?.feature_toggles || {};
+        res.render('admin/features', { user: req.session.user, org: req.session.org, activeTab: 'features', features });
+    } catch (err) {
+        console.error('[ADMIN] Features error:', err);
+        res.render('admin/features', { user: req.session.user, org: req.session.org, activeTab: 'features', features: {} });
+    }
+});
+
+app.post('/admin/features', async (req, res) => {
+    if (!req.session.user) return res.redirect('/auth/login');
+    if (!['Admin', 'Principal', 'Super Admin'].includes(req.session.user.role)) return res.redirect('/dashboard');
+    try {
+        const modules = ['crm', 'intel', 'marketing', 'huddle', 'vault', 'cfo', 'danimal', 'inventory', 'mailer', 'pm', 'command'];
+        const toggles = {};
+        modules.forEach(m => { toggles[m] = req.body[m] === 'on'; });
+        await pool.query('UPDATE organizations SET feature_toggles = $1 WHERE id = $2', [JSON.stringify(toggles), req.session.org?.id]);
+        req.session.features = toggles;
+        res.redirect('/admin/features?success=Feature settings updated');
+    } catch (err) {
+        console.error('[ADMIN] Features save error:', err);
+        res.redirect('/admin/features?error=Failed to save settings');
+    }
 });
 
 
+// ============================================
+// SYSTEM API - USER MANAGEMENT
+// ============================================
+
+// POST - Create new user
+app.post('/system/api/users', async (req, res) => {
+    try {
+        const orgId = req.session.org?.id;
+        if (!orgId) return res.json({ success: false, error: 'Not authenticated' });
+
+        const { name, email, role_id, password } = req.body;
+        if (!name || !email) return res.json({ success: false, error: 'Name and email are required' });
+
+        // Check for duplicate email
+        const existing = await pool.query('SELECT id FROM users WHERE LOWER(email) = LOWER($1)', [email]);
+        if (existing.rows.length > 0) return res.json({ success: false, error: 'Email already exists' });
+
+        // Generate license key: ZENO-XXXX-2026-ROLE
+        const code = name.split(' ').map(n => n.substring(0, 2).toUpperCase()).join('').substring(0, 4);
+        const roleLookup = await pool.query('SELECT name FROM roles WHERE id = $1', [role_id]);
+        const roleName = roleLookup.rows[0]?.name || 'User';
+        const roleCode = roleName.substring(0, 5).toUpperCase().replace(/\s/g, '');
+        const licenseKey = 'ZENO-' + code + '-2026-' + roleCode;
+
+        // If password provided, hash it and set active; otherwise pending activation
+        let passwordHash = 'PENDING_ACTIVATION';
+        let status = 'pending';
+        if (password && password.trim()) {
+            const bcrypt = require('bcryptjs');
+            passwordHash = await bcrypt.hash(password, 10);
+            status = 'active';
+        }
+
+        const result = await pool.query(`
+            INSERT INTO users (organization_id, name, email, password_hash, role, status, license_key, license_status, license_issued_at, license_issued_by)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, 'issued', NOW(), $8)
+            RETURNING id, name, email, role, license_key, status
+        `, [orgId, name, email, passwordHash, roleName, status, licenseKey, req.session.user?.name || 'Admin']);
+
+        const newUser = result.rows[0];
+        const activationLink = 'https://zenith.cre-us.com/auth/activate?email=' + encodeURIComponent(email);
+
+        console.log(`[ADMIN] User created: ${email} by ${req.session.user?.email}`);
+
+        res.json({
+            success: true,
+            user: newUser,
+            license_key: licenseKey,
+            activation_link: status === 'pending' ? activationLink : null
+        });
+    } catch (err) {
+        console.error('[ADMIN] Create user error:', err);
+        res.json({ success: false, error: 'Failed to create user' });
+    }
+});
+
+// PUT - Update existing user
+app.put('/system/api/users/:id', async (req, res) => {
+    try {
+        const orgId = req.session.org?.id;
+        if (!orgId) return res.json({ success: false, error: 'Not authenticated' });
+
+        const { name, email, role_id, password, feature_overrides } = req.body;
+        const userId = req.params.id;
+
+        // Save feature overrides if provided
+        if (feature_overrides && typeof feature_overrides === 'object') {
+            await pool.query('UPDATE users SET feature_overrides = $1 WHERE id = $2 AND organization_id = $3',
+                [JSON.stringify(feature_overrides), userId, orgId]);
+        }
+
+        const roleLookup = await pool.query('SELECT name FROM roles WHERE id = $1', [role_id]);
+        const roleName = roleLookup.rows[0]?.name || 'User';
+
+        if (password && password.trim()) {
+            const bcrypt = require('bcryptjs');
+            const hash = await bcrypt.hash(password, 10);
+            await pool.query(
+                'UPDATE users SET name = $1, email = $2, role = $3, password_hash = $4 WHERE id = $5 AND organization_id = $6',
+                [name, email, roleName, hash, userId, orgId]
+            );
+        } else {
+            await pool.query(
+                'UPDATE users SET name = $1, email = $2, role = $3 WHERE id = $4 AND organization_id = $5',
+                [name, email, roleName, userId, orgId]
+            );
+        }
+
+        console.log(`[ADMIN] User updated: ${email} by ${req.session.user?.email}`);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('[ADMIN] Update user error:', err);
+        res.json({ success: false, error: 'Failed to update user' });
+    }
+});
+
+// GET - Single user for edit modal
+app.get('/system/api/users/:id', async (req, res) => {
+    try {
+        const orgId = req.session.org?.id;
+        const result = await pool.query(
+            'SELECT id, name, email, role, status, license_key, feature_overrides FROM users WHERE id = $1 AND organization_id = $2',
+            [req.params.id, orgId]
+        );
+        if (result.rows.length === 0) return res.json({ success: false, error: 'User not found' });
+        res.json({ success: true, user: result.rows[0] });
+    } catch (err) {
+        res.json({ success: false, error: 'Failed to load user' });
+    }
+});
+
+// PUT - Update user status (freeze/terminate/activate)
+app.put('/system/api/users/:id/status', async (req, res) => {
+    try {
+        const orgId = req.session.org?.id;
+        if (!orgId) return res.json({ success: false, error: 'Not authenticated' });
+
+        const { status, reason } = req.body;
+        const userId = req.params.id;
+
+        // Don't let users terminate themselves
+        if (parseInt(userId) === req.session.user?.id && (status === 'terminated' || status === 'under_review')) {
+            return res.json({ success: false, error: 'Cannot change your own status' });
+        }
+
+        await pool.query(`
+            UPDATE users SET status = $1, status_reason = $2, status_changed_by = $3, status_changed_at = NOW()
+            WHERE id = $4 AND organization_id = $5
+        `, [status, reason || null, req.session.user?.name || 'Admin', userId, orgId]);
+
+        console.log(`[ADMIN] User ${userId} status -> ${status} by ${req.session.user?.email}`);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('[ADMIN] Status update error:', err);
+        res.json({ success: false, error: 'Failed to update status' });
+    }
+});
+
+
+// Theme preference API
+app.post('/api/user/theme', async (req, res) => {
+    try {
+        if (!req.session.user) return res.json({ success: false });
+        const theme = req.body.theme === 'dark' ? 'dark' : 'light';
+        req.session.theme = theme;
+        res.json({ success: true, theme });
+    } catch (err) {
+        res.json({ success: false });
+    }
+});
 
 // Super Admin (MSG only)
 app.get('/superadmin', async (req, res) => {
@@ -2071,6 +2304,126 @@ app.post('/api/crm/leads', async (req, res) => {
     }
 });
 
+// Danimal Data address autocomplete
+app.get('/api/danimal/address-search', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: 'Not authenticated' });
+    try {
+        const { q } = req.query;
+        if (!q || q.length < 3) return res.json({ results: [] });
+
+        const searchTerm = q.trim();
+        const result = await pool.query(
+            "SELECT DISTINCT site_address, site_city, site_zip, parcel_id, property_use_desc, building_sf, year_built FROM danimal_properties WHERE UPPER(site_address) LIKE $1 ORDER BY site_address LIMIT 8",
+            [searchTerm + '%']
+        );
+
+        res.json({
+            results: result.rows.map(r => ({
+                address: r.site_address,
+                city: r.site_city,
+                zip: r.site_zip,
+                parcel_id: r.parcel_id,
+                type: r.property_use_desc,
+                sqft: r.building_sf ? parseFloat(r.building_sf) : null,
+                year: r.year_built
+            }))
+        });
+    } catch (err) {
+        console.error('[Danimal Search] Error:', err);
+        res.json({ results: [] });
+    }
+});
+
+// Danimal Data property lookup (auto-populate from address)
+app.get('/api/danimal/property-lookup', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: 'Not authenticated' });
+    try {
+        const { address, city, zip } = req.query;
+        if (!address || address.length < 5) return res.json({ found: false });
+
+        const searchAddr = address.toUpperCase().trim();
+        let result;
+
+        // Try exact address match first
+        result = await pool.query(
+            "SELECT * FROM danimal_properties WHERE UPPER(site_address) = $1 LIMIT 5",
+            [searchAddr]
+        );
+
+        // If no exact match, try LIKE search
+        if (result.rows.length === 0) {
+            result = await pool.query(
+                "SELECT * FROM danimal_properties WHERE UPPER(site_address) LIKE $1 LIMIT 5",
+                ['%' + searchAddr + '%']
+            );
+        }
+
+        // Filter by city/zip if provided
+        let matches = result.rows;
+        if (city && matches.length > 1) {
+            const filtered = matches.filter(m => m.site_city && m.site_city.toUpperCase() === city.toUpperCase());
+            if (filtered.length > 0) matches = filtered;
+        }
+        if (zip && matches.length > 1) {
+            const filtered = matches.filter(m => m.site_zip === zip);
+            if (filtered.length > 0) matches = filtered;
+        }
+
+        if (matches.length === 0) return res.json({ found: false });
+
+        // Return the best match with all useful fields
+        const p = matches[0];
+        res.json({
+            found: true,
+            count: matches.length,
+            property: {
+                parcel_id: p.parcel_id || p.strap,
+                strap: p.strap,
+                address: p.site_address,
+                city: p.site_city,
+                state: p.site_state || 'FL',
+                zip: p.site_zip,
+                county: p.county,
+                lat: p.latitude,
+                lng: p.longitude,
+                property_type: p.property_use_desc,
+                property_use_code: p.property_use_code,
+                zoning: p.zoning,
+                building_sf: p.building_sf ? parseFloat(p.building_sf) : null,
+                lot_size_sf: p.land_area_sf ? parseFloat(p.land_area_sf) : null,
+                lot_size_acres: p.land_area_acres ? parseFloat(p.land_area_acres) : null,
+                year_built: p.year_built,
+                num_buildings: p.num_buildings,
+                num_units: p.num_units,
+                just_value: p.just_value ? parseFloat(p.just_value) : null,
+                assessed_value: p.assessed_value ? parseFloat(p.assessed_value) : null,
+                taxable_value: p.taxable_value ? parseFloat(p.taxable_value) : null,
+                land_value: p.land_value ? parseFloat(p.land_value) : null,
+                building_value: p.building_value ? parseFloat(p.building_value) : null,
+                owner_name: p.owner_name,
+                owner_name_2: p.owner_name_2,
+                owner_address: p.owner_address,
+                owner_city: p.owner_city,
+                owner_state: p.owner_state,
+                owner_zip: p.owner_zip,
+                last_sale_date: p.last_sale_date,
+                last_sale_price: p.last_sale_price ? parseFloat(p.last_sale_price) : null,
+                legal_description: p.legal_description,
+                subdivision: p.subdivision
+            },
+            all_matches: matches.length > 1 ? matches.map(m => ({
+                address: m.site_address,
+                city: m.site_city,
+                zip: m.site_zip,
+                parcel_id: m.parcel_id
+            })) : undefined
+        });
+    } catch (err) {
+        console.error('[Danimal Lookup] Error:', err);
+        res.status(500).json({ found: false, error: err.message });
+    }
+});
+
 // Update lead stage (for drag-and-drop)
 app.put('/api/leads/:id/stage', async (req, res) => {
     try {
@@ -2092,10 +2445,48 @@ app.put('/api/leads/:id/stage', async (req, res) => {
             return res.status(404).json({ success: false, error: 'Lead not found' });
         }
         
+        // Marketing Suite: Auto-create draft when lead moves to Closed Won
+        if (stage === 'Closed Won' && result.rows[0]) {
+            try {
+                const lead = result.rows[0];
+                const webhookPayload = {
+                    event: 'listing_won',
+                    listing_id: parseInt(id),
+                    tenant_id: orgId,
+                    data: {
+                        listing: {
+                            property_name: lead.company || lead.name,
+                            address: lead.property_address || '',
+                            city: lead.property_city || '',
+                            state: lead.property_state || 'FL',
+                            listing_type: lead.property_type || 'for_sale',
+                            broker: 'CRE Consultants',
+                            photo_count: 1
+                        },
+                        actor_id: req.session?.user?.id || null
+                    }
+                };
+                const http = require('http');
+                const postData = JSON.stringify(webhookPayload);
+                const webhookReq = http.request({
+                    hostname: 'localhost',
+                    port: process.env.PORT || 8080,
+                    path: '/api/marketing/webhook/crm',
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(postData) }
+                });
+                webhookReq.on('error', (e) => console.error('[Marketing] Webhook error:', e.message));
+                webhookReq.write(postData);
+                webhookReq.end();
+                console.log('[Marketing] Webhook fired for lead ' + id + ' → Closed Won');
+            } catch (webhookErr) {
+                console.error('[Marketing] Webhook failed:', webhookErr.message);
+            }
+        }
+
         res.json({ success: true, lead: result.rows[0] });
     } catch (err) {
         console.error('Update lead stage error:', err);
-        res.status(500).json({ success: false, error: err.message });
     }
 });
 
@@ -2192,6 +2583,14 @@ app.post('/api/leads', async (req, res) => {
         console.error('Create lead error:', err);
         res.status(500).json({ success: false, error: err.message });
     }
+});
+
+// ============================================
+// MARKETING SUITE VIEW
+// ============================================
+app.get('/marketing', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+    res.render('marketing');
 });
 
 // ============================================
@@ -3018,6 +3417,120 @@ app.get('/api/flyer-generator/flyers', (req, res) => {
 
 // Serve generated flyers
 app.use('/flyer-outputs', express.static(path.join(__dirname, 'modules', 'flyer-generator', 'output')));
+
+// ============================================
+// IDML GENERATOR (InDesign Export)
+// ============================================
+let IDMLGenerator;
+try {
+    IDMLGenerator = require('./modules/idml-generator/idml-generator');
+    console.log('[IDML] Generator module loaded');
+} catch (e) {
+    console.warn('[IDML] Generator module not available:', e.message);
+}
+
+app.post('/api/idml/generate/:leadId', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: 'Not authenticated' });
+    if (!IDMLGenerator) return res.status(500).json({ error: 'IDML generator not available' });
+    try {
+        const orgId = req.session.org?.id;
+        const leadResult = await pool.query('SELECT * FROM leads WHERE id = $1 AND organization_id = $2', [req.params.leadId, orgId]);
+        if (leadResult.rows.length === 0) return res.status(404).json({ error: 'Lead not found' });
+        const lead = leadResult.rows[0];
+
+        // Get broker info from assigned user or session user
+        let broker = { name: req.session.user.name, email: req.session.user.email };
+        if (lead.assigned_to) {
+            const brokerResult = await pool.query('SELECT name, email FROM users WHERE id = $1', [lead.assigned_to]);
+            if (brokerResult.rows.length > 0) broker = brokerResult.rows[0];
+        }
+
+        // Get photos if they exist
+        let photoResult = { rows: [] };
+        try {
+            photoResult = await pool.query('SELECT processed_url, original_url FROM marketing_photos WHERE listing_id = $1 ORDER BY sort_order', [lead.id]);
+        } catch(e) { console.log('[IDML] No photos or error:', e.message); }
+        const photos = photoResult.rows.map(p => path.join(__dirname, p.processed_url || p.original_url || '')).filter(p => p && fs.existsSync(p));
+
+        // Ensure output dir exists
+        const idmlOutputDir = path.join(__dirname, 'modules', 'idml-generator', 'output');
+        if (!fs.existsSync(idmlOutputDir)) fs.mkdirSync(idmlOutputDir, { recursive: true });
+
+        const generator = new IDMLGenerator({
+            outputDir: path.join(__dirname, 'modules', 'idml-generator', 'output')
+        });
+        const result = await generator.generate(lead, photos, broker);
+
+        console.log('[IDML] Generated for lead ' + lead.id + ': ' + result.filename);
+        res.json({ success: true, filename: result.filename, path: '/idml-outputs/' + result.filename });
+    } catch (err) {
+        console.error('[IDML] Generation error:', err);
+        res.status(500).json({ error: 'Failed to generate IDML: ' + err.message });
+    }
+});
+
+app.get('/api/idml/download/:filename', (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: 'Not authenticated' });
+    const filePath = path.join(__dirname, 'modules', 'idml-generator', 'output', req.params.filename);
+    if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'File not found' });
+    res.download(filePath);
+});
+
+app.use('/idml-outputs', express.static(path.join(__dirname, 'modules', 'idml-generator', 'output')));
+
+// ============================================
+// DOCUMENT GENERATOR (LOI & Listing Agreements)
+// ============================================
+let DocumentGenerator;
+try {
+    DocumentGenerator = require('./modules/doc-generator/loi-generator');
+    const docOutputDir = path.join(__dirname, 'modules', 'doc-generator', 'output');
+    if (!fs.existsSync(docOutputDir)) fs.mkdirSync(docOutputDir, { recursive: true });
+    console.log('[DOC] Document generator loaded');
+} catch (e) {
+    console.warn('[DOC] Document generator not available:', e.message);
+}
+
+app.post('/api/docs/generate/:leadId', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: 'Not authenticated' });
+    if (!DocumentGenerator) return res.status(500).json({ error: 'Document generator not available' });
+    try {
+        const { type } = req.body; // 'loi' or 'listing_agreement'
+        const orgId = req.session.org?.id;
+        const leadResult = await pool.query('SELECT * FROM leads WHERE id = $1 AND organization_id = $2', [req.params.leadId, orgId]);
+        if (leadResult.rows.length === 0) return res.status(404).json({ error: 'Lead not found' });
+        const lead = leadResult.rows[0];
+
+        let broker = { name: req.session.user.name, email: req.session.user.email };
+        if (lead.assigned_to) {
+            const brokerResult = await pool.query('SELECT name, email FROM users WHERE id = $1', [lead.assigned_to]);
+            if (brokerResult.rows.length > 0) broker = brokerResult.rows[0];
+        }
+
+        const generator = new DocumentGenerator({
+            outputDir: path.join(__dirname, 'modules', 'doc-generator', 'output')
+        });
+
+        let result;
+        if (type === 'listing_agreement') {
+            result = await generator.generateListingAgreement(lead, broker);
+        } else {
+            result = await generator.generateLOI(lead, broker);
+        }
+
+        res.json({ success: true, filename: result.filename, download: '/api/docs/download/' + result.filename });
+    } catch (err) {
+        console.error('[DOC] Generation error:', err);
+        res.status(500).json({ error: 'Failed to generate document: ' + err.message });
+    }
+});
+
+app.get('/api/docs/download/:filename', (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: 'Not authenticated' });
+    const filePath = path.join(__dirname, 'modules', 'doc-generator', 'output', req.params.filename);
+    if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'File not found' });
+    res.download(filePath);
+});
 app.use('/intel/exports', express.static(path.join(__dirname, 'public', 'intel', 'exports')));
 // ============================================
 // START SERVER

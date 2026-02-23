@@ -1,0 +1,1027 @@
+/* ============================================
+   ZENITH OS - UNIFIED THEME SYSTEM v1.0
+   Light mode default, dark mode toggle
+   ============================================ */
+
+/* ---- LIGHT MODE (DEFAULT) ---- */
+:root, [data-theme="light"] {
+    /* Backgrounds */
+    --bg-page: #F8FAFC;
+    --bg-surface: #FFFFFF;
+    --bg-surface-hover: #F1F5F9;
+    --bg-surface-alt: #F1F5F9;
+    --bg-sidebar: #FFFFFF;
+    --bg-input: #FFFFFF;
+    --bg-modal-overlay: rgba(15, 23, 42, 0.5);
+    --bg-code: #F1F5F9;
+    --bg-tooltip: #1E293B;
+
+    /* Text */
+    --text-primary: #1E293B;
+    --text-secondary: #475569;
+    --text-muted: #64748B;
+    --text-inverse: #FFFFFF;
+    --text-link: #3B82F6;
+    --text-on-accent: #FFFFFF;
+
+    /* Borders */
+    --border: #E2E8F0;
+    --border-strong: #CBD5E1;
+    --border-input: #CBD5E1;
+    --border-focus: #10B981;
+
+    /* Accent Colors */
+    --accent-emerald: #10B981;
+    --accent-emerald-hover: #059669;
+    --accent-emerald-subtle: rgba(16, 185, 129, 0.08);
+    --accent-cyan: #06B6D4;
+    --accent-blue: #3B82F6;
+    --accent-blue-subtle: rgba(59, 130, 246, 0.08);
+    --accent-violet: #8B5CF6;
+    --accent-amber: #F59E0B;
+    --accent-amber-subtle: rgba(245, 158, 11, 0.08);
+    --accent-rose: #F43F5E;
+    --accent-rose-subtle: rgba(244, 63, 94, 0.08);
+
+    /* Status */
+    --status-active: #10B981;
+    --status-active-bg: rgba(16, 185, 129, 0.1);
+    --status-pending: #F59E0B;
+    --status-pending-bg: rgba(245, 158, 11, 0.1);
+    --status-danger: #EF4444;
+    --status-danger-bg: rgba(239, 68, 68, 0.1);
+    --status-info: #3B82F6;
+    --status-info-bg: rgba(59, 130, 246, 0.1);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
+
+    /* Sidebar */
+    --sidebar-bg: #FFFFFF;
+    --sidebar-text: #475569;
+    --sidebar-text-active: #10B981;
+    --sidebar-hover: #F1F5F9;
+    --sidebar-active-bg: rgba(16, 185, 129, 0.08);
+    --sidebar-border: #E2E8F0;
+    --sidebar-section: #94A3B8;
+
+    /* Cards */
+    --card-bg: #FFFFFF;
+    --card-border: #E2E8F0;
+    --card-header-bg: transparent;
+
+    /* Tables */
+    --table-header-bg: #F8FAFC;
+    --table-header-text: #64748B;
+    --table-row-hover: #F8FAFC;
+    --table-border: #E2E8F0;
+
+    /* Modal */
+    --modal-bg: #FFFFFF;
+    --modal-header-bg: #F8FAFC;
+    --modal-border: #E2E8F0;
+
+    /* Scrollbar */
+    --scrollbar-track: #F1F5F9;
+    --scrollbar-thumb: #CBD5E1;
+    --scrollbar-thumb-hover: #94A3B8;
+}
+
+/* ---- DARK MODE ---- */
+[data-theme="dark"] {
+    /* Backgrounds */
+    --bg-page: #0B0F19;
+    --bg-surface: #111827;
+    --bg-surface-hover: #1F2937;
+    --bg-surface-alt: #1a2332;
+    --bg-sidebar: #111827;
+    --bg-input: #1F2937;
+    --bg-modal-overlay: rgba(0, 0, 0, 0.7);
+    --bg-code: #1F2937;
+    --bg-tooltip: #F8FAFC;
+
+    /* Text */
+    --text-primary: #F1F5F9;
+    --text-secondary: #CBD5E1;
+    --text-muted: #94A3B8;
+    --text-inverse: #0B0F19;
+    --text-link: #60A5FA;
+    --text-on-accent: #FFFFFF;
+
+    /* Borders */
+    --border: #1F2937;
+    --border-strong: #374151;
+    --border-input: #374151;
+    --border-focus: #10B981;
+
+    /* Accent Colors (same accents, adjusted subtles) */
+    --accent-emerald: #10B981;
+    --accent-emerald-hover: #34D399;
+    --accent-emerald-subtle: rgba(16, 185, 129, 0.12);
+    --accent-cyan: #22D3EE;
+    --accent-blue: #60A5FA;
+    --accent-blue-subtle: rgba(96, 165, 250, 0.12);
+    --accent-violet: #A78BFA;
+    --accent-amber: #FBBF24;
+    --accent-amber-subtle: rgba(251, 191, 36, 0.12);
+    --accent-rose: #FB7185;
+    --accent-rose-subtle: rgba(251, 113, 133, 0.12);
+
+    /* Status */
+    --status-active: #34D399;
+    --status-active-bg: rgba(52, 211, 153, 0.15);
+    --status-pending: #FBBF24;
+    --status-pending-bg: rgba(251, 191, 36, 0.15);
+    --status-danger: #FB7185;
+    --status-danger-bg: rgba(251, 113, 133, 0.15);
+    --status-info: #60A5FA;
+    --status-info-bg: rgba(96, 165, 250, 0.15);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+
+    /* Sidebar */
+    --sidebar-bg: #111827;
+    --sidebar-text: #94A3B8;
+    --sidebar-text-active: #10B981;
+    --sidebar-hover: rgba(255, 255, 255, 0.04);
+    --sidebar-active-bg: rgba(16, 185, 129, 0.12);
+    --sidebar-border: #1F2937;
+    --sidebar-section: #64748B;
+
+    /* Cards */
+    --card-bg: #111827;
+    --card-border: #1F2937;
+    --card-header-bg: rgba(255, 255, 255, 0.02);
+
+    /* Tables */
+    --table-header-bg: #0B0F19;
+    --table-header-text: #94A3B8;
+    --table-row-hover: rgba(255, 255, 255, 0.03);
+    --table-border: #1F2937;
+
+    /* Modal */
+    --modal-bg: #1F2937;
+    --modal-header-bg: #111827;
+    --modal-border: #374151;
+
+    /* Scrollbar */
+    --scrollbar-track: #111827;
+    --scrollbar-thumb: #374151;
+    --scrollbar-thumb-hover: #4B5563;
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+a { color: var(--text-link); text-decoration: none; }
+a:hover { opacity: 0.85; }
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+
+/* ============================================
+   SIDEBAR
+   ============================================ */
+.z-sidebar {
+    width: 240px;
+    background: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--sidebar-border);
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    transition: background-color 0.3s ease;
+}
+
+.z-sidebar .logo {
+    padding: 20px 16px;
+    border-bottom: 1px solid var(--sidebar-border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.z-sidebar .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--accent-emerald), var(--accent-cyan));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 800;
+    color: white;
+}
+
+.z-sidebar .logo-text {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.z-sidebar .nav-section {
+    padding: 16px 12px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--sidebar-section);
+}
+
+.z-sidebar .nav-items {
+    padding: 4px 8px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.z-sidebar .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: var(--sidebar-text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    margin-bottom: 2px;
+}
+
+.z-sidebar .nav-item:hover {
+    background: var(--sidebar-hover);
+    color: var(--text-primary);
+}
+
+.z-sidebar .nav-item.active {
+    background: var(--sidebar-active-bg);
+    color: var(--sidebar-text-active);
+    border-left-color: var(--sidebar-text-active);
+}
+
+.z-sidebar .nav-item i {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.z-sidebar .sidebar-footer {
+    padding: 12px;
+    border-top: 1px solid var(--sidebar-border);
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+.z-main {
+    margin-left: 240px;
+    padding: 24px 32px;
+    min-height: 100vh;
+}
+
+.z-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.z-page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.z-page-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ============================================
+   CARDS
+   ============================================ */
+.z-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.z-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.z-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.z-card-body {
+    padding: 20px;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.z-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.z-btn-primary {
+    background: var(--accent-emerald);
+    color: var(--text-on-accent);
+}
+.z-btn-primary:hover { background: var(--accent-emerald-hover); }
+
+.z-btn-secondary {
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+.z-btn-secondary:hover { background: var(--bg-surface-hover); }
+
+.z-btn-danger {
+    background: var(--status-danger);
+    color: white;
+}
+.z-btn-danger:hover { opacity: 0.9; }
+
+.z-btn-warning {
+    background: var(--status-pending);
+    color: white;
+}
+
+.z-btn-sm {
+    padding: 6px 14px;
+    font-size: 12px;
+    border-radius: 6px;
+}
+
+/* ============================================
+   TABLES
+   ============================================ */
+.z-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.z-table th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--table-header-text);
+    background: var(--table-header-bg);
+    border-bottom: 1px solid var(--table-border);
+    font-weight: 600;
+}
+
+.z-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--table-border);
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.z-table tr:hover td {
+    background: var(--table-row-hover);
+}
+
+/* ============================================
+   FORMS
+   ============================================ */
+.z-form-group {
+    margin-bottom: 16px;
+}
+
+.z-form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.z-form-input, .z-form-select, .z-form-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border-input);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    transition: border-color 0.15s;
+}
+
+.z-form-input:focus, .z-form-select:focus, .z-form-textarea:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--accent-emerald-subtle);
+}
+
+/* ============================================
+   MODAL
+   ============================================ */
+.z-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--bg-modal-overlay);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.z-modal-overlay.active {
+    display: flex;
+}
+
+.z-modal {
+    background: var(--modal-bg);
+    border: 1px solid var(--modal-border);
+    border-radius: 16px;
+    width: 480px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+}
+
+.z-modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--modal-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.z-modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.z-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+.z-modal-close:hover { color: var(--text-primary); }
+
+.z-modal-body {
+    padding: 24px;
+}
+
+.z-modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--modal-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* ============================================
+   STATUS BADGES
+   ============================================ */
+.z-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.z-badge-active {
+    background: var(--status-active-bg);
+    color: var(--status-active);
+}
+
+.z-badge-pending {
+    background: var(--status-pending-bg);
+    color: var(--status-pending);
+}
+
+.z-badge-danger {
+    background: var(--status-danger-bg);
+    color: var(--status-danger);
+}
+
+.z-badge-info {
+    background: var(--status-info-bg);
+    color: var(--status-info);
+}
+
+/* ============================================
+   KPI CARDS
+   ============================================ */
+.z-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.z-kpi {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.z-kpi::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--kpi-accent, var(--accent-emerald));
+}
+
+.z-kpi-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.z-kpi-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* ============================================
+   TABS
+   ============================================ */
+.z-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+}
+
+.z-tab {
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+}
+
+.z-tab:hover { color: var(--text-primary); }
+
+.z-tab.active {
+    color: var(--accent-emerald);
+    border-bottom-color: var(--accent-emerald);
+}
+
+/* ============================================
+   USER AVATAR
+   ============================================ */
+.z-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-emerald), var(--accent-cyan));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.z-avatar-sm { width: 28px; height: 28px; font-size: 11px; }
+.z-avatar-lg { width: 48px; height: 48px; font-size: 18px; }
+
+/* ============================================
+   THEME TOGGLE
+   ============================================ */
+.z-theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.z-theme-switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: var(--border-strong);
+    border-radius: 12px;
+    transition: background 0.3s;
+    cursor: pointer;
+}
+
+.z-theme-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+[data-theme="dark"] .z-theme-switch {
+    background: var(--accent-emerald);
+}
+
+[data-theme="dark"] .z-theme-switch::after {
+    transform: translateX(20px);
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.z-empty {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-muted);
+}
+
+.z-empty i {
+    font-size: 48px;
+    margin-bottom: 12px;
+    display: block;
+    opacity: 0.4;
+}
+
+.z-empty p {
+    font-size: 14px;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+.z-flex { display: flex; }
+.z-flex-center { align-items: center; }
+.z-flex-between { justify-content: space-between; }
+.z-gap-8 { gap: 8px; }
+.z-gap-12 { gap: 12px; }
+.z-gap-16 { gap: 16px; }
+.z-mt-16 { margin-top: 16px; }
+.z-mt-24 { margin-top: 24px; }
+.z-mb-16 { margin-bottom: 16px; }
+.z-mb-24 { margin-bottom: 24px; }
+.z-text-muted { color: var(--text-muted); }
+.z-text-sm { font-size: 13px; }
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .z-sidebar { display: none; }
+    .z-main { margin-left: 0; padding: 16px; }
+    .z-kpi-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ============================================
+   GLOBAL OVERRIDES - Forces theme on legacy views
+   These use !important to override inline styles
+   Remove as views are migrated to use var() natively
+   ============================================ */
+body {
+    background: var(--bg-page) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Sidebar overrides */
+.sidebar, [class*="sidebar"] {
+    background: var(--sidebar-bg) !important;
+    border-color: var(--sidebar-border) !important;
+}
+
+.sidebar a, .sidebar .nav-item, [class*="sidebar"] a {
+    color: var(--sidebar-text) !important;
+}
+
+.sidebar a:hover, .sidebar .nav-item:hover, [class*="sidebar"] a:hover {
+    background: var(--sidebar-hover) !important;
+    color: var(--text-primary) !important;
+}
+
+.sidebar .nav-item.active, [class*="sidebar"] .active {
+    background: var(--sidebar-active-bg) !important;
+    color: var(--sidebar-text-active) !important;
+}
+
+.sidebar .section-label, .sidebar .nav-section, [class*="sidebar"] .section-label {
+    color: var(--sidebar-section) !important;
+}
+
+/* Card overrides */
+.card, .stat-card, .kpi-card, [class*="card"] {
+    background: var(--card-bg) !important;
+    border-color: var(--card-border) !important;
+}
+
+.card-header, [class*="card-header"] {
+    border-color: var(--card-border) !important;
+}
+
+/* Table overrides */
+table th {
+    background: var(--table-header-bg) !important;
+    color: var(--table-header-text) !important;
+    border-color: var(--table-border) !important;
+}
+
+table td {
+    border-color: var(--table-border) !important;
+    color: var(--text-primary) !important;
+}
+
+table tr:hover td {
+    background: var(--table-row-hover) !important;
+}
+
+/* Modal overrides */
+.modal, [class*="modal"]:not([class*="overlay"]) {
+    background: var(--modal-bg) !important;
+    border-color: var(--modal-border) !important;
+}
+
+.modal-header, [class*="modal-header"] {
+    border-color: var(--modal-border) !important;
+}
+
+.modal-footer, [class*="modal-footer"] {
+    border-color: var(--modal-border) !important;
+}
+
+.modal-overlay, [class*="modal-overlay"] {
+    background: var(--bg-modal-overlay) !important;
+}
+
+/* Form overrides */
+input[type="text"], input[type="email"], input[type="password"],
+input[type="search"], input[type="number"], input[type="tel"],
+input[type="url"], textarea, select {
+    background: var(--bg-input) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-input) !important;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: var(--border-focus) !important;
+    box-shadow: 0 0 0 3px var(--accent-emerald-subtle) !important;
+}
+
+/* Text overrides */
+h1, h2, h3, h4, h5, h6, .page-title, [class*="title"] {
+    color: var(--text-primary) !important;
+}
+
+p, .description, [class*="subtitle"], [class*="description"] {
+    color: var(--text-secondary) !important;
+}
+
+.text-muted, [class*="muted"], small {
+    color: var(--text-muted) !important;
+}
+
+/* Link overrides */
+a:not(.btn):not(.nav-item):not([class*="btn"]) {
+    color: var(--text-link) !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+
+/* Border overrides for common patterns */
+hr, [class*="divider"] {
+    border-color: var(--border) !important;
+}
+
+/* Badge/pill overrides */
+.badge, [class*="badge"], .status-badge {
+    /* Let individual badge colors stay, just fix text contrast */
+}
+
+/* Tab overrides */
+.tab, [class*="tab-btn"], [class*="nav-tab"] {
+    color: var(--text-muted) !important;
+}
+
+.tab.active, [class*="tab-btn"].active, [class*="nav-tab"].active {
+    color: var(--accent-emerald) !important;
+}
+
+/* ============================================
+   VISIBILITY FIXES - Contrast & readability
+   ============================================ */
+
+/* Fix white/light card headers that don't adapt */
+.stat-card, .kpi-card, [class*="stat-card"], [class*="kpi"] {
+    color: var(--text-primary) !important;
+}
+
+.stat-card *, .kpi-card *, [class*="stat-card"] *, [class*="kpi"] * {
+    color: inherit !important;
+}
+
+.stat-card .label, .stat-card .kpi-label, [class*="stat-card"] small,
+.kpi-label, [class*="label"] {
+    color: var(--text-muted) !important;
+}
+
+.stat-card .value, .stat-card h2, .stat-card h3,
+.kpi-value, [class*="stat"] h2, [class*="stat"] h3 {
+    color: var(--text-primary) !important;
+}
+
+/* Fix section labels and headers */
+.section-label, .quick-access-label, [class*="section-title"],
+[class*="section-label"], .card-title {
+    color: var(--text-muted) !important;
+}
+
+/* Fix quick access cards text */
+.quick-card h3, .quick-card p, [class*="quick-card"] h3, [class*="quick-card"] p {
+    color: var(--text-primary) !important;
+}
+
+[class*="quick-card"] p, .quick-card .desc {
+    color: var(--text-secondary) !important;
+}
+
+/* Fix filter/tab buttons */
+.filter-btn, [class*="filter-btn"], [class*="tab-btn"],
+.status-filter, [class*="status-filter"] {
+    background: var(--bg-surface) !important;
+    color: var(--text-secondary) !important;
+    border-color: var(--border) !important;
+}
+
+.filter-btn:hover, [class*="filter-btn"]:hover {
+    background: var(--bg-surface-hover) !important;
+}
+
+.filter-btn.active, [class*="filter-btn"].active,
+[class*="tab-btn"].active, [class*="status-filter"].active {
+    background: var(--accent-emerald) !important;
+    color: white !important;
+    border-color: var(--accent-emerald) !important;
+}
+
+/* Fix main content area background */
+.main-content, .content, [class*="main-content"],
+[class*="content-area"], .page-content {
+    background: var(--bg-page) !important;
+}
+
+/* Fix lead cards in Kanban */
+.lead-card, [class*="lead-card"], .kanban-card, [class*="kanban-card"] {
+    background: var(--card-bg) !important;
+    border-color: var(--card-border) !important;
+}
+
+.lead-card *, [class*="lead-card"] *, .kanban-card *, [class*="kanban-card"] * {
+    color: var(--text-primary) !important;
+}
+
+/* Fix pipeline column backgrounds */
+.pipeline-column, .kanban-column, [class*="pipeline-col"], [class*="kanban-col"] {
+    background: var(--bg-surface-alt) !important;
+    border-color: var(--card-border) !important;
+}
+
+.pipeline-column h3, .kanban-column h3 {
+    color: var(--text-primary) !important;
+}
+
+/* Fix template cards */
+.template-card, [class*="template-card"] {
+    background: var(--bg-surface-alt) !important;
+    border-color: var(--card-border) !important;
+}
+
+.template-card p, [class*="template-card"] p,
+.template-card span, [class*="template-card"] span {
+    color: var(--text-secondary) !important;
+}
+
+/* Fix page header area */
+.top-bar, .page-header, [class*="top-bar"], [class*="page-header"] {
+    background: var(--bg-page) !important;
+    border-color: var(--border) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Fix activity items */
+.activity-item, [class*="activity"] {
+    color: var(--text-secondary) !important;
+}
+
+/* Fix welcome text and descriptions */
+.welcome-text, [class*="welcome"] h1, [class*="welcome"] h2 {
+    color: var(--text-primary) !important;
+}
+
+/* Fix accent-colored text to stay visible */
+.text-emerald, [style*="color: #10b981"], [style*="color:#10b981"] {
+    color: var(--accent-emerald) !important;
+}
+
+/* Fix dropdown/select styling */
+select, .dropdown {
+    background: var(--bg-input) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-input) !important;
+}
+
+select option {
+    background: var(--bg-surface) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Fix settings card backgrounds */
+.settings-card, [class*="settings-card"] {
+    background: var(--card-bg) !important;
+    border-color: var(--card-border) !important;
+}
+
+.settings-card h2, .settings-card p, .settings-card label {
+    color: var(--text-primary) !important;
+}
+
+.settings-card .card-desc {
+    color: var(--text-muted) !important;
+}
+
+/* Fix placeholder text */
+::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 0.7;
+}

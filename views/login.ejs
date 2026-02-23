@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="<%= typeof theme !== 'undefined' ? theme : 'light' %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zenith OS | Enterprise Login</title>
+    <title>CRE OS | Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/theme.css">
+    <script src="/js/theme.js"></script>
     <style>
         :root {
             --bg-void: #000000;
@@ -162,10 +164,11 @@
     <div class="login-container">
         <div class="login-card">
             <div class="logo-section">
-                <div class="logo-icon">Z</div>
+                <div class="logo-icon" style="font-size:24px;">C</div>
                 <div class="logo-text">
-                    <h1>Zenith OS</h1>
-                    <p>Enterprise Platform by Main Street Group</p>
+                    <h1>CRE OS</h1>
+                    <p style="margin-bottom:4px;">Commercial Real Estate Operations Suite</p>
+                    <p style="font-size:11px;opacity:0.6;">powered by Danimal Data LLC</p>
                 </div>
             </div>
 
@@ -194,21 +197,14 @@
                     <input type="password" name="password" class="form-input" placeholder="••••••••">
                 </div>
 
-                <button type="submit" class="btn-login">Sign In to AXIS</button>
+                <button type="submit" class="btn-login">Sign In to CRE OS</button>
             </form>
 
-            <div class="divider"><span>or activate with license key</span></div>
+            <div class="divider"><span>new to CRE OS?</span></div>
 
-            <form action="/auth/login" method="POST">
-                <div class="form-group">
-                    <label class="form-label">License Key</label>
-                    <input type="text" name="license_key" class="form-input license-input" placeholder="XXXX-XXXX-XXXX-XXXX">
-                </div>
-
-                <button type="submit" class="btn-login" style="background: linear-gradient(135deg, var(--accent-cyan), #0891B2);">
-                    Activate License
-                </button>
-            </form>
+            <button onclick="window.location.href='/auth/activate'" type="button" style="width:100%;display:block;text-align:center;text-decoration:none;background:linear-gradient(135deg, var(--accent-cyan), #0891B2);padding:16px;border-radius:12px;border:none;color:white;font-size:16px;font-weight:700;cursor:pointer;margin-top:10px;">
+                Set Up New Account
+            </button>
 
             <p class="footer-text">
                 Need access? <a href="https://umbrassi.com" target="_blank">Request Enterprise Account</a><br>
@@ -217,6 +213,6 @@
         </div>
     </div>
 
-    <div class="version-badge">Zenith OS v2.4.0</div>
+    <div class="version-badge">CRE OS v2.10.5</div>
 </body>
 </html>

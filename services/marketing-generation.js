@@ -195,7 +195,8 @@ class GenerationService {
       };
 
     } catch (err) {
-      console.error(`  ❌ Generation failed:`, err.message);
+      console.error('  ❌ Generation failed:', err.message);
+      console.error('  Stack:', err.stack);
 
       // Transition to failed state
       try {
@@ -229,8 +230,8 @@ class GenerationService {
     return {
       ...baseData,
       tagline_prefix: taglinePrefix,
-      header_display_name: headerDisplayName.toUpperCase(),
-      listing_badge_lower: baseData.listing_badge.toLowerCase(),
+      header_display_name: (headerDisplayName || '').toUpperCase(),
+      listing_badge_lower: (baseData.listing_badge || '').toLowerCase(),
       property_type_desc: 'commercial',
       brand_primary: brand.colors?.primary || '#1B6B3A',
       brand_primary_dark: brand.colors?.primaryDark || '#145A2E',
@@ -248,8 +249,8 @@ class GenerationService {
       brand_font_heading: brand.fonts?.heading || "'Montserrat', sans-serif",
       brand_font_body: brand.fonts?.body || "'Open Sans', sans-serif",
       brand_logo_src: logoSrc,
-      road_labels: rawListing.nearby_roads || [],
-      highway_shields: rawListing.highway_shields || [],
+      road_labels: (rawListing && rawListing.nearby_roads) || [],
+      highway_shields: (rawListing && rawListing.highway_shields) || [],
       hero_image_src: processedPhotos.hero_cover || processedPhotos[Object.keys(processedPhotos)[0]] || null,
       accent_image_src: processedPhotos.secondary_exterior || null,
       map_image_src: processedPhotos.location_reference || null,
@@ -348,10 +349,34 @@ ${htmlPages.map(html => {
 
   async loadListing(listingId, tenantId) {
     if (this.db) {
-      const r = await this.db.query('SELECT * FROM listings WHERE id = $1 AND tenant_id = $2', [listingId, tenantId]);
-      return r.rows[0];
+      const r = await this.db.query('SELECT * FROM leads WHERE id = $1 AND organization_id = $2', [listingId, tenantId]);
+      const lead = r.rows[0];
+      if (!lead) return null;
+      // Map CRM lead fields → marketing listing schema
+      return {
+        ...lead,
+        property_name: lead.company || lead.name || 'Untitled Property',
+        address: lead.property_address || '',
+        city: lead.property_city || '',
+        state: lead.property_state || 'FL',
+        zip: lead.property_zip || '',
+        listing_type: (lead.property_type || 'for_sale').toLowerCase().replace(/\s+/g, '_'),
+        building_sf: lead.property_sqft || null,
+        price: lead.value ? parseFloat(lead.value) : null,
+        tagline: '',
+        highlights: [],
+        land_acres: null,
+        zoning: '',
+        year_built: '',
+        parking: '',
+        cap_rate: '',
+        lease_rate: null,
+        cam: null,
+        re_taxes: null,
+        parcel_id: '',
+      };
     }
-    return null; // Will be overridden in test harness
+    return null;
   }
 
   async loadBrand(brandId, tenantId) {
@@ -369,9 +394,26 @@ ${htmlPages.map(html => {
   }
 
   async getListingPhotos(listingId, tenantId) {
-    // In production: query listing_photos table or S3 bucket
-    // For now: return empty (photos will come from draft generation request)
-    return [];
+    try {
+      // Query photos from marketing_photos table for this draft
+      const result = await this.pool.query(
+        `SELECT mp.original_url FROM marketing_photos mp
+         JOIN marketing_drafts md ON mp.draft_id = md.id
+         WHERE mp.listing_id = $1 AND md.tenant_id = $2
+         ORDER BY mp.sort_order`,
+        [listingId, tenantId]
+      );
+      // Convert URL paths to file paths
+      const photoPaths = result.rows.map(r => {
+        const filename = require('path').basename(r.original_url);
+        return require('path').join(__dirname, '..', 'marketing-output', 'photos', filename);
+      }).filter(p => require('fs').existsSync(p));
+      console.log(`  [Photos] Found ${photoPaths.length} photos for listing ${listingId}`);
+      return photoPaths;
+    } catch (err) {
+      console.error('  [Photos] Error loading photos:', err.message);
+      return [];
+    }
   }
 }
 

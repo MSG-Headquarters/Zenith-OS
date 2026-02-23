@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="<%= typeof theme !== 'undefined' ? theme : 'light' %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Huddle | Zenith OS</title>
+    <title>The Huddle | CRE OS</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/theme.css">
+    <script src="/js/theme.js"></script>
     <style>
         :root {
             --primary: #7c3aed;
@@ -487,7 +489,7 @@
             </div>
 
             <div class="sidebar-footer">
-                <a href="/dashboard" class="back-link">← Back to AXIS</a>
+                <a href="/dashboard" class="back-link">← Back to CRE Home</a>
             </div>
         </aside>
 

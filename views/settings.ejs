@@ -1,28 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="<%= typeof theme !== 'undefined' ? theme : 'light' %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Settings | Zenith OS</title>
+    <title>Account Settings | CRE OS</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/theme.css">
+    <script src="/js/theme.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
         
         .settings-container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
         
-        .back-link { display: inline-flex; align-items: center; gap: 8px; color: #64748b; text-decoration: none; font-size: 0.9rem; margin-bottom: 24px; transition: color 0.2s; }
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; margin-bottom: 24px; transition: color 0.2s; }
         .back-link:hover { color: #10b981; }
         
         .page-header { margin-bottom: 40px; }
         .page-header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
-        .page-header p { color: #64748b; }
+        .page-header p { color: var(--text-muted); }
         
         .settings-card { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 32px; margin-bottom: 24px; }
         .settings-card h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
         .settings-card h2 i { color: #10b981; }
-        .settings-card .card-desc { color: #64748b; font-size: 0.85rem; margin-bottom: 24px; }
+        .settings-card .card-desc { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px; }
         
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
         .form-row.single { grid-template-columns: 1fr; }
@@ -34,9 +36,9 @@
         .form-input { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(15, 23, 42, 0.8); color: #e2e8f0; font-size: 0.95rem; outline: none; transition: all 0.2s; }
         .form-input:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
         .form-input:disabled { opacity: 0.6; cursor: not-allowed; }
-        .form-input::placeholder { color: #475569; }
+        .form-input::placeholder { color: var(--text-secondary); }
         
-        .password-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; padding: 4px; transition: color 0.2s; }
+        .password-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; transition: color 0.2s; }
         .password-toggle:hover { color: #10b981; }
         
         .btn { padding: 12px 24px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
@@ -53,19 +55,20 @@
         .user-info-display { display: flex; align-items: center; gap: 20px; padding: 20px; background: rgba(15, 23, 42, 0.5); border-radius: 12px; margin-bottom: 24px; }
         .user-avatar { width: 72px; height: 72px; border-radius: 16px; background: linear-gradient(135deg, #10b981, #06b6d4); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 700; color: white; }
         .user-details h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 4px; }
-        .user-details p { color: #64748b; font-size: 0.9rem; }
+        .user-details p { color: var(--text-muted); font-size: 0.9rem; }
         .user-details .role-badge { display: inline-block; padding: 4px 10px; background: rgba(16, 185, 129, 0.15); color: #10b981; border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin-top: 8px; }
         
         .password-requirements { margin-top: 12px; padding: 12px; background: rgba(15, 23, 42, 0.5); border-radius: 8px; }
-        .password-requirements p { font-size: 0.75rem; color: #64748b; margin-bottom: 8px; }
+        .password-requirements p { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; }
         .password-requirements ul { list-style: none; }
-        .password-requirements li { font-size: 0.75rem; color: #64748b; padding: 2px 0; display: flex; align-items: center; gap: 6px; }
+        .password-requirements li { font-size: 0.75rem; color: var(--text-muted); padding: 2px 0; display: flex; align-items: center; gap: 6px; }
         .password-requirements li i { font-size: 0.7rem; }
         .password-requirements li.valid { color: #10b981; }
         .password-requirements li.valid i { color: #10b981; }
         
         .form-actions { display: flex; gap: 12px; margin-top: 24px; }
     </style>
+<%- include("partials/security") %>
 </head>
 <body>
     <div class="settings-container">
@@ -177,7 +180,44 @@
         </div>
     </div>
     
+
+        <div class="settings-card">
+            <h2><i class="bi bi-palette"></i> Appearance</h2>
+            <p class="card-desc">Customize how CRE OS looks for you.</p>
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 0;">
+                <div>
+                    <div style="font-weight: 600; margin-bottom: 4px;">Theme</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">Switch between light and dark mode</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="bi bi-sun-fill" style="font-size: 18px; color: var(--accent-amber);"></i>
+                    <div id="themeSwitch" onclick="toggleTheme()" style="position:relative;width:52px;height:28px;background:var(--border-strong);border-radius:14px;cursor:pointer;transition:background 0.3s;">
+                        <div id="themeSwitchKnob" style="position:absolute;top:3px;left:3px;width:22px;height:22px;background:white;border-radius:50%;transition:transform 0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
+                    </div>
+                    <i class="bi bi-moon-fill" style="font-size: 16px; color: var(--accent-blue);"></i>
+                </div>
+            </div>
+        </div>
     <script>
+        // Theme toggle
+        function toggleTheme() {
+            ZenithTheme.toggle();
+            updateThemeSwitch();
+        }
+        function updateThemeSwitch() {
+            var isDark = ZenithTheme.current() === 'dark';
+            var knob = document.getElementById('themeSwitchKnob');
+            var sw = document.getElementById('themeSwitch');
+            if (isDark) {
+                knob.style.transform = 'translateX(24px)';
+                sw.style.background = 'var(--accent-emerald)';
+            } else {
+                knob.style.transform = 'translateX(0)';
+                sw.style.background = 'var(--border-strong)';
+            }
+        }
+        updateThemeSwitch();
+
         function togglePassword(inputId, btn) {
             const input = document.getElementById(inputId);
             const icon = btn.querySelector('i');

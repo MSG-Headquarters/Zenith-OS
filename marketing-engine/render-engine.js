@@ -404,7 +404,7 @@ ${htmlPages.map((html, i) => {
 
 // ── UTILITIES ───────────────────────────────────────────────────────────
 function sanitizeFilename(name) {
-  return name.replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_').substring(0, 50);
+  return (name || 'untitled').replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '_').substring(0, 50);
 }
 
 module.exports = {

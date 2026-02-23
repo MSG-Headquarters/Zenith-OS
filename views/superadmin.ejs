@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="<%= typeof theme !== 'undefined' ? theme : 'light' %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MSG Super Admin | Zenith OS</title>
+    <title>MSG Super Admin | CRE OS</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/theme.css">
+    <script src="/js/theme.js"></script>
     <style>
         :root {
             --bg-void: #000000; --bg-card: #0a0f1a; --bg-slate: #0f1419;
@@ -145,7 +147,7 @@
             </table>
         </div>
 
-        <a href="/dashboard" class="back-link">← Back to AXIS Dashboard</a>
+        <a href="/dashboard" class="back-link">← Back to CRE Dashboard</a>
     </div>
 
     <script>

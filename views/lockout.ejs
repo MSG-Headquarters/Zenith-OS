@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="<%= typeof theme !== 'undefined' ? theme : 'light' %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Suspended | Zenith OS</title>
+    <title>Account Suspended | CRE OS</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/theme.css">
+    <script src="/js/theme.js"></script>
     <style>
         :root {
             --bg-void: #000000;
@@ -140,7 +142,7 @@
                 'suspended': {
                     icon: '🔒',
                     title: 'Account Suspended',
-                    subtitle: 'Your Zenith OS license has been suspended. Access to all platform features is currently restricted.',
+                    subtitle: 'Your CRE OS license has been suspended. Access to all platform features is currently restricted.',
                     status: 'Suspended',
                     reasonTitle: 'Reason for Suspension',
                     reasonText: 'Payment overdue for more than 60 days. Please update your payment method to restore access.',
@@ -149,7 +151,7 @@
                 'expired': {
                     icon: '⏰',
                     title: 'License Expired',
-                    subtitle: 'Your Zenith OS license has expired. Renew now to continue accessing the platform.',
+                    subtitle: 'Your CRE OS license has expired. Renew now to continue accessing the platform.',
                     status: 'Expired',
                     reasonTitle: 'License Expiration',
                     reasonText: 'Your license period has ended. Contact Main Street Group to renew your subscription.',
@@ -158,7 +160,7 @@
                 'terminated': {
                     icon: '⛔',
                     title: 'License Terminated',
-                    subtitle: 'Your Zenith OS license has been permanently terminated.',
+                    subtitle: 'Your CRE OS license has been permanently terminated.',
                     status: 'Terminated',
                     reasonTitle: 'Termination Notice',
                     reasonText: 'This license has been terminated due to a violation of the terms of service. All data will be deleted within 30 days.',
@@ -218,6 +220,6 @@
         </div>
     </div>
 
-    <div class="version-badge">Zenith OS | License Enforcement System</div>
+    <div class="version-badge">CRE OS | License Enforcement System</div>
 </body>
 </html>
