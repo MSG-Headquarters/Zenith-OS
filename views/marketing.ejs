@@ -40,14 +40,14 @@
         .layout { display: flex; min-height: 100vh; }
 
         /* Sidebar — matches existing CRE OS */
-        .sidebar { width: 260px; background: var(--bg-dark); color: white; padding: 24px 16px; flex-shrink: 0; }
-        .sidebar-brand { font-size: 20px; font-weight: 700; padding: 0 8px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px; letter-spacing: -0.5px; }
-        .sidebar-brand span { color: var(--accent-green-light); }
-        .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; color: rgba(255,255,255,0.6); text-decoration: none; border-radius: 8px; font-size: 14px; margin-bottom: 2px; transition: all 0.2s; }
-        .sidebar-nav a:hover { color: white; background: rgba(255,255,255,0.08); }
-        .sidebar-nav a.active { color: white; background: rgba(27,107,58,0.3); }
-        .sidebar-nav a i { width: 20px; font-size: 16px; }
-        .sidebar-section { font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 16px 12px 8px; letter-spacing: 0.5px; }
+        .sidebar { width: 260px; background: var(--bg-surface); border-right: 1px solid var(--border); padding: 12px 8px; flex-shrink: 0; }
+        .sidebar-brand { margin-bottom: 8px; border-bottom: 1px solid var(--border); }
+        .sidebar-brand span { color: var(--accent-emerald); }
+        .sidebar-nav a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: var(--text-secondary); text-decoration: none; border-radius: 8px; font-size: 14px; margin-bottom: 2px; transition: all 0.15s ease; }
+        .sidebar-nav a:hover { background: var(--bg-gray, #f1f5f9); color: var(--text-primary); }
+        .sidebar-nav a.active { background: rgba(16, 185, 129, 0.1); color: var(--accent-emerald); }
+        .sidebar-nav a i { width: 20px; font-size: 16px; flex-shrink: 0; }
+        .sidebar-section { font-size: 10px; text-transform: uppercase; color: var(--text-muted); padding: 16px 12px 8px; letter-spacing: 1.5px; font-weight: 700; }
 
         /* Main content */
         .main { flex: 1; overflow-y: auto; }
@@ -143,36 +143,41 @@
 <body>
 <div class="layout">
     <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="sidebar-brand">CRE <span>OS</span></div>
-        <nav class="sidebar-nav">
-            <a href="/dashboard"><i class="bi bi-grid-1x2"></i> Dashboard</a>
+    <aside class="sidebar" style="width:260px;background:var(--bg-surface);border-right:1px solid var(--border);padding:12px 8px;flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:10px;padding:16px 12px 20px;margin-bottom:8px;border-bottom:1px solid var(--border);">
+            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#10B981,#059669);display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-megaphone" style="color:#fff;font-size:16px;"></i>
+            </div>
+            <div>
+                <div style="font-size:15px;font-weight:700;color:var(--text-primary);">Marketing Suite</div>
+                <div style="font-size:11px;color:var(--text-muted);">Content & Distribution</div>
+            </div>
+        </div>
+        <nav style="flex:1;padding:4px;overflow-y:auto;">
+            <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1.5px;padding:8px 12px;">Listing Packages</div>
+            <a href="/marketing" class="active" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--accent-emerald);background:rgba(16,185,129,0.1);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-collection" style="width:20px;"></i> All Packages</a>
+            <a href="#" onclick="filterDrafts('pending', this)" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-clock" style="width:20px;"></i> In Production</a>
+            <a href="#" onclick="filterDrafts('review', this)" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-eye" style="width:20px;"></i> Awaiting Review</a>
+            <a href="#" onclick="filterDrafts('approval', this)" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-send-check" style="width:20px;"></i> Sent to Broker</a>
+            <a href="#" onclick="filterDrafts('approved', this)" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-check2-all" style="width:20px;"></i> Approved / Live</a>
+            <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1.5px;padding:16px 12px 8px;">Promotional</div>
+            <a href="#" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-file-earmark-bar-graph" style="width:20px;"></i> BOVs</a>
+            <a href="#" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-journal-richtext" style="width:20px;"></i> Offering Memos</a>
+            <a href="#" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-bar-chart-line" style="width:20px;"></i> Market Reports</a>
+            <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1.5px;padding:16px 12px 8px;">Navigate</div>
+            <a href="/dashboard" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-house" style="width:20px;"></i> CRE Home</a>
             <% if (features.crm !== false) { %>
-            <a href="/crm"><i class="bi bi-funnel"></i> CRM</a>
+            <a href="/crm" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-funnel" style="width:20px;"></i> CRM</a>
             <% } %>
             <% if (features.intel !== false) { %>
-            <a href="/intel"><i class="bi bi-easel"></i> INTEL</a>
+            <a href="/intel" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-broadcast" style="width:20px;"></i> INTEL</a>
             <% } %>
-            <a href="/marketing" class="active"><i class="bi bi-megaphone"></i> Marketing</a>
             <% if (features.huddle !== false) { %>
-            <a href="/huddle"><i class="bi bi-chat-dots"></i> Huddle</a>
+            <a href="/huddle" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-chat-dots" style="width:20px;"></i> Huddle</a>
             <% } %>
             <% if (features.vault !== false) { %>
-            <a href="/vault"><i class="bi bi-safe"></i> Vault</a>
+            <a href="/vault" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-lock" style="width:20px;"></i> Vault</a>
             <% } %>
-            <% if (features.cfo !== false) { %>
-            <a href="/cfo"><i class="bi bi-graph-up-arrow"></i> CFO</a>
-            <% } %>
-
-            <div class="sidebar-section">Data</div>
-            <% if (features.danimal !== false) { %>
-            <a href="/danimal"><i class="bi bi-database"></i> Danimal Data</a>
-            <% } %>
-            <% if (features.command !== false) { %>
-            <a href="/command"><i class="bi bi-terminal"></i> Command</a>
-            <% } %>
-            <div class="sidebar-section">Account</div>
-            <a href="/settings"><i class="bi bi-gear"></i> Settings</a>
         </nav>
     </aside>
 
@@ -323,7 +328,8 @@
 
             return `<tr>
                 <td>
-                    <div class="draft-property">Listing #${d.listing_id}</div>
+                    <div class="draft-property">${d.property_address || d.lead_company || d.lead_name || "Listing #" + d.listing_id}</div>
+                    <div style="font-size:12px;color:var(--text-muted);">${d.property_city || ""}</div>
                     <div class="draft-address">${d.id.slice(0, 8)}...</div>
                 </td>
                 <td>${statusBadge(d.status)}</td>

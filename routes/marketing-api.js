@@ -50,7 +50,7 @@ module.exports = function(pool) {
     try {
       const { status, listing_id, page = 1, limit = 20 } = req.query;
       const offset = (page - 1) * limit;
-      let query = 'SELECT * FROM marketing_drafts WHERE tenant_id = $1';
+      let query = 'SELECT md.*, l.property_address, l.property_city, l.company as lead_company, l.name as lead_name FROM marketing_drafts md LEFT JOIN leads l ON md.listing_id::text = l.id::text WHERE md.tenant_id = $1';
       const params = [getTenantId(req)];
       let idx = 2;
       if (status) { query += ` AND status = $${idx++}`; params.push(status); }

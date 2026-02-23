@@ -693,8 +693,18 @@ app.post('/auth/login', async (req, res) => {
             }
             req.session.features = merged;
         } catch (e) { req.session.features = {}; }
-        // Update last login
+        // Update last login + IP tracking
+        const clientIP = req.headers['cf-connecting-ip'] || (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.ip;
+        const userAgent = req.headers['user-agent'] || 'Unknown';
+        const country = req.headers['cf-ipcountry'] || 'Unknown';
         await pool.query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]);
+        try {
+            await pool.query(
+                "INSERT INTO audit_log (tenant_id, user_id, action, entity_type, metadata, ip_address, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW())",
+                [req.session.org.id, user.id, 'login', 'session', JSON.stringify({ email: user.email, country, user_agent: userAgent.substring(0, 200) }), clientIP]
+            );
+            console.log('[Auth] Login:', user.email, 'IP:', clientIP, 'Country:', country);
+        } catch(auditErr) { console.log('[Audit] Log error:', auditErr.message); }
         res.redirect('/dashboard');
         
     } catch (err) {
@@ -2311,7 +2321,7 @@ app.get('/api/danimal/address-search', async (req, res) => {
         const { q } = req.query;
         if (!q || q.length < 3) return res.json({ results: [] });
 
-        const searchTerm = q.trim();
+        const searchTerm = q.toUpperCase().trim();
         const result = await pool.query(
             "SELECT DISTINCT site_address, site_city, site_zip, parcel_id, property_use_desc, building_sf, year_built FROM danimal_properties WHERE UPPER(site_address) LIKE $1 ORDER BY site_address LIMIT 8",
             [searchTerm + '%']
@@ -3454,7 +3464,7 @@ app.post('/api/idml/generate/:leadId', async (req, res) => {
 
         // Ensure output dir exists
         const idmlOutputDir = path.join(__dirname, 'modules', 'idml-generator', 'output');
-        if (!fs.existsSync(idmlOutputDir)) fs.mkdirSync(idmlOutputDir, { recursive: true });
+        const _fs = require('fs'); if (!_fs.existsSync(idmlOutputDir)) _fs.mkdirSync(idmlOutputDir, { recursive: true });
 
         const generator = new IDMLGenerator({
             outputDir: path.join(__dirname, 'modules', 'idml-generator', 'output')
@@ -3472,7 +3482,7 @@ app.post('/api/idml/generate/:leadId', async (req, res) => {
 app.get('/api/idml/download/:filename', (req, res) => {
     if (!req.session.user) return res.status(401).json({ error: 'Not authenticated' });
     const filePath = path.join(__dirname, 'modules', 'idml-generator', 'output', req.params.filename);
-    if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'File not found' });
+    if (!require('fs').existsSync(filePath)) return res.status(404).json({ error: 'File not found' });
     res.download(filePath);
 });
 
@@ -3528,7 +3538,7 @@ app.post('/api/docs/generate/:leadId', async (req, res) => {
 app.get('/api/docs/download/:filename', (req, res) => {
     if (!req.session.user) return res.status(401).json({ error: 'Not authenticated' });
     const filePath = path.join(__dirname, 'modules', 'doc-generator', 'output', req.params.filename);
-    if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'File not found' });
+    if (!require('fs').existsSync(filePath)) return res.status(404).json({ error: 'File not found' });
     res.download(filePath);
 });
 app.use('/intel/exports', express.static(path.join(__dirname, 'public', 'intel', 'exports')));

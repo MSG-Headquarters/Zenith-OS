@@ -99,7 +99,39 @@
     </style>
 </head>
 <body>
-    <%- include('../partials/sidebar') %>
+    <!-- Admin Sidebar -->
+    <div class="sidebar" style="width:240px;background:#1a2332;display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,0.06);position:fixed;top:0;bottom:0;left:0;z-index:100;padding:20px 12px;">
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px 24px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:16px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#3B82F6,#8B5CF6);display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-shield-lock" style="color:#fff;font-size:16px;"></i>
+            </div>
+            <div>
+                <div style="font-size:15px;font-weight:700;color:#f1f5f9;">Admin Panel</div>
+                <div style="font-size:11px;color:#64748b;">CRE OS</div>
+            </div>
+        </div>
+        <nav style="flex:1;">
+            <div style="font-size:10px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:1.5px;padding:8px 12px;">Admin</div>
+            <a href="/system" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-grid-1x2" style="width:20px;"></i> Overview</a>
+            <a href="/system/users" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-people" style="width:20px;"></i> Users</a>
+            <a href="/system/roles" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-person-badge" style="width:20px;"></i> Roles</a>
+            <a href="/system/audit" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#f59e0b;background:rgba(245,158,11,0.1);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-clock-history" style="width:20px;"></i> Audit Log</a>
+            <div style="font-size:10px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:1.5px;padding:16px 12px 8px;">Navigate</div>
+            <a href="/dashboard" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-house" style="width:20px;"></i> Dashboard</a>
+            <a href="/crm" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-funnel" style="width:20px;"></i> CRM</a>
+            <a href="/marketing" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-megaphone" style="width:20px;"></i> Marketing</a>
+        </nav>
+        <div style="padding:12px;border-top:1px solid rgba(255,255,255,0.08);margin-top:auto;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                <div style="width:32px;height:32px;border-radius:8px;background:#3B82F6;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;"><%= typeof user !== 'undefined' && user ? user.name.charAt(0).toUpperCase() : 'U' %></div>
+                <div>
+                    <div style="font-size:13px;font-weight:600;color:#f1f5f9;"><%= typeof user !== 'undefined' && user ? user.name : 'User' %></div>
+                    <div style="font-size:11px;color:#64748b;">Administrator</div>
+                </div>
+            </div>
+            <a href="/auth/logout" style="display:flex;align-items:center;gap:8px;color:#64748b;text-decoration:none;font-size:13px;padding:8px 0;"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
+        </div>
+    </div>
 
     <div class="main-content">
         <div class="top-bar">
@@ -328,37 +360,57 @@
                 .join(' ');
         }
 
-        function formatDetails(entry) {
+function formatDetails(entry) {
             let html = '';
-            
-            if (entry.entity_type) {
-                html += `<div class="audit-entity">${entry.entity_type} #${entry.entity_id || ''}</div>`;
+            // Show entity info
+            if (entry.entity_type && entry.entity_type !== 'session') {
+                html += '<div style="font-weight:600;color:var(--text-primary);">' + entry.entity_type + (entry.entity_id ? ' #' + entry.entity_id : '') + '</div>';
             }
-
+            // Show login/session info with IP
+            if (entry.action === 'login' || entry.entity_type === 'session') {
+                if (entry.ip_address) {
+                    html += '<div style="font-size:12px;"><i class="bi bi-geo-alt"></i> ' + entry.ip_address + '</div>';
+                }
+                if (entry.metadata) {
+                    try {
+                        const meta = typeof entry.metadata === 'string' ? JSON.parse(entry.metadata) : entry.metadata;
+                        if (meta.country && meta.country !== 'Unknown') html += '<div style="font-size:12px;color:var(--text-muted);"><i class="bi bi-globe"></i> ' + meta.country + '</div>';
+                        if (meta.user_agent) html += '<div style="font-size:11px;color:var(--text-muted);max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + meta.user_agent + '">' + meta.user_agent.substring(0, 60) + '...</div>';
+                    } catch(e) {}
+                }
+                return html || '<span style="color:var(--text-muted);">?</span>';
+            }
+            // Show old/new value changes
             if (entry.old_value || entry.new_value) {
                 html += '<div class="audit-changes">';
                 try {
-                    const oldVal = entry.old_value ? JSON.parse(entry.old_value) : {};
-                    const newVal = entry.new_value ? JSON.parse(entry.new_value) : {};
-                    
+                    const oldVal = entry.old_value ? (typeof entry.old_value === 'string' ? JSON.parse(entry.old_value) : entry.old_value) : {};
+                    const newVal = entry.new_value ? (typeof entry.new_value === 'string' ? JSON.parse(entry.new_value) : entry.new_value) : {};
                     const allKeys = new Set([...Object.keys(oldVal), ...Object.keys(newVal)]);
                     allKeys.forEach(key => {
-                        if (oldVal[key] !== newVal[key]) {
-                            html += `<div class="audit-change-item">
-                                <span class="field">${key}:</span>
-                                ${oldVal[key] ? `<span class="old">${oldVal[key]}</span>` : ''}
-                                ${oldVal[key] && newVal[key] ? '→' : ''}
-                                ${newVal[key] ? `<span class="new">${newVal[key]}</span>` : ''}
-                            </div>`;
+                        if (JSON.stringify(oldVal[key]) !== JSON.stringify(newVal[key])) {
+                            html += '<div style="font-size:12px;"><span style="font-weight:600;">' + key + ':</span> ';
+                            if (oldVal[key]) html += '<span style="color:#ef4444;text-decoration:line-through;">' + String(oldVal[key]).substring(0, 50) + '</span> ';
+                            if (oldVal[key] && newVal[key]) html += '? ';
+                            if (newVal[key]) html += '<span style="color:#10b981;">' + String(newVal[key]).substring(0, 50) + '</span>';
+                            html += '</div>';
                         }
                     });
-                } catch (e) {
-                    html += entry.new_value || '';
-                }
+                } catch(e) { html += '<span style="color:var(--text-muted);">?</span>'; }
                 html += '</div>';
             }
-
-            return html || '<span style="color: #64748b;">-</span>';
+            // Show metadata if present
+            if (!html && entry.metadata) {
+                try {
+                    const meta = typeof entry.metadata === 'string' ? JSON.parse(entry.metadata) : entry.metadata;
+                    if (meta && typeof meta === 'object') {
+                        Object.keys(meta).slice(0, 3).forEach(key => {
+                            html += '<div style="font-size:12px;"><span style="font-weight:600;">' + key + ':</span> ' + String(meta[key]).substring(0, 60) + '</div>';
+                        });
+                    }
+                } catch(e) {}
+            }
+            return html || '<span style="color:var(--text-muted);">?</span>';
         }
 
         function getInitials(name) {
