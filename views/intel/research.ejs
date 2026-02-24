@@ -179,32 +179,40 @@
     </div>
 
     <!-- Sidebar -->
-    <nav class="sidebar">
-        <div class="sidebar-brand">
-            <h2>Zenith OS</h2>
-            <p><%= typeof tenant !== 'undefined' && tenant ? tenant.name : 'CRE Consultants' %></p>
+    <nav class="sidebar" style="width:260px;background:var(--bg-surface,#0f1724);border-right:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;z-index:50;padding:12px 8px;">
+        <div style="display:flex;align-items:center;gap:10px;padding:16px 12px 20px;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#3B82F6,#06B6D4);display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-broadcast" style="color:#fff;font-size:16px;"></i>
+            </div>
+            <div>
+                <div style="font-size:15px;font-weight:700;color:#f1f5f9;">INTEL Engine</div>
+                <div style="font-size:11px;color:#64748b;">AI Research Assistant</div>
+            </div>
         </div>
-        <div class="nav-section">
-            <div class="nav-section-label">Navigation</div>
-            <a href="/dashboard" class="nav-item"><span class="nav-icon"><i class="bi bi-house"></i></span> Dashboard</a>
-            <a href="/crm" class="nav-item"><span class="nav-icon"><i class="bi bi-kanban"></i></span> CRM Pipeline</a>
-            <a href="/intel" class="nav-item active"><span class="nav-icon"><i class="bi bi-broadcast"></i></span> INTEL</a>
-            <a href="/huddle" class="nav-item"><span class="nav-icon"><i class="bi bi-chat-dots"></i></span> Huddle</a>
-            <a href="/mailer" class="nav-item"><span class="nav-icon"><i class="bi bi-envelope"></i></span> Mailer</a>
-            <a href="/vault" class="nav-item"><span class="nav-icon"><i class="bi bi-lock"></i></span> Vault</a>
-            <a href="/pm" class="nav-item"><span class="nav-icon"><i class="bi bi-building"></i></span> Property Mgmt</a>
-            <a href="/cfo" class="nav-item"><span class="nav-icon"><i class="bi bi-graph-up"></i></span> CFO</a>
-            <a href="/danimal" class="nav-item"><span class="nav-icon"><i class="bi bi-database"></i></span> Danimal Data</a>
+        <div style="flex:1;overflow-y:auto;">
+            <div style="font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:1.5px;padding:8px 12px;">Research Tools</div>
+            <a href="/intel/research" class="nav-item active" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#60a5fa;background:rgba(59,130,246,0.1);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-cpu" style="width:20px;"></i> AI Assistant</a>
+            <a href="#" onclick="selectReportType('cma','Generate a Comparative Market Analysis for ')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:13px;margin-bottom:2px;"><i class="bi bi-bar-chart-line" style="width:20px;color:#3b82f6;"></i> CMA Report</a>
+            <a href="#" onclick="selectReportType('bov','Generate a Broker Opinion of Value for ')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:13px;margin-bottom:2px;"><i class="bi bi-cash-coin" style="width:20px;color:#10b981;"></i> BOV</a>
+            <a href="#" onclick="selectReportType('om','Generate an Offering Memorandum for ')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:13px;margin-bottom:2px;"><i class="bi bi-file-earmark-richtext" style="width:20px;color:#ef4444;"></i> Offering Memo</a>
+            <a href="#" onclick="selectReportType('swot','Generate a SWOT Analysis for ')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:13px;margin-bottom:2px;"><i class="bi bi-bullseye" style="width:20px;color:#f59e0b;"></i> SWOT Analysis</a>
+            <a href="#" onclick="selectReportType('cim','Generate a Confidential Information Memorandum for ')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:13px;margin-bottom:2px;"><i class="bi bi-lock" style="width:20px;color:#8b5cf6;"></i> CIM</a>
+            <a href="#" onclick="selectMarketReport()" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:13px;margin-bottom:2px;"><i class="bi bi-newspaper" style="width:20px;color:#06b6d4;"></i> Market Report</a>
+            <div style="font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:1.5px;padding:16px 12px 8px;">Navigate</div>
+            <a href="/dashboard" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-house" style="width:20px;"></i> CRE Home</a>
+            <a href="/crm" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-funnel" style="width:20px;"></i> CRM</a>
+            <a href="/marketing" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-megaphone" style="width:20px;"></i> Marketing</a>
+            <a href="/huddle" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-chat-dots" style="width:20px;"></i> Huddle</a>
         </div>
-        <div class="sidebar-footer">
-            <div class="user-info">
-                <div class="user-avatar"><%= typeof user !== 'undefined' && user && user.name ? user.name.charAt(0) : 'U' %></div>
+        <div style="padding:12px;border-top:1px solid rgba(255,255,255,0.08);margin-top:auto;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                <div style="width:32px;height:32px;border-radius:8px;background:#3B82F6;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;"><%= typeof user !== 'undefined' && user && user.name ? user.name.charAt(0) : 'U' %></div>
                 <div>
-                    <div class="user-name"><%= typeof user !== 'undefined' && user ? user.name : 'User' %></div>
-                    <div class="user-role"><%= typeof user !== 'undefined' && user ? user.role : '' %></div>
+                    <div style="font-size:13px;font-weight:600;color:#f1f5f9;"><%= typeof user !== 'undefined' && user ? user.name : 'User' %></div>
+                    <div style="font-size:11px;color:#64748b;"><%= typeof user !== 'undefined' && user ? user.role : '' %></div>
                 </div>
             </div>
-            <a href="/auth/logout"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
+            <a href="/auth/logout" style="display:flex;align-items:center;gap:8px;color:#64748b;text-decoration:none;font-size:13px;padding:8px 0;"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
         </div>
     </nav>
 
@@ -213,19 +221,12 @@
         <!-- Top Bar -->
         <div class="top-bar">
             <div style="display:flex;align-items:center;gap:12px;">
-                <h1><span class="accent">INTEL</span> Research</h1>
+                <h1><span class="accent">INTEL</span> Research Assistant</h1>
                 <span class="ai-badge">AI POWERED</span>
             </div>
             <div class="top-bar-actions">
-                <a href="/intel" class="btn btn-ghost"><i class="bi bi-arrow-left"></i> Back to INTEL</a>
+                
             </div>
-        </div>
-
-        <!-- Intel Tabs -->
-        <div class="intel-tabs">
-            <a href="/intel" class="intel-tab"><i class="bi bi-grid-3x3-gap"></i> Overview</a>
-            <a href="/intel/research" class="intel-tab active"><i class="bi bi-search"></i> Research <span class="ai-badge">AI</span></a>
-            <a href="/intel/create" class="intel-tab"><i class="bi bi-brush"></i> Create</a>
         </div>
 
         <!-- Chat Area -->

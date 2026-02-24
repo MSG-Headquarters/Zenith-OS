@@ -2948,10 +2948,10 @@ app.get('/pm', async (req, res) => {
     try {
         const org = await pool.query('SELECT * FROM organizations WHERE id = $1', [req.session.user.organization_id]);
         const tenant = org.rows[0];
-        res.render('pm/dashboard', { user: req.session.user, tenant, stats: {} });
+        res.render('pm/dashboard', { user: req.session.user, tenant, stats: {}, features: req.session.features || {}, theme: req.session.user.theme || 'light' });
     } catch (error) {
         console.error('[PM] Dashboard error:', error);
-        res.render('pm/dashboard', { user: req.session.user, tenant: {}, stats: {} });
+        res.render('pm/dashboard', { user: req.session.user, tenant: {}, stats: {}, features: req.session.features || {}, theme: req.session.user.theme || 'light' });
     }
 });
 
@@ -3038,10 +3038,52 @@ app.get('/api/pm/stats', async (req, res) => {
     }
 });
 
+
+// API: Get full portfolio with tenant counts
+app.get('/api/pm/portfolio', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: 'Unauthorized' });
+    try {
+        const props = await pool.query(`
+            SELECT p.*, 
+                (SELECT COUNT(*) FROM pm_tenants t WHERE t.property_id = p.id AND t.tenant_status IN ('Current','MTM')) as tenant_count
+            FROM pm_properties p WHERE p.is_active = true ORDER BY p.short_name
+        `);
+        const openReqs = await pool.query("SELECT COUNT(*) as c FROM pm_maintenance_requests WHERE status NOT IN ('Completed','Closed')");
+        res.json({ success: true, properties: props.rows, openRequests: parseInt(openReqs.rows[0].c) });
+    } catch(e) { console.error('[PM] Portfolio error:', e); res.status(500).json({ error: e.message }); }
+});
+
+// API: Get all tenants with property info
+app.get('/api/pm/tenants', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: 'Unauthorized' });
+    try {
+        const result = await pool.query(`
+            SELECT t.*, p.short_name as property_name, p.property_address
+            FROM pm_tenants t 
+            JOIN pm_properties p ON t.property_id = p.id 
+            ORDER BY p.short_name, t.unit_number
+        `);
+        const now = new Date();
+        const tenants = result.rows.map(t => {
+            if (t.lease_end) {
+                const days = Math.ceil((new Date(t.lease_end) - now) / (1000*60*60*24));
+                t.is_expiring = days >= 0 && days <= 90;
+                t.days_remaining = days;
+            }
+            return t;
+        });
+        res.json({ success: true, tenants });
+    } catch(e) { console.error('[PM] Tenants error:', e); res.status(500).json({ error: e.message }); }
+});
+
 // ============================================
 // INTEL MODULE
 // ============================================
 app.get('/intel', async (req, res) => {
+    // Redirect to Research as primary INTEL experience
+    return res.redirect('/intel/research');
+    // Original dashboard below (kept for reference)
+
     if (!req.session.user) return res.redirect('/auth/login');
     try {
         res.render('intel/dashboard', {
@@ -3070,6 +3112,9 @@ app.get('/intel/research', async (req, res) => {
 });
 
 app.get('/intel/create', async (req, res) => {
+    return res.redirect('/intel/research');
+    // Original create below (kept for reference)
+
     if (!req.session.user) return res.redirect('/auth/login');
     try {
         res.render('intel/create', {
