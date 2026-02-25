@@ -1,314 +1,77 @@
 /**
- * INTEL AI RESEARCH ASSISTANT — API ROUTE (v3)
- * Zenith OS — The Adam Project Edition
- *
+ * ═══════════════════════════════════════════════════════════════════════════
+ * INTEL AI RESEARCH ASSISTANT — ROUTES (v3 — Phase 2: Market Intelligence)
+ * Zenith OS
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
  * Features:
- * - File upload & parsing (Excel, PDF, CSV)
- * - "Adam Project" persistent knowledge base
- * - Excel CMA export generation
- * - Anthropic API with web_search tool
- * - Danimal Data, Census, FDOT, Property Appraiser enrichment
- *
+ *   - Anthropic Claude API with web_search tool
+ *   - Adam-style market narrative generation
+ *   - INTEL Market Benchmarks enrichment (6,698+ data points)
+ *   - Top Transactions enrichment (275+ deals)
+ *   - IQR outlier detection for CMA/BOV validation
+ *   - Danimal Data enrichment (1.5M+ FL licensees)
+ *   - Census API enrichment (demographics)
+ *   - FDOT traffic data enrichment
+ *   - County Property Appraiser enrichment
+ *   - The Adam Project (persistent learning from uploads)
+ *   - File upload parsing (Excel, PDF, CSV)
+ *   - Excel export for structured report data
+ * 
  * Main Street Group Technology Division
  * Christ is King
+ * ═══════════════════════════════════════════════════════════════════════════
  */
 
 const https = require('https');
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
 const multer = require('multer');
-const ExcelJS = require('exceljs');
 
-// Multer config
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = path.join(__dirname, '..', 'uploads');
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        const ts = Date.now();
-        const safe = file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-        cb(null, `${ts}-${safe}`);
-    }
-});
+// Multer config for file uploads
 const upload = multer({
-    storage,
-    limits: { fileSize: 25 * 1024 * 1024 }, // 25MB
+    dest: path.join(__dirname, '..', 'uploads'),
+    limits: { fileSize: 25 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
-        const allowed = ['.pdf','.xlsx','.xls','.csv','.doc','.docx','.txt','.png','.jpg','.jpeg'];
+        const allowed = ['.pdf', '.xlsx', '.xls', '.csv', '.doc', '.docx', '.txt', '.png', '.jpg', '.jpeg'];
         const ext = path.extname(file.originalname).toLowerCase();
         cb(null, allowed.includes(ext));
     }
 });
 
-// ── File Parsers ──
-async function parseExcel(filePath) {
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile(filePath);
-    const results = [];
-    workbook.eachSheet((sheet) => {
-        const headers = [];
-        let headerRow = null;
-        sheet.eachRow((row, rowNum) => {
-            if (rowNum === 1) {
-                headerRow = rowNum;
-                row.eachCell((cell, colNum) => {
-                    headers[colNum] = String(cell.value || '').trim();
-                });
-            } else {
-                const obj = {};
-                row.eachCell((cell, colNum) => {
-                    const key = headers[colNum] || `col_${colNum}`;
-                    obj[key] = cell.value;
-                });
-                if (Object.keys(obj).length > 0) results.push(obj);
-            }
-        });
-    });
-    return { type: 'spreadsheet', rows: results, rowCount: results.length, headers: results[0] ? Object.keys(results[0]) : [] };
-}
-
-async function parsePDF(filePath) {
-    const pdfParse = require('pdf-parse');
-    const buffer = fs.readFileSync(filePath);
-    const data = await pdfParse(buffer);
-    return { type: 'pdf', text: data.text, pages: data.numpages, chars: data.text.length };
-}
-
-async function parseCSV(filePath) {
-    const content = fs.readFileSync(filePath, 'utf-8');
-    const lines = content.split('\n').filter(l => l.trim());
-    if (lines.length === 0) return { type: 'csv', rows: [], rowCount: 0, headers: [] };
-    
-    // Simple CSV parse (handles basic cases)
-    const parseRow = (line) => {
-        const result = [];
-        let current = '';
-        let inQuotes = false;
-        for (const ch of line) {
-            if (ch === '"') { inQuotes = !inQuotes; }
-            else if (ch === ',' && !inQuotes) { result.push(current.trim()); current = ''; }
-            else { current += ch; }
-        }
-        result.push(current.trim());
-        return result;
-    };
-    
-    const headers = parseRow(lines[0]);
-    const rows = [];
-    for (let i = 1; i < lines.length; i++) {
-        const values = parseRow(lines[i]);
-        const obj = {};
-        headers.forEach((h, idx) => { if (h) obj[h] = values[idx] || ''; });
-        if (Object.keys(obj).length > 0) rows.push(obj);
-    }
-    return { type: 'csv', rows, rowCount: rows.length, headers };
-}
-
-async function parseTxt(filePath) {
-    const text = fs.readFileSync(filePath, 'utf-8');
-    return { type: 'text', text, chars: text.length };
-}
-
-async function parseFile(filePath, originalName) {
-    const ext = path.extname(originalName).toLowerCase();
-    try {
-        if (['.xlsx', '.xls'].includes(ext)) return await parseExcel(filePath);
-        if (ext === '.pdf') return await parsePDF(filePath);
-        if (ext === '.csv') return await parseCSV(filePath);
-        if (['.txt', '.doc', '.docx'].includes(ext)) return await parseTxt(filePath);
-        return { type: 'unsupported', message: `Cannot parse ${ext} files yet` };
-    } catch (err) {
-        console.error(`[INTEL AI] Parse error for ${originalName}:`, err.message);
-        return { type: 'error', message: err.message };
-    }
-}
-
-// ── Adam Project: Store parsed data ──
-async function storeToAdamProject(pool, orgId, userId, userName, fileName, parsedData) {
-    if (!parsedData || parsedData.type === 'error' || parsedData.type === 'unsupported') return 0;
-    
-    let stored = 0;
-    
-    if (parsedData.rows && parsedData.rows.length > 0) {
-        // Spreadsheet or CSV — try to extract structured records
-        for (const row of parsedData.rows.slice(0, 500)) { // Cap at 500 rows per file
-            const raw = JSON.stringify(row);
-            
-            // Smart field mapping — look for common CRE column names
-            const findField = (keys, row) => {
-                for (const k of keys) {
-                    for (const col of Object.keys(row)) {
-                        if (col.toLowerCase().includes(k.toLowerCase())) return row[col];
-                    }
-                }
-                return null;
-            };
-            
-            const address = findField(['address', 'location', 'property', 'site'], row);
-            const city = findField(['city', 'market'], row);
-            const county = findField(['county', 'submarket'], row);
-            const propType = findField(['type', 'property type', 'asset', 'class'], row);
-            const sf = findField(['sf', 'square feet', 'sqft', 'size', 'gla', 'area'], row);
-            const price = findField(['price', 'sale price', 'sold', 'amount', 'value'], row);
-            const capRate = findField(['cap', 'cap rate'], row);
-            const ppsf = findField(['price/sf', 'price per sf', '$/sf', 'ppsf'], row);
-            const noi = findField(['noi', 'net operating'], row);
-            const occ = findField(['occupancy', 'occ', 'leased'], row);
-            const rent = findField(['rent', 'asking', 'lease rate'], row);
-            const tenant = findField(['tenant', 'lessee', 'occupant'], row);
-            
-            try {
-                await pool.query(`
-                    INSERT INTO adam_project_data 
-                    (org_id, uploaded_by, uploaded_by_name, source_file, source_type, record_type,
-                     property_address, property_city, property_county, property_type,
-                     square_footage, sale_price, cap_rate, price_per_sf, noi, 
-                     occupancy_rate, asking_rent, tenant_name, raw_data)
-                    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
-                `, [
-                    orgId, userId, userName, fileName, 'upload', propType ? 'comp' : 'data',
-                    address ? String(address).substring(0, 500) : null,
-                    city ? String(city).substring(0, 255) : null,
-                    county ? String(county).substring(0, 255) : null,
-                    propType ? String(propType).substring(0, 255) : null,
-                    sf ? parseFloat(String(sf).replace(/[^0-9.]/g, '')) || null : null,
-                    price ? parseFloat(String(price).replace(/[^0-9.]/g, '')) || null : null,
-                    capRate ? parseFloat(String(capRate).replace(/[^0-9.%]/g, '')) || null : null,
-                    ppsf ? parseFloat(String(ppsf).replace(/[^0-9.]/g, '')) || null : null,
-                    noi ? parseFloat(String(noi).replace(/[^0-9.]/g, '')) || null : null,
-                    occ ? parseFloat(String(occ).replace(/[^0-9.%]/g, '')) || null : null,
-                    rent ? parseFloat(String(rent).replace(/[^0-9.]/g, '')) || null : null,
-                    tenant ? String(tenant).substring(0, 500) : null,
-                    raw
-                ]);
-                stored++;
-            } catch (dbErr) {
-                // Skip individual row errors
-            }
-        }
-    }
-    
-    return stored;
-}
-
-// ── Build file context for Claude ──
-function buildFileContext(parsedFiles) {
-    let context = '';
-    for (const pf of parsedFiles) {
-        context += `\n\n[UPLOADED FILE — ${pf.name}]\n`;
-        if (pf.parsed.type === 'spreadsheet' || pf.parsed.type === 'csv') {
-            context += `Type: ${pf.parsed.type} | Rows: ${pf.parsed.rowCount} | Columns: ${pf.parsed.headers.join(', ')}\n`;
-            // Include first 30 rows as context
-            const sample = pf.parsed.rows.slice(0, 30);
-            if (sample.length > 0) {
-                context += `Data:\n`;
-                // Header row
-                const cols = pf.parsed.headers.slice(0, 15); // cap columns
-                context += '| ' + cols.join(' | ') + ' |\n';
-                context += '| ' + cols.map(() => '---').join(' | ') + ' |\n';
-                sample.forEach(row => {
-                    context += '| ' + cols.map(c => {
-                        let v = row[c];
-                        if (v === null || v === undefined) return '';
-                        if (typeof v === 'object' && v.result !== undefined) v = v.result;
-                        return String(v).substring(0, 40);
-                    }).join(' | ') + ' |\n';
-                });
-                if (pf.parsed.rowCount > 30) {
-                    context += `... and ${pf.parsed.rowCount - 30} more rows\n`;
-                }
-            }
-        } else if (pf.parsed.type === 'pdf' || pf.parsed.type === 'text') {
-            context += `Type: ${pf.parsed.type} | Pages: ${pf.parsed.pages || 'N/A'} | Characters: ${pf.parsed.chars}\n`;
-            // Include up to 8000 chars of text
-            const txt = pf.parsed.text || '';
-            context += txt.substring(0, 8000);
-            if (txt.length > 8000) context += `\n... (truncated, ${txt.length - 8000} more characters)`;
-        } else {
-            context += `Type: ${pf.parsed.type} | ${pf.parsed.message || ''}\n`;
-        }
-    }
-    return context;
-}
+// Optional packages (graceful fallback)
+let ExcelJS, pdfParse;
+try { ExcelJS = require('exceljs'); } catch (e) { ExcelJS = null; }
+try { pdfParse = require('pdf-parse'); } catch (e) { pdfParse = null; }
 
 
-// ── System Prompt ──
+// ═══════════════════════════════════════════════════════════════════════════
+// SYSTEM PROMPT
+// ═══════════════════════════════════════════════════════════════════════════
+
 const INTEL_AI_SYSTEM_PROMPT = `You are INTEL Research AI, the intelligence engine powering Zenith OS for CRE Consultants — a commercial real estate brokerage in Southwest Florida.
 
-You are helping Adam Kerner (Director of Market Research & Data Analytics) and the CRE Consultants brokerage team generate professional CRE reports and analysis.
+## ROLE
+You are a senior CRE research analyst producing institutional-quality reports and analysis. Your work matches the caliber of TCG, CBRE, JLL, and Cushman & Wakefield research departments. You write with authority, precision, and market fluency.
 
-## YOUR CAPABILITIES
+## REPORT TYPES
+- **CMA (Comparative Market Analysis)**: Comp selection, adjustment grid, reconciled value range. Flag outliers using IQR statistical analysis when available.
+- **SWOT Analysis**: Strengths/Weaknesses/Opportunities/Threats for a property or market position.
+- **CIM (Confidential Information Memorandum)**: Investment-grade property overview, financials, tenant summary, market context.
+- **BOV (Broker Opinion of Value)**: Valuation methodology, comp analysis, income approach, reconciled opinion. Apply IQR bounds when available.
+- **OM (Offering Memorandum)**: Marketing document with property highlights, financials, area demographics, and investment thesis.
+- **Market Report / Newsletter**: Quarterly/periodic market intelligence covering vacancy, absorption, rents, cap rates, construction pipeline, and notable transactions.
 
-You generate the following report types:
-
-### CMA — Comparative Market Analysis
-- Analyze comparable property sales, active listings, and market trends
-- Include price per SF, cap rates, days on market, absorption rates
-- Compare subject property against 3-5 relevant comps within defined radius
-- Provide market positioning and pricing recommendations
-- USE WEB SEARCH to find actual comparable sales data from CoStar, CREXi, LoopNet, and public records
-
-### SWOT — SWOT Analysis
-- Strengths: Property attributes, location advantages, tenant quality, physical condition
-- Weaknesses: Deferred maintenance, vacancy, lease rollover risk, access issues
-- Opportunities: Value-add potential, market trends, zoning changes, development pipeline
-- Threats: Competition, economic indicators, regulatory changes, environmental risks
-
-### CIM — Confidential Information Memorandum
-- Executive Summary with investment highlights
-- Property Overview (location, size, year built, construction, parking, zoning)
-- Financial Analysis (rent roll, operating expenses, NOI, cap rate, cash-on-cash)
-- Tenant Profiles with lease terms and credit quality
-- Area Overview with demographics, economics, and growth drivers
-- Market Outlook and comparable transactions
-
-### BOV — Broker Opinion of Value
-- Income Approach (NOI / cap rate with market cap rate support)
-- Sales Comparison Approach (comparable sales analysis)
-- Cost Approach (when applicable)
-- Reconciled value range with confidence assessment
-- Market conditions affecting value
-
-### OM — Offering Memorandum
-- Property Highlights and Investment Summary
-- Financial Overview (income, expenses, NOI, returns)
-- Tenant Information and Lease Abstract
-- Area Demographics and Economic Overview
-- Traffic Counts and Accessibility
-- Site Plan, Aerial Views, and Location Map references
-
-### Market Report — Newsletter Market Intelligence
-- Available in cadences: Daily, Weekly, Monthly, Quarterly, Semi-Annual, Annual
-- Format as a professional newsletter suitable for distribution to clients and investors
-
-## FILE ANALYSIS
-When files are uploaded (Excel, PDF, CSV), you receive the parsed contents in your context. 
-- For spreadsheets: Analyze all columns, identify property data, comps, rent rolls, and financial data
-- For PDFs: Extract key information from offering memorandums, appraisals, environmental reports, lease abstracts
-- Incorporate file data directly into your analysis — these are primary data sources
-- When you identify structured property data (comps, sales, rents), note that it has been stored in "The Adam Project" database for future reference
-
-## EXCEL EXPORT
-When you generate a CMA, BOV, or any report with tabular data, include a structured JSON block at the end of your response wrapped in <!--EXPORT_DATA_START--> and <!--EXPORT_DATA_END--> tags. Format:
-{"title":"Report Title","sheets":[{"name":"Sheet Name","headers":["Col1","Col2"],"rows":[["val1","val2"]]}]}
-This enables the Excel export button for the user. Include multiple sheets when appropriate (e.g., "Comparable Sales", "Financial Summary", "Market Overview").
-
-## IMPORTANT INSTRUCTIONS FOR WEB SEARCH
-You have access to the web_search tool. USE IT AGGRESSIVELY for:
-- Finding actual comparable sales and transaction data
-- Current cap rates and market pricing for specific property types and locations
-- Recent news about developments, tenants, and market activity in Southwest Florida
-- Verifying property details (size, year built, ownership, tenant roster)
-- Current interest rates and capital markets conditions
-- Traffic counts from FDOT when not provided in data context
-- Demographic data when not provided in data context
-
-When you search and find real data, present it WITH the source. Only use [VERIFY] tags for data requiring proprietary access or physical inspection.
+## DATA INTEGRITY
+- When citing data from injected sources (Danimal Data, Census, FDOT, Market Benchmarks, Adam Project), present it as authoritative and factual.
+- When supplementing with web search, clearly distinguish between verified local data and web-sourced estimates.
+- If you lack data for a specific metric, use [VERIFY: description] tags so the broker knows to confirm.
+- Only use [VERIFY] tags for data requiring proprietary access or physical inspection.
 
 ## DATA SOURCES
 You have access to enriched data injected into your context from:
+- **INTEL Market Benchmarks**: 6,698+ SWFL market data points — vacancy rates, absorption, asking rents, cap rates, construction pipeline, lease activity by size bracket, submarket drill-downs for Lee, Collier, and Charlotte counties across Industrial, Office, Retail, Land, and Multifamily sectors (Q4 2024–Q3 2025)
+- **Top Transactions**: 275+ notable CRE deals with sale prices, cap rates, buyer/seller, square footage
 - **The Adam Project**: Proprietary CRE data uploaded by the team (comps, rent rolls, operating statements, market data)
 - **Danimal Data**: 1.5M+ Florida DBPR professional licensees
 - **Census API**: Population, median household income, home values, employment statistics
@@ -316,8 +79,41 @@ You have access to enriched data injected into your context from:
 - **County Property Appraiser**: Property sales, assessments, ownership records
 - **Web Search**: Real-time access to current market data, news, and property information
 
+## INTEL MARKET BENCHMARKS — NARRATIVE STYLE
+Write market narratives like Adam Kerner, Director of Market Research & Data Analytics at CRE Consultants:
+- **Lead with the headline**: Start each section with the most impactful finding
+- **Contextualize every metric**: Never just state a number — compare QoQ, YoY, vs regional averages
+- **Tell the story**: Connect data points to market dynamics (rising rents + low vacancy + pipeline = landlord's market)
+- **Precise CRE language**: "absorption", "basis points", "tightening", "compression", "deliveries", "pipeline", "flight to quality"
+- **Submarket granularity**: Always break down to submarket level when data is available
+- **Lease activity analysis**: Interpret size brackets (heavy <2,500 SF = small business demand, heavy >25,000 SF = institutional/logistics)
+
+## MARKET REPORT STRUCTURE
+When generating Market Reports:
+1. **Executive Summary** — 3-4 sentences capturing the market narrative
+2. **Key Metrics Dashboard** — Table with vacancy, absorption, rent, cap rate, construction pipeline
+3. **Sector Deep Dives** — One section per property type with submarket breakdowns
+4. **Notable Transactions** — Top deals with analysis of market signals
+5. **Lease Activity Analysis** — By size bracket with demand trend interpretation
+6. **Year-over-Year Comparisons** — Trend lines and directional commentary
+7. **Outlook** — Forward-looking commentary based on pipeline, absorption trends, macro
+
+## IQR OUTLIER DETECTION
+When statistical analysis data is present:
+- Reference acceptable ranges when discussing comp validity
+- Flag subject property metrics outside IQR bounds
+- In CMA/BOV: "After removing N statistical outliers (outside IQR range X%-Y%), the adjusted median is Z%"
+- This ensures defensible valuations for institutional scrutiny
+
+## DATA CITATION
+- Cite "INTEL Market Benchmarks" for injected benchmark data
+- Cite "Danimal Data" for licensee statistics
+- Cite "Census ACS" for demographics
+- Cite "FDOT" for traffic counts
+- When web search conflicts with benchmarks, note both with explanation
+
 ## FORMATTING STANDARDS
-- Structure reports professionally matching institutional CRE standards (TCG, CBRE, JLL quality)
+- Structure reports professionally matching institutional CRE standards
 - Use clear section headers with **bold** formatting
 - Present financial data in organized tables using markdown
 - Lead with executive summary/key findings
@@ -329,7 +125,10 @@ You have access to enriched data injected into your context from:
 - Key team: Dan Smith (Principal Broker), Mitchell Tindell (Senior Associate), Chris Khouri (Managing Director), Jonathan Agee (Director of Marketing), Adam Kerner (Director of Market Research & Data Analytics)`;
 
 
-// ── Helper: Census API Query ──
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPER: Census API Query
+// ═══════════════════════════════════════════════════════════════════════════
+
 function queryCensus(state, county) {
     return new Promise((resolve) => {
         const CENSUS_API_KEY = process.env.CENSUS_API_KEY;
@@ -359,14 +158,19 @@ function queryCensus(state, county) {
     });
 }
 
-// ── Helper: Extract Location ──
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPER: Extract Location from User Message
+// ═══════════════════════════════════════════════════════════════════════════
+
 function extractLocation(message) {
     const msgLower = message.toLowerCase();
     const cityCountyMap = {
         'fort myers': 'lee', 'cape coral': 'lee', 'lehigh acres': 'lee',
         'bonita springs': 'lee', 'estero': 'lee', 'sanibel': 'lee',
         'naples': 'collier', 'marco island': 'collier', 'immokalee': 'collier',
-        'punta gorda': 'charlotte', 'port charlotte': 'charlotte',
+        'ave maria': 'collier', 'golden gate': 'collier',
+        'punta gorda': 'charlotte', 'port charlotte': 'charlotte', 'englewood': 'charlotte', 'murdock': 'charlotte',
         'sarasota': 'sarasota', 'venice': 'sarasota', 'north port': 'sarasota',
         'bradenton': 'manatee', 'palmetto': 'manatee',
         'tampa': 'hillsborough', 'orlando': 'orange',
@@ -385,80 +189,487 @@ function extractLocation(message) {
 }
 
 
-// ── Excel Export Generator ──
-async function generateExcel(exportData) {
-    const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'Zenith OS — INTEL Research';
-    workbook.created = new Date();
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPER: Detect Sector, County, Quarter from User Message (NEW — Phase 2)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function detectSectorAndQuarter(message) {
+    const msg = message.toLowerCase();
     
-    for (const sheet of exportData.sheets) {
-        const ws = workbook.addWorksheet(sheet.name);
+    // Sector detection
+    const sectorMap = {
+        'industrial': ['industrial', 'warehouse', 'distribution', 'flex space', 'manufacturing', 'logistics'],
+        'office': ['office', 'office space', 'class a office', 'class b office', 'medical office', 'co-working'],
+        'retail': ['retail', 'shopping center', 'strip mall', 'restaurant', 'storefront', 'plaza', 'outparcel'],
+        'land': ['land', 'vacant land', 'development site', 'acreage', 'lot', 'entitled land', 'raw land'],
+        'multifamily': ['multifamily', 'multi-family', 'apartment', 'apartments', 'residential rental', 'duplex', 'triplex', 'fourplex']
+    };
+    
+    let detectedSector = null;
+    for (const [sector, keywords] of Object.entries(sectorMap)) {
+        for (const kw of keywords) {
+            if (msg.includes(kw)) { detectedSector = sector; break; }
+        }
+        if (detectedSector) break;
+    }
+    
+    // County detection (SWFL focus)
+    const countyKeywords = {
+        'lee': ['lee county', 'fort myers', 'cape coral', 'lehigh', 'bonita springs', 'estero', 'sanibel'],
+        'collier': ['collier county', 'naples', 'marco island', 'immokalee', 'ave maria', 'golden gate'],
+        'charlotte': ['charlotte county', 'punta gorda', 'port charlotte', 'englewood', 'murdock']
+    };
+    
+    let detectedCounty = null;
+    for (const [county, keywords] of Object.entries(countyKeywords)) {
+        for (const kw of keywords) {
+            if (msg.includes(kw)) { detectedCounty = county; break; }
+        }
+        if (detectedCounty) break;
+    }
+    
+    // Quarter detection
+    let detectedQuarter = null;
+    let detectedYear = null;
+    
+    const quarterPatterns = [
+        /q([1-4])\s*(?:20)?(\d{2})/i,
+        /q([1-4])\s*'(\d{2})/i,
+        /(first|second|third|fourth)\s+quarter\s*(?:of\s*)?(?:20)?(\d{2})/i
+    ];
+    
+    const quarterWordMap = { 'first': '1', 'second': '2', 'third': '3', 'fourth': '4' };
+    
+    for (const pattern of quarterPatterns) {
+        const match = msg.match(pattern);
+        if (match) {
+            const qNum = quarterWordMap[match[1].toLowerCase()] || match[1];
+            detectedQuarter = `Q${qNum}`;
+            detectedYear = match[2].length === 2 ? `20${match[2]}` : match[2];
+            break;
+        }
+    }
+    
+    // Default to most recent quarter for "latest", "current", etc.
+    if (!detectedQuarter && (msg.includes('latest') || msg.includes('current') || msg.includes('most recent') || msg.includes('today'))) {
+        detectedQuarter = 'Q3';
+        detectedYear = '2025';
+    }
+    
+    return { sector: detectedSector, county: detectedCounty, quarter: detectedQuarter, year: detectedYear };
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPER: Query INTEL Market Benchmarks (NEW — Phase 2)
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function queryMarketBenchmarks(pool, { sector, county, quarter, year }) {
+    if (!pool) return [];
+    
+    try {
+        let conditions = [];
+        let params = [];
+        let paramIdx = 1;
         
-        // Title row
-        ws.mergeCells(1, 1, 1, sheet.headers.length);
-        const titleCell = ws.getCell('A1');
-        titleCell.value = exportData.title || 'INTEL Research Report';
-        titleCell.font = { size: 14, bold: true, color: { argb: 'FF1B7A4A' } };
-        titleCell.alignment = { horizontal: 'left' };
+        if (sector) {
+            conditions.push(`LOWER(sector) = LOWER($${paramIdx})`);
+            params.push(sector);
+            paramIdx++;
+        }
+        if (county) {
+            conditions.push(`LOWER(county) = LOWER($${paramIdx})`);
+            params.push(county);
+            paramIdx++;
+        }
+        if (quarter && year) {
+            conditions.push(`quarter = $${paramIdx}`);
+            params.push(`${quarter} ${year}`);
+            paramIdx++;
+        }
         
-        // Subtitle
-        ws.mergeCells(2, 1, 2, sheet.headers.length);
-        const subCell = ws.getCell('A2');
-        subCell.value = `Generated by INTEL Research AI — CRE Consultants — ${new Date().toLocaleDateString()}`;
-        subCell.font = { size: 9, italic: true, color: { argb: 'FF666666' } };
+        if (conditions.length === 0) {
+            conditions.push(`LOWER(county) = 'swfl'`);
+        }
         
-        // Headers at row 4
-        const headerRow = ws.getRow(4);
-        sheet.headers.forEach((h, i) => {
-            const cell = headerRow.getCell(i + 1);
-            cell.value = h;
-            cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
-            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1B7A4A' } };
-            cell.border = { bottom: { style: 'thin', color: { argb: 'FF1B7A4A' } } };
-            cell.alignment = { horizontal: 'center', wrapText: true };
-        });
+        const query = `
+            SELECT 
+                county, sector, submarket, quarter,
+                vacancy_rate, asking_rent_avg, asking_rent_range_low, asking_rent_range_high,
+                cap_rate_avg, cap_rate_range_low, cap_rate_range_high,
+                absorption_sf, net_absorption_sf,
+                inventory_sf, total_buildings,
+                construction_pipeline_sf, under_construction_sf,
+                avg_price_per_sf, median_sale_price,
+                lease_activity_total_sf, lease_activity_under_2500,
+                lease_activity_2500_5000, lease_activity_5000_10000,
+                lease_activity_10000_25000, lease_activity_over_25000,
+                yoy_rent_change, yoy_vacancy_change, yoy_absorption_change,
+                market_trend, notes
+            FROM intel_market_benchmarks
+            WHERE ${conditions.join(' AND ')}
+            ORDER BY county, sector, submarket
+        `;
         
-        // Data rows
-        sheet.rows.forEach((row, rowIdx) => {
-            const dataRow = ws.getRow(5 + rowIdx);
-            row.forEach((val, colIdx) => {
-                const cell = dataRow.getCell(colIdx + 1);
-                // Try to parse numbers
-                const num = parseFloat(String(val).replace(/[$,%]/g, ''));
-                if (!isNaN(num) && String(val).match(/^[\$\d,.\-%]+$/)) {
-                    cell.value = num;
-                    if (String(val).includes('$')) cell.numFmt = '$#,##0';
-                    else if (String(val).includes('%')) cell.numFmt = '0.00%';
-                    else cell.numFmt = '#,##0';
-                } else {
-                    cell.value = val;
+        const result = await pool.query(query, params);
+        return result.rows;
+    } catch (err) {
+        console.error('[INTEL AI] Market benchmarks query error:', err.message);
+        return [];
+    }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPER: Query Top Transactions (NEW — Phase 2)
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function queryTopTransactions(pool, { sector, county, quarter, year }) {
+    if (!pool) return [];
+    
+    try {
+        let conditions = [];
+        let params = [];
+        let paramIdx = 1;
+        
+        if (sector) {
+            conditions.push(`LOWER(sector) = LOWER($${paramIdx})`);
+            params.push(sector);
+            paramIdx++;
+        }
+        if (county) {
+            conditions.push(`LOWER(county) = LOWER($${paramIdx})`);
+            params.push(county);
+            paramIdx++;
+        }
+        if (quarter && year) {
+            conditions.push(`quarter = $${paramIdx}`);
+            params.push(`${quarter} ${year}`);
+            paramIdx++;
+        }
+        
+        if (conditions.length === 0) {
+            conditions.push('1=1');
+        }
+        
+        const query = `
+            SELECT 
+                property_name, property_address, county, sector, quarter,
+                transaction_type, sale_price, price_per_sf,
+                square_footage, cap_rate, buyer, seller,
+                transaction_date, notes
+            FROM intel_top_transactions
+            WHERE ${conditions.join(' AND ')}
+            ORDER BY sale_price DESC NULLS LAST
+            LIMIT 25
+        `;
+        
+        const result = await pool.query(query, params);
+        return result.rows;
+    } catch (err) {
+        console.error('[INTEL AI] Top transactions query error:', err.message);
+        return [];
+    }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPER: IQR Outlier Detection (NEW — Phase 2)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function iqrOutlierFilter(values, multiplier = 1.5) {
+    if (!values || values.length < 4) {
+        return { clean: values || [], outliers: [], q1: null, q3: null, iqr: null, lowerBound: null, upperBound: null, median: null };
+    }
+    
+    const sorted = [...values].sort((a, b) => a - b);
+    const n = sorted.length;
+    
+    const q1 = sorted[Math.floor(n * 0.25)];
+    const q3 = sorted[Math.floor(n * 0.75)];
+    const median = sorted[Math.floor(n * 0.5)];
+    const iqr = q3 - q1;
+    
+    const lowerBound = q1 - (multiplier * iqr);
+    const upperBound = q3 + (multiplier * iqr);
+    
+    const clean = [], outliers = [];
+    for (const val of values) {
+        if (val < lowerBound || val > upperBound) outliers.push(val);
+        else clean.push(val);
+    }
+    
+    return { clean, outliers, q1, q3, iqr, lowerBound, upperBound, median };
+}
+
+
+function applyIQRToBenchmarks(benchmarks) {
+    if (!benchmarks || benchmarks.length === 0) return '';
+    
+    const capRates = benchmarks.map(b => parseFloat(b.cap_rate_avg)).filter(v => !isNaN(v) && v > 0);
+    const priceSF = benchmarks.map(b => parseFloat(b.avg_price_per_sf)).filter(v => !isNaN(v) && v > 0);
+    const askingRents = benchmarks.map(b => parseFloat(b.asking_rent_avg)).filter(v => !isNaN(v) && v > 0);
+    const vacancyRates = benchmarks.map(b => parseFloat(b.vacancy_rate)).filter(v => !isNaN(v));
+    
+    let analysis = '\n\n[STATISTICAL ANALYSIS — IQR Outlier Detection]\n';
+    
+    if (capRates.length >= 4) {
+        const cr = iqrOutlierFilter(capRates);
+        analysis += `Cap Rates: Median ${cr.median.toFixed(2)}%, IQR ${cr.q1.toFixed(2)}%-${cr.q3.toFixed(2)}%, Acceptable: ${cr.lowerBound.toFixed(2)}%-${cr.upperBound.toFixed(2)}%`;
+        if (cr.outliers.length > 0) analysis += ` | ⚠️ ${cr.outliers.length} outlier(s): ${cr.outliers.map(v => v.toFixed(2) + '%').join(', ')}`;
+        analysis += '\n';
+    }
+    
+    if (priceSF.length >= 4) {
+        const ps = iqrOutlierFilter(priceSF);
+        analysis += `Price/SF: Median $${ps.median.toFixed(2)}, IQR $${ps.q1.toFixed(2)}-$${ps.q3.toFixed(2)}, Acceptable: $${ps.lowerBound.toFixed(2)}-$${ps.upperBound.toFixed(2)}`;
+        if (ps.outliers.length > 0) analysis += ` | ⚠️ ${ps.outliers.length} outlier(s): ${ps.outliers.map(v => '$' + v.toFixed(2)).join(', ')}`;
+        analysis += '\n';
+    }
+    
+    if (askingRents.length >= 4) {
+        const ar = iqrOutlierFilter(askingRents);
+        analysis += `Asking Rents: Median $${ar.median.toFixed(2)}/SF, IQR $${ar.q1.toFixed(2)}-$${ar.q3.toFixed(2)}, Acceptable: $${ar.lowerBound.toFixed(2)}-$${ar.upperBound.toFixed(2)}`;
+        if (ar.outliers.length > 0) analysis += ` | ⚠️ ${ar.outliers.length} outlier(s): ${ar.outliers.map(v => '$' + v.toFixed(2)).join(', ')}`;
+        analysis += '\n';
+    }
+    
+    if (vacancyRates.length >= 4) {
+        const vr = iqrOutlierFilter(vacancyRates);
+        analysis += `Vacancy: Median ${vr.median.toFixed(1)}%, IQR ${vr.q1.toFixed(1)}%-${vr.q3.toFixed(1)}%\n`;
+    }
+    
+    analysis += 'Use these ranges to validate comp data and flag properties outside normal market parameters.\n';
+    return analysis;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPER: Format Benchmark Context for System Prompt (NEW — Phase 2)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function formatBenchmarkContext(benchmarks, transactions, detection) {
+    if (benchmarks.length === 0 && transactions.length === 0) return '';
+    
+    let context = '';
+    
+    // ── Market Benchmarks ──
+    if (benchmarks.length > 0) {
+        const quarterLabel = detection.quarter && detection.year 
+            ? `${detection.quarter} ${detection.year}` 
+            : benchmarks[0]?.quarter || 'Latest';
+        const countyLabel = detection.county 
+            ? detection.county.charAt(0).toUpperCase() + detection.county.slice(1) + ' County'
+            : 'SWFL Region';
+        const sectorLabel = detection.sector
+            ? detection.sector.charAt(0).toUpperCase() + detection.sector.slice(1)
+            : 'All Sectors';
+        
+        context += `\n\n[LIVE DATA — INTEL Market Benchmarks: ${countyLabel} | ${sectorLabel} | ${quarterLabel}]\n`;
+        context += `Records: ${benchmarks.length} submarket data points\n\n`;
+        
+        // Group by sector
+        const bySector = {};
+        for (const b of benchmarks) {
+            const key = b.sector || 'Unknown';
+            if (!bySector[key]) bySector[key] = [];
+            bySector[key].push(b);
+        }
+        
+        for (const [sector, rows] of Object.entries(bySector)) {
+            context += `── ${sector.toUpperCase()} ──\n`;
+            
+            const countyRows = rows.filter(r => !r.submarket || r.submarket === 'County Average' || r.submarket === 'Regional');
+            const subRows = rows.filter(r => r.submarket && r.submarket !== 'County Average' && r.submarket !== 'Regional');
+            
+            for (const r of countyRows) {
+                context += `  ${r.county} County Overview (${r.quarter}):\n`;
+                if (r.vacancy_rate !== null) {
+                    context += `    Vacancy Rate: ${parseFloat(r.vacancy_rate).toFixed(1)}%`;
+                    if (r.yoy_vacancy_change !== null) context += ` (YoY: ${parseFloat(r.yoy_vacancy_change) > 0 ? '+' : ''}${parseFloat(r.yoy_vacancy_change).toFixed(1)} bps)`;
+                    context += '\n';
                 }
-                // Alternate row shading
-                if (rowIdx % 2 === 0) {
-                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F5F5' } };
+                if (r.asking_rent_avg !== null) {
+                    context += `    Avg Asking Rent: $${parseFloat(r.asking_rent_avg).toFixed(2)}/SF`;
+                    if (r.asking_rent_range_low !== null && r.asking_rent_range_high !== null) context += ` (Range: $${parseFloat(r.asking_rent_range_low).toFixed(2)}-$${parseFloat(r.asking_rent_range_high).toFixed(2)})`;
+                    if (r.yoy_rent_change !== null) context += ` | YoY: ${parseFloat(r.yoy_rent_change) > 0 ? '+' : ''}${parseFloat(r.yoy_rent_change).toFixed(1)}%`;
+                    context += '\n';
                 }
-                cell.font = { size: 10 };
-                cell.alignment = { wrapText: true };
-            });
-        });
+                if (r.cap_rate_avg !== null) {
+                    context += `    Avg Cap Rate: ${parseFloat(r.cap_rate_avg).toFixed(2)}%`;
+                    if (r.cap_rate_range_low !== null && r.cap_rate_range_high !== null) context += ` (Range: ${parseFloat(r.cap_rate_range_low).toFixed(2)}%-${parseFloat(r.cap_rate_range_high).toFixed(2)}%)`;
+                    context += '\n';
+                }
+                if (r.absorption_sf !== null) {
+                    context += `    Net Absorption: ${parseInt(r.absorption_sf).toLocaleString()} SF`;
+                    if (r.yoy_absorption_change !== null) context += ` (YoY: ${parseFloat(r.yoy_absorption_change) > 0 ? '+' : ''}${parseFloat(r.yoy_absorption_change).toFixed(1)}%)`;
+                    context += '\n';
+                }
+                if (r.inventory_sf !== null) context += `    Total Inventory: ${parseInt(r.inventory_sf).toLocaleString()} SF (${r.total_buildings || '?'} buildings)\n`;
+                if (r.construction_pipeline_sf !== null) context += `    Construction Pipeline: ${parseInt(r.construction_pipeline_sf).toLocaleString()} SF\n`;
+                if (r.avg_price_per_sf !== null) context += `    Avg Sale Price/SF: $${parseFloat(r.avg_price_per_sf).toFixed(2)}\n`;
+                
+                if (r.lease_activity_total_sf !== null) {
+                    context += `    Lease Activity: ${parseInt(r.lease_activity_total_sf).toLocaleString()} SF total\n`;
+                    if (r.lease_activity_under_2500) context += `      <2,500 SF: ${parseInt(r.lease_activity_under_2500).toLocaleString()} SF\n`;
+                    if (r.lease_activity_2500_5000) context += `      2,500-5,000 SF: ${parseInt(r.lease_activity_2500_5000).toLocaleString()} SF\n`;
+                    if (r.lease_activity_5000_10000) context += `      5,000-10,000 SF: ${parseInt(r.lease_activity_5000_10000).toLocaleString()} SF\n`;
+                    if (r.lease_activity_10000_25000) context += `      10,000-25,000 SF: ${parseInt(r.lease_activity_10000_25000).toLocaleString()} SF\n`;
+                    if (r.lease_activity_over_25000) context += `      >25,000 SF: ${parseInt(r.lease_activity_over_25000).toLocaleString()} SF\n`;
+                }
+                
+                if (r.market_trend) context += `    Market Trend: ${r.market_trend}\n`;
+                if (r.notes) context += `    Notes: ${r.notes}\n`;
+            }
+            
+            if (subRows.length > 0) {
+                context += `\n  Submarket Breakdown:\n`;
+                for (const r of subRows) {
+                    context += `    ${r.submarket}: `;
+                    const parts = [];
+                    if (r.vacancy_rate !== null) parts.push(`Vacancy ${parseFloat(r.vacancy_rate).toFixed(1)}%`);
+                    if (r.asking_rent_avg !== null) parts.push(`Rent $${parseFloat(r.asking_rent_avg).toFixed(2)}/SF`);
+                    if (r.cap_rate_avg !== null) parts.push(`Cap ${parseFloat(r.cap_rate_avg).toFixed(2)}%`);
+                    if (r.absorption_sf !== null) parts.push(`Absorption ${parseInt(r.absorption_sf).toLocaleString()} SF`);
+                    if (r.inventory_sf !== null) parts.push(`Inventory ${parseInt(r.inventory_sf).toLocaleString()} SF`);
+                    context += parts.join(' | ') + '\n';
+                }
+            }
+            
+            context += '\n';
+        }
+    }
+    
+    // ── Top Transactions ──
+    if (transactions.length > 0) {
+        const quarterLabel = detection.quarter && detection.year 
+            ? `${detection.quarter} ${detection.year}` : 'Recent';
         
-        // Auto-width columns
-        sheet.headers.forEach((h, i) => {
-            const col = ws.getColumn(i + 1);
-            let maxLen = h.length;
-            sheet.rows.forEach(row => {
-                const val = String(row[i] || '');
-                if (val.length > maxLen) maxLen = val.length;
-            });
-            col.width = Math.min(Math.max(maxLen + 4, 12), 40);
-        });
+        context += `[LIVE DATA — Top Transactions: ${quarterLabel}]\n`;
+        context += `Notable deals: ${transactions.length}\n\n`;
         
-        // Footer
-        const footerRow = ws.getRow(5 + sheet.rows.length + 1);
-        ws.mergeCells(footerRow.number, 1, footerRow.number, sheet.headers.length);
-        const footerCell = footerRow.getCell(1);
-        footerCell.value = 'CRE Consultants — Fort Myers, FL | Data sourced from The Adam Project, Danimal Data, public records, and web research';
-        footerCell.font = { size: 8, italic: true, color: { argb: 'FF999999' } };
+        for (const t of transactions) {
+            context += `  • ${t.property_name || t.property_address}`;
+            if (t.county) context += ` (${t.county} County)`;
+            context += '\n';
+            const details = [];
+            if (t.transaction_type) details.push(t.transaction_type);
+            if (t.sale_price) details.push(`$${parseInt(t.sale_price).toLocaleString()}`);
+            if (t.price_per_sf) details.push(`$${parseFloat(t.price_per_sf).toFixed(2)}/SF`);
+            if (t.square_footage) details.push(`${parseInt(t.square_footage).toLocaleString()} SF`);
+            if (t.cap_rate) details.push(`${parseFloat(t.cap_rate).toFixed(2)}% cap`);
+            if (details.length > 0) context += `    ${details.join(' | ')}\n`;
+            if (t.buyer || t.seller) {
+                context += `    `;
+                if (t.buyer) context += `Buyer: ${t.buyer}`;
+                if (t.buyer && t.seller) context += ' | ';
+                if (t.seller) context += `Seller: ${t.seller}`;
+                context += '\n';
+            }
+            if (t.notes) context += `    ${t.notes}\n`;
+        }
+        context += '\n';
+    }
+    
+    return context;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPER: Parse Uploaded Files
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function parseFile(filePath, originalName) {
+    const ext = path.extname(originalName).toLowerCase();
+    
+    try {
+        if ((ext === '.xlsx' || ext === '.xls') && ExcelJS) {
+            const workbook = new ExcelJS.Workbook();
+            await workbook.xlsx.readFile(filePath);
+            let content = '';
+            workbook.eachSheet((sheet) => {
+                content += `\n--- Sheet: ${sheet.name} ---\n`;
+                sheet.eachRow({ includeEmpty: false }, (row, rowNum) => {
+                    if (rowNum <= 100) {
+                        const vals = row.values.slice(1).map(v => (v && typeof v === 'object' && v.result !== undefined) ? v.result : (v || '')).join(' | ');
+                        content += vals + '\n';
+                    }
+                });
+            });
+            return content.substring(0, 50000);
+        }
+        
+        if (ext === '.pdf' && pdfParse) {
+            const buffer = fs.readFileSync(filePath);
+            const data = await pdfParse(buffer);
+            return (data.text || '').substring(0, 50000);
+        }
+        
+        if (ext === '.csv' || ext === '.txt') {
+            return fs.readFileSync(filePath, 'utf-8').substring(0, 50000);
+        }
+        
+        return `[File uploaded: ${originalName} — content extraction not available for this format]`;
+    } catch (err) {
+        console.error(`[INTEL AI] File parse error (${originalName}):`, err.message);
+        return `[File uploaded: ${originalName} — error parsing: ${err.message}]`;
+    }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPER: Store to Adam Project
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function storeToAdamProject(pool, orgId, userId, userName, fileName, parsedContent) {
+    if (!pool) return 0;
+    
+    try {
+        const result = await pool.query(
+            `INSERT INTO adam_project_data (org_id, uploaded_by, uploaded_by_name, source_file, source_type, record_type, notes, raw_data, created_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+             RETURNING id`,
+            [orgId, userId, userName, fileName, path.extname(fileName).replace('.',''), 'uploaded_file', `Auto-stored from INTEL AI upload`, JSON.stringify({ content_preview: parsedContent.substring(0, 5000) })]
+        );
+        return result.rows.length;
+    } catch (err) {
+        console.error('[INTEL AI] Adam Project store error:', err.message);
+        return 0;
+    }
+}
+
+
+function buildFileContext(parsedFiles) {
+    let ctx = '\n\n[UPLOADED FILES]\n';
+    for (const f of parsedFiles) {
+        ctx += `\n--- ${f.name} ---\n`;
+        ctx += f.parsed.substring(0, 15000) + '\n';
+    }
+    return ctx;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPER: Excel Export
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function generateExcel(exportData) {
+    if (!ExcelJS) return null;
+    
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Report Data');
+    
+    if (exportData.headers && exportData.rows) {
+        sheet.addRow(exportData.headers);
+        for (const row of exportData.rows) {
+            sheet.addRow(row);
+        }
+        
+        // Style header row
+        const headerRow = sheet.getRow(1);
+        headerRow.font = { bold: true };
+        headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1a2332' } };
+        headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
     }
     
     const buffer = await workbook.xlsx.writeBuffer();
@@ -466,37 +677,29 @@ async function generateExcel(exportData) {
 }
 
 
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // MAIN ROUTE REGISTRATION
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+
 function registerIntelAIRoutes(app, pool) {
 
-    // POST /api/intel/ai/chat — AI Research with file upload support
+    // ── POST /api/intel/ai/chat — AI Research Assistant ──
     app.post('/api/intel/ai/chat', upload.array('files', 10), async (req, res) => {
         if (!req.session || !req.session.user) {
             return res.status(401).json({ success: false, error: 'Not authenticated' });
         }
 
         try {
-            // Parse body — may come as FormData or JSON
-            let messages, reportType, reportCadence, fileNames;
-            
-            if (req.is('multipart/form-data')) {
-                messages = JSON.parse(req.body.messages || '[]');
-                reportType = req.body.reportType || null;
-                reportCadence = req.body.reportCadence || null;
-                fileNames = req.body.fileNames ? JSON.parse(req.body.fileNames) : [];
-            } else {
-                ({ messages, reportType, reportCadence } = req.body);
-                fileNames = req.body.files || [];
-            }
+            const { messages, reportType, reportCadence } = req.body;
+            const parsedMessages = typeof messages === 'string' ? JSON.parse(messages) : messages;
 
-            if (!messages || !Array.isArray(messages) || messages.length === 0) {
+            if (!parsedMessages || !Array.isArray(parsedMessages) || parsedMessages.length === 0) {
                 return res.status(400).json({ success: false, error: 'Messages required' });
             }
 
             const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
             if (!ANTHROPIC_API_KEY) {
+                console.error('[INTEL AI] ANTHROPIC_API_KEY not configured');
                 return res.status(500).json({ success: false, error: 'AI service not configured. Please set ANTHROPIC_API_KEY.' });
             }
 
@@ -510,20 +713,11 @@ function registerIntelAIRoutes(app, pool) {
                     const parsed = await parseFile(file.path, file.originalname);
                     parsedFiles.push({ name: file.originalname, parsed });
                     
-                    // Store to Adam Project
                     if (pool) {
-                        const stored = await storeToAdamProject(
-                            pool,
-                            req.session.org?.id,
-                            req.session.user.id,
-                            req.session.user.name,
-                            file.originalname,
-                            parsed
-                        );
+                        const stored = await storeToAdamProject(pool, req.session.org?.id, req.session.user.id, req.session.user.name, file.originalname, parsed);
                         adamProjectStored += stored;
                     }
                     
-                    // Clean up temp file
                     try { fs.unlinkSync(file.path); } catch (e) {}
                 }
             }
@@ -531,7 +725,6 @@ function registerIntelAIRoutes(app, pool) {
             // ── BUILD CONTEXT ──
             let contextAdditions = '';
 
-            // Report type
             if (reportType) {
                 const reportNames = { cma:'Comparative Market Analysis (CMA)', swot:'SWOT Analysis', cim:'Confidential Information Memorandum (CIM)', bov:'Broker Opinion of Value (BOV)', om:'Offering Memorandum (OM)', market_report:'Market Report / Newsletter' };
                 contextAdditions += `\n\nReport type selected: ${reportNames[reportType] || reportType}. Generate this report type.`;
@@ -540,119 +733,186 @@ function registerIntelAIRoutes(app, pool) {
                 }
             }
 
-            // File context
             if (parsedFiles.length > 0) {
                 contextAdditions += buildFileContext(parsedFiles);
                 if (adamProjectStored > 0) {
-                    contextAdditions += `\n\n[${adamProjectStored} records from uploaded files have been stored in The Adam Project database for future reference.]`;
+                    contextAdditions += `\n\n[${adamProjectStored} records from uploaded files stored in The Adam Project for future reference.]`;
                 }
             }
 
-            // ── DATA ENRICHMENT ──
-            const lastUserMsg = messages[messages.length - 1]?.content || '';
+            // ══════════════════════════════════════════════════════════
+            // DATA ENRICHMENT
+            // ══════════════════════════════════════════════════════════
+            const lastUserMsg = parsedMessages[parsedMessages.length - 1]?.content || '';
             let dataContext = '';
             const location = extractLocation(lastUserMsg);
             const enrichmentSources = [];
 
-            // Adam Project data
+            // ── Adam Project Data ──
             if (pool && (location.city || location.county)) {
                 try {
                     const adamQuery = location.city
-                        ? `SELECT record_type, property_address, property_city, property_type, square_footage, sale_price, cap_rate, price_per_sf, noi, occupancy_rate, asking_rent, tenant_name, sale_date, source_file 
-                           FROM adam_project_data WHERE UPPER(property_city) LIKE UPPER($1) ORDER BY created_at DESC LIMIT 20`
-                        : `SELECT record_type, property_address, property_city, property_type, square_footage, sale_price, cap_rate, price_per_sf, noi, occupancy_rate, asking_rent, tenant_name, sale_date, source_file 
-                           FROM adam_project_data WHERE UPPER(property_county) LIKE UPPER($1) ORDER BY created_at DESC LIMIT 20`;
+                        ? `SELECT record_type, property_address, property_city, property_type, square_footage, sale_price, cap_rate, price_per_sf, noi, occupancy_rate, asking_rent, tenant_name, sale_date, source_file FROM adam_project_data WHERE UPPER(property_city) LIKE UPPER($1) ORDER BY created_at DESC LIMIT 20`
+                        : `SELECT record_type, property_address, property_city, property_type, square_footage, sale_price, cap_rate, price_per_sf, noi, occupancy_rate, asking_rent, tenant_name, sale_date, source_file FROM adam_project_data WHERE UPPER(property_county) LIKE UPPER($1) ORDER BY created_at DESC LIMIT 20`;
                     
                     const adamResult = await pool.query(adamQuery, ['%' + (location.city || location.county) + '%']);
                     
                     if (adamResult.rows.length > 0) {
-                        dataContext += `\n\n[LIVE DATA — The Adam Project: Proprietary CRE Data for ${location.city || location.county}]\n`;
-                        dataContext += `Records: ${adamResult.rows.length}\n`;
+                        dataContext += `\n\n[LIVE DATA — The Adam Project: Proprietary CRE Data for ${location.city || location.county}]\nRecords: ${adamResult.rows.length}\n`;
                         adamResult.rows.forEach(r => {
                             const parts = [r.property_address, r.property_type, r.square_footage ? r.square_footage + ' SF' : null, r.sale_price ? '$' + Number(r.sale_price).toLocaleString() : null, r.cap_rate ? r.cap_rate + '% cap' : null, r.tenant_name].filter(Boolean);
                             dataContext += `  - ${parts.join(' | ')} (source: ${r.source_file})\n`;
                         });
                         enrichmentSources.push('Adam Project');
                     }
-                } catch (err) {
-                    console.error('[INTEL AI] Adam Project query error:', err.message);
-                }
+                } catch (err) { console.error('[INTEL AI] Adam Project error:', err.message); }
             }
 
-            // Danimal Data
-            if (pool && location.city) {
+            // ── Danimal Data ──
+            if (pool && (location.city || location.county)) {
                 try {
-                    const danimalResult = await pool.query(`SELECT industry, COUNT(*) as count FROM danimal_leads WHERE UPPER(city) LIKE UPPER($1) GROUP BY industry ORDER BY count DESC LIMIT 15`, ['%' + location.city + '%']);
-                    const countResult = await pool.query(`SELECT COUNT(*) as total FROM danimal_leads WHERE UPPER(city) LIKE UPPER($1)`, ['%' + location.city + '%']);
+                    const danimalQuery = location.city
+                        ? `SELECT industry, COUNT(*) as count FROM danimal_leads WHERE UPPER(city) LIKE UPPER($1) GROUP BY industry ORDER BY count DESC LIMIT 15`
+                        : `SELECT industry, COUNT(*) as count FROM danimal_leads WHERE UPPER(county) = UPPER($1) GROUP BY industry ORDER BY count DESC LIMIT 15`;
+                    const countQuery = location.city
+                        ? `SELECT COUNT(*) as total FROM danimal_leads WHERE UPPER(city) LIKE UPPER($1)`
+                        : `SELECT COUNT(*) as total FROM danimal_leads WHERE UPPER(county) = UPPER($1)`;
+                    
+                    const param = location.city ? '%' + location.city + '%' : location.county;
+                    const danimalResult = await pool.query(danimalQuery, [param]);
+                    const countResult = await pool.query(countQuery, [param]);
+                    
                     if (danimalResult.rows.length > 0) {
                         const total = parseInt(countResult.rows[0].total);
-                        dataContext += `\n\n[LIVE DATA — Danimal Data: Professional Licensees in ${location.city}]\nTotal: ${total.toLocaleString()}\n`;
-                        danimalResult.rows.forEach(row => { dataContext += `  - ${row.industry}: ${parseInt(row.count).toLocaleString()}\n`; });
-                        enrichmentSources.push('Danimal Data');
-                    }
-                } catch (err) { console.error('[INTEL AI] Danimal error:', err.message); }
-            } else if (pool && location.county) {
-                try {
-                    const danimalResult = await pool.query(`SELECT industry, COUNT(*) as count FROM danimal_leads WHERE UPPER(county) = UPPER($1) GROUP BY industry ORDER BY count DESC LIMIT 15`, [location.county]);
-                    const countResult = await pool.query(`SELECT COUNT(*) as total FROM danimal_leads WHERE UPPER(county) = UPPER($1)`, [location.county]);
-                    if (danimalResult.rows.length > 0) {
-                        const total = parseInt(countResult.rows[0].total);
-                        dataContext += `\n\n[LIVE DATA — Danimal Data: Professional Licensees in ${location.county} County]\nTotal: ${total.toLocaleString()}\n`;
+                        dataContext += `\n\n[LIVE DATA — Danimal Data: Professional Licensees in ${location.city || location.county}]\nTotal: ${total.toLocaleString()}\n`;
                         danimalResult.rows.forEach(row => { dataContext += `  - ${row.industry}: ${parseInt(row.count).toLocaleString()}\n`; });
                         enrichmentSources.push('Danimal Data');
                     }
                 } catch (err) { console.error('[INTEL AI] Danimal error:', err.message); }
             }
 
-            // Census
+            // ── Census Data ──
             if (location.county) {
                 try {
                     const census = await queryCensus('12', location.county);
                     if (census) {
-                        dataContext += `\n\n[LIVE DATA — Census ACS 5-Year: ${location.county} County, FL]\n`;
-                        dataContext += `Population: ${census.population.toLocaleString()}\nMedian HH Income: $${census.medianHouseholdIncome.toLocaleString()}\nMedian Home Value: $${census.medianHomeValue.toLocaleString()}\nEmployed: ${census.employedPopulation.toLocaleString()}\nMedian Age: ${census.medianAge}\nHousing Units: ${census.totalHousingUnits.toLocaleString()}\n`;
-                        enrichmentSources.push('Census API');
+                        dataContext += `\n\n[LIVE DATA — Census ACS: ${location.county.charAt(0).toUpperCase() + location.county.slice(1)} County Demographics]\n`;
+                        dataContext += `  Population: ${census.population.toLocaleString()}\n`;
+                        dataContext += `  Median HH Income: $${census.medianHouseholdIncome.toLocaleString()}\n`;
+                        dataContext += `  Median Home Value: $${census.medianHomeValue.toLocaleString()}\n`;
+                        dataContext += `  Employed Population: ${census.employedPopulation.toLocaleString()}\n`;
+                        dataContext += `  Median Age: ${census.medianAge}\n`;
+                        dataContext += `  Total Housing Units: ${census.totalHousingUnits.toLocaleString()}\n`;
+                        enrichmentSources.push('Census ACS');
                     }
                 } catch (err) { console.error('[INTEL AI] Census error:', err.message); }
             }
 
-            // FDOT
+            // ── FDOT Traffic Data ──
             if (pool && (location.city || location.county)) {
                 try {
-                    const fdotCheck = await pool.query(`SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'fdot_traffic') as exists`);
+                    const fdotCheck = await pool.query(`SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'fdot_traffic_data')`);
                     if (fdotCheck.rows[0].exists) {
-                        const fdotResult = await pool.query(`SELECT road_name, aadt, county, year FROM fdot_traffic WHERE UPPER(county) = UPPER($1) ORDER BY aadt DESC LIMIT 10`, [location.county || location.city]);
+                        const fdotQuery = location.city
+                            ? `SELECT road_name, aadt, year, county FROM fdot_traffic_data WHERE UPPER(city) LIKE UPPER($1) ORDER BY aadt DESC LIMIT 10`
+                            : `SELECT road_name, aadt, year, county FROM fdot_traffic_data WHERE UPPER(county) LIKE UPPER($1) ORDER BY aadt DESC LIMIT 10`;
+                        const fdotResult = await pool.query(fdotQuery, ['%' + (location.city || location.county) + '%']);
                         if (fdotResult.rows.length > 0) {
-                            dataContext += `\n\n[LIVE DATA — FDOT Traffic: ${location.county || location.city}]\n`;
-                            fdotResult.rows.forEach(row => { dataContext += `  - ${row.road_name}: ${parseInt(row.aadt).toLocaleString()} AADT (${row.year})\n`; });
+                            dataContext += `\n\n[LIVE DATA — FDOT Traffic Counts: ${location.city || location.county}]\n`;
+                            fdotResult.rows.forEach(r => { dataContext += `  - ${r.road_name}: ${parseInt(r.aadt).toLocaleString()} AADT (${r.year})\n`; });
                             enrichmentSources.push('FDOT Traffic');
                         }
                     }
                 } catch (err) { console.error('[INTEL AI] FDOT error:', err.message); }
             }
 
-            // Property Appraiser
-            if (pool && location.county) {
+            // ── Property Appraiser Data ──
+            if (pool && (location.city || location.county)) {
                 try {
-                    const paCheck = await pool.query(`SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'properties') as exists`);
+                    const paCheck = await pool.query(`SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'properties')`);
                     if (paCheck.rows[0].exists) {
-                        const salesResult = await pool.query(`SELECT COUNT(*) as total_sales, AVG(sale_price) as avg_price, MIN(sale_price) as min_price, MAX(sale_price) as max_price FROM property_sales WHERE sale_price > 10000 AND sale_date >= NOW() - INTERVAL '24 months'`);
-                        if (salesResult.rows.length > 0 && parseInt(salesResult.rows[0].total_sales) > 0) {
-                            const s = salesResult.rows[0];
-                            dataContext += `\n\n[LIVE DATA — Property Appraiser: Recent Sales (24mo)]\nTransactions: ${parseInt(s.total_sales).toLocaleString()}\nAvg Price: $${Math.round(parseFloat(s.avg_price)).toLocaleString()}\nRange: $${Math.round(parseFloat(s.min_price)).toLocaleString()} - $${Math.round(parseFloat(s.max_price)).toLocaleString()}\n`;
+                        const salesQuery = location.city
+                            ? `SELECT property_address, sale_price, sale_date FROM properties WHERE UPPER(city) LIKE UPPER($1) AND sale_price > 100000 ORDER BY sale_date DESC LIMIT 10`
+                            : `SELECT property_address, sale_price, sale_date FROM properties WHERE UPPER(county) LIKE UPPER($1) AND sale_price > 100000 ORDER BY sale_date DESC LIMIT 10`;
+                        const salesResult = await pool.query(salesQuery, ['%' + (location.city || location.county) + '%']);
+                        if (salesResult.rows.length > 0) {
+                            dataContext += `\n\n[LIVE DATA — Property Appraiser: Recent Sales in ${location.city || location.county}]\n`;
+                            salesResult.rows.forEach(s => {
+                                dataContext += `  - ${s.property_address}: $${Number(s.sale_price).toLocaleString()} (${s.sale_date ? new Date(s.sale_date).toLocaleDateString() : 'N/A'})\n`;
+                            });
                             enrichmentSources.push('Property Records');
                         }
                     }
                 } catch (err) { console.error('[INTEL AI] PA error:', err.message); }
             }
 
+            // ══════════════════════════════════════════════════════════
+            // INTEL MARKET BENCHMARKS ENRICHMENT (Phase 2 — NEW)
+            // ══════════════════════════════════════════════════════════
+            const detection = detectSectorAndQuarter(lastUserMsg);
+            const isMarketReport = reportType === 'market_report';
+            
+            if (pool && (detection.sector || detection.county || detection.quarter || isMarketReport)) {
+                const queries = [];
+                
+                if (isMarketReport && detection.county && !detection.sector) {
+                    // Pull all 5 sectors for comprehensive market report
+                    for (const sector of ['industrial', 'office', 'retail', 'land', 'multifamily']) {
+                        queries.push({ ...detection, sector });
+                    }
+                } else {
+                    queries.push(detection);
+                }
+                
+                let allBenchmarks = [];
+                let allTransactions = [];
+                
+                for (const q of queries) {
+                    const benchmarks = await queryMarketBenchmarks(pool, q);
+                    const txns = await queryTopTransactions(pool, q);
+                    allBenchmarks = allBenchmarks.concat(benchmarks);
+                    allTransactions = allTransactions.concat(txns);
+                }
+                
+                // Deduplicate transactions
+                const txnSeen = new Set();
+                allTransactions = allTransactions.filter(t => {
+                    const key = (t.property_name || '') + (t.sale_price || '');
+                    if (txnSeen.has(key)) return false;
+                    txnSeen.add(key);
+                    return true;
+                });
+                
+                if (allBenchmarks.length > 0 || allTransactions.length > 0) {
+                    dataContext += formatBenchmarkContext(allBenchmarks, allTransactions, detection);
+                    enrichmentSources.push('INTEL Market Benchmarks');
+                    
+                    if (allTransactions.length > 0) {
+                        enrichmentSources.push('Top Transactions');
+                    }
+                    
+                    // Apply IQR for CMA/BOV
+                    if (reportType === 'cma' || reportType === 'bov') {
+                        const iqrAnalysis = applyIQRToBenchmarks(allBenchmarks);
+                        if (iqrAnalysis) {
+                            dataContext += iqrAnalysis;
+                            enrichmentSources.push('IQR Outlier Analysis');
+                        }
+                    }
+                    
+                    console.log(`[INTEL AI] Market enrichment: ${allBenchmarks.length} benchmarks, ${allTransactions.length} transactions${detection.sector ? ', sector: ' + detection.sector : ''}${detection.county ? ', county: ' + detection.county : ''}${detection.quarter ? ', quarter: ' + detection.quarter + ' ' + (detection.year || '') : ''}`);
+                }
+            }
+
             if (enrichmentSources.length > 0) {
                 dataContext += `\n\n[Data sources queried: ${enrichmentSources.join(', ')}]`;
             }
 
-            // ── BUILD API REQUEST ──
+            // ══════════════════════════════════════════════════════════
+            // BUILD API REQUEST
+            // ══════════════════════════════════════════════════════════
             const systemPrompt = INTEL_AI_SYSTEM_PROMPT + contextAdditions + dataContext;
-            const trimmedMessages = messages.slice(-20);
+            const trimmedMessages = parsedMessages.slice(-20);
 
             const apiBody = {
                 model: 'claude-sonnet-4-20250514',
@@ -680,7 +940,6 @@ function registerIntelAIRoutes(app, pool) {
             const apiData = await apiResponse.json();
             const responseText = apiData.content?.filter(b => b.type === 'text').map(b => b.text).filter(Boolean).join('\n') || 'Error generating response.';
 
-            // Check for export data
             let hasExportData = false;
             const exportMatch = responseText.match(/<!--EXPORT_DATA_START-->([\s\S]*?)<!--EXPORT_DATA_END-->/);
             if (exportMatch) hasExportData = true;
@@ -689,16 +948,14 @@ function registerIntelAIRoutes(app, pool) {
             const tokensOut = apiData.usage?.output_tokens || '?';
             const searchUsed = apiData.content?.some(b => b.type === 'tool_use' || b.type === 'web_search_tool_result');
 
-            console.log(`[INTEL AI] Response | Tokens: ${tokensIn}/${tokensOut} | Search: ${searchUsed ? 'yes' : 'no'} | Export: ${hasExportData} | Adam Project: +${adamProjectStored}`);
+            console.log(`[INTEL AI] Response | Tokens: ${tokensIn}/${tokensOut} | Search: ${searchUsed ? 'yes' : 'no'} | Export: ${hasExportData}`);
 
             return res.json({
                 success: true,
-                response: responseText.replace(/<!--EXPORT_DATA_START-->[\s\S]*?<!--EXPORT_DATA_END-->/, '').trim(),
+                response: responseText,
                 enrichment: enrichmentSources,
-                searchUsed: searchUsed === true,
                 hasExportData,
-                adamProjectStored,
-                filesProcessed: parsedFiles.map(f => ({ name: f.name, type: f.parsed.type, rows: f.parsed.rowCount || 0 }))
+                usage: { input_tokens: tokensIn, output_tokens: tokensOut }
             });
 
         } catch (error) {
@@ -707,227 +964,33 @@ function registerIntelAIRoutes(app, pool) {
         }
     });
 
-
-    // ── Parse markdown tables from AI response ──
-    function parseMarkdownTables(text) {
-        const tables = [];
-        const lines = text.split('\n');
-        let currentTable = null;
-        let currentSection = 'Report Data';
-        
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            
-            // Track section headers
-            if (line.startsWith('## ') || line.startsWith('### ') || line.startsWith('**') && line.endsWith('**')) {
-                currentSection = line.replace(/^#+\s*/, '').replace(/\*\*/g, '').trim();
-            }
-            
-            // Detect markdown table row
-            if (line.startsWith('|') && line.endsWith('|')) {
-                const cells = line.split('|').slice(1, -1).map(c => c.trim());
-                
-                // Skip separator rows (|---|---|)
-                if (cells.every(c => /^[-:]+$/.test(c))) continue;
-                
-                if (!currentTable) {
-                    currentTable = { name: currentSection.substring(0, 31), headers: cells, rows: [] };
-                } else {
-                    currentTable.rows.push(cells);
-                }
-            } else {
-                if (currentTable && currentTable.rows.length > 0) {
-                    tables.push(currentTable);
-                }
-                currentTable = null;
-            }
-        }
-        if (currentTable && currentTable.rows.length > 0) tables.push(currentTable);
-        
-        // If no tables found, extract key-value pairs from bullet points
-        if (tables.length === 0) {
-            const kvPairs = [];
-            for (const line of lines) {
-                const match = line.match(/^[\-•]\s*\*?\*?(.+?)\*?\*?\s*[:：]\s*(.+)$/);
-                if (match) kvPairs.push([match[1].trim(), match[2].trim()]);
-            }
-            if (kvPairs.length > 0) {
-                tables.push({ name: 'Report Summary', headers: ['Metric', 'Value'], rows: kvPairs });
-            }
-        }
-        
-        return tables;
-    }
-
-    // POST /api/intel/ai/export — Generate Excel from AI response
+    // ── POST /api/intel/ai/export — Export report data to Excel ──
     app.post('/api/intel/ai/export', async (req, res) => {
-        if (!req.session || !req.session.user) return res.status(401).json({ success: false, error: 'Not authenticated' });
-        
+        if (!req.session || !req.session.user) {
+            return res.status(401).json({ success: false, error: 'Not authenticated' });
+        }
+
         try {
-            const { exportData, format } = req.body;
-            if (!exportData) return res.status(400).json({ success: false, error: 'No data to export' });
-            
-            const responseText = typeof exportData === 'string' ? exportData : JSON.stringify(exportData);
-            const tables = parseMarkdownTables(responseText);
-            
-            if (format === 'docx') {
-                // ── Word Export ──
-                const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
-                        AlignmentType, HeadingLevel, BorderStyle, WidthType, ShadingType } = require('docx');
-                
-                const children = [];
-                const lines = responseText.split('\n');
-                
-                // Title
-                children.push(new Paragraph({
-                    children: [new TextRun({ text: 'INTEL Research Report', bold: true, size: 32, font: 'Arial', color: '1B7A4A' })],
-                    spacing: { after: 100 }
-                }));
-                children.push(new Paragraph({
-                    children: [new TextRun({ text: `CRE Consultants — Generated ${new Date().toLocaleDateString()}`, italics: true, size: 18, font: 'Arial', color: '666666' })],
-                    spacing: { after: 300 }
-                }));
-                
-                // Parse content line by line
-                for (const line of lines) {
-                    const trimmed = line.trim();
-                    if (!trimmed) { children.push(new Paragraph({ spacing: { after: 80 } })); continue; }
-                    
-                    // Skip export tags
-                    if (trimmed.includes('EXPORT_DATA')) continue;
-                    
-                    // Headers
-                    if (trimmed.startsWith('### ')) {
-                        children.push(new Paragraph({
-                            children: [new TextRun({ text: trimmed.replace(/^###\s*/, '').replace(/\*\*/g, ''), bold: true, size: 24, font: 'Arial', color: '1B7A4A' })],
-                            spacing: { before: 200, after: 100 }
-                        }));
-                    } else if (trimmed.startsWith('## ')) {
-                        children.push(new Paragraph({
-                            children: [new TextRun({ text: trimmed.replace(/^##\s*/, '').replace(/\*\*/g, ''), bold: true, size: 28, font: 'Arial', color: '1B7A4A' })],
-                            spacing: { before: 240, after: 120 }
-                        }));
-                    } else if (trimmed.startsWith('---')) {
-                        children.push(new Paragraph({
-                            border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC', space: 1 } },
-                            spacing: { before: 100, after: 100 }
-                        }));
-                    } else if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
-                        // Skip — tables handled separately below
-                    } else if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
-                        const text = trimmed.replace(/^[-•]\s*/, '').replace(/\*\*/g, '');
-                        children.push(new Paragraph({
-                            children: [new TextRun({ text: '•  ' + text, size: 20, font: 'Arial' })],
-                            indent: { left: 360 }, spacing: { after: 60 }
-                        }));
-                    } else {
-                        // Regular paragraph — handle bold markers
-                        const parts = trimmed.split(/\*\*(.*?)\*\*/g);
-                        const runs = [];
-                        parts.forEach((part, idx) => {
-                            if (!part) return;
-                            runs.push(new TextRun({ text: part, bold: idx % 2 === 1, size: 20, font: 'Arial' }));
-                        });
-                        if (runs.length > 0) {
-                            children.push(new Paragraph({ children: runs, spacing: { after: 80 } }));
-                        }
-                    }
-                }
-                
-                // Add parsed tables as Word tables
-                for (const t of tables) {
-                    const border = { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' };
-                    const borders = { top: border, bottom: border, left: border, right: border };
-                    const colCount = t.headers.length;
-                    const colWidth = Math.floor(9360 / colCount);
-                    
-                    children.push(new Paragraph({ spacing: { before: 200 } }));
-                    
-                    const headerRow = new TableRow({
-                        children: t.headers.map(h => new TableCell({
-                            borders, width: { size: colWidth, type: WidthType.DXA },
-                            shading: { fill: '1B7A4A', type: ShadingType.CLEAR },
-                            margins: { top: 60, bottom: 60, left: 80, right: 80 },
-                            children: [new Paragraph({ children: [new TextRun({ text: h, bold: true, color: 'FFFFFF', size: 18, font: 'Arial' })], alignment: AlignmentType.CENTER })]
-                        }))
-                    });
-                    
-                    const dataRows = t.rows.map((row, rIdx) => new TableRow({
-                        children: row.map((cell, cIdx) => new TableCell({
-                            borders, width: { size: colWidth, type: WidthType.DXA },
-                            shading: rIdx % 2 === 0 ? { fill: 'F5F5F5', type: ShadingType.CLEAR } : undefined,
-                            margins: { top: 40, bottom: 40, left: 80, right: 80 },
-                            children: [new Paragraph({ children: [new TextRun({ text: cell || '', size: 18, font: 'Arial' })] })]
-                        }))
-                    }));
-                    
-                    children.push(new Table({
-                        width: { size: 9360, type: WidthType.DXA },
-                        columnWidths: Array(colCount).fill(colWidth),
-                        rows: [headerRow, ...dataRows]
-                    }));
-                }
-                
-                // Footer
-                children.push(new Paragraph({ spacing: { before: 400 } }));
-                children.push(new Paragraph({
-                    children: [new TextRun({ text: 'CRE Consultants — Fort Myers, FL | Powered by Zenith OS INTEL Research', italics: true, size: 16, font: 'Arial', color: '999999' })]
-                }));
-                
-                const doc = new Document({
-                    sections: [{
-                        properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } },
-                        children
-                    }]
-                });
-                
-                const buffer = await Packer.toBuffer(doc);
-                const filename = 'INTEL_Report_' + new Date().toISOString().split('T')[0] + '.docx';
-                res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-                res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-                res.send(Buffer.from(buffer));
-                console.log(`[INTEL AI] Word export: ${filename} by ${req.session.user.name}`);
-                
-            } else {
-                // ── Excel Export ──
-                if (tables.length === 0) {
-                    return res.status(400).json({ success: false, error: 'No tabular data found in the response to export.' });
-                }
-                
-                const buffer = await generateExcel({ title: 'INTEL Research Report', sheets: tables });
-                const filename = 'INTEL_Report_' + new Date().toISOString().split('T')[0] + '.xlsx';
-                res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-                res.send(Buffer.from(buffer));
-                console.log(`[INTEL AI] Excel export: ${filename} by ${req.session.user.name}`);
+            const { exportData } = req.body;
+            if (!exportData || !ExcelJS) {
+                return res.status(400).json({ success: false, error: 'Export not available' });
             }
-        } catch (err) {
-            console.error('[INTEL AI] Export error:', err);
-            res.status(500).json({ success: false, error: 'Failed to generate export file' });
+
+            const buffer = await generateExcel(exportData);
+            if (!buffer) {
+                return res.status(500).json({ success: false, error: 'Failed to generate export' });
+            }
+
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', `attachment; filename="INTEL_Report_${Date.now()}.xlsx"`);
+            return res.send(Buffer.from(buffer));
+        } catch (error) {
+            console.error('[INTEL AI] Export error:', error);
+            return res.status(500).json({ success: false, error: 'Export failed' });
         }
     });
 
-
-    // GET /api/intel/ai/adam-project/stats — Adam Project stats
-    app.get('/api/intel/ai/adam-project/stats', async (req, res) => {
-        if (!req.session || !req.session.user) return res.status(401).json({ success: false, error: 'Not authenticated' });
-        try {
-            const result = await pool.query(`
-                SELECT COUNT(*) as total_records,
-                       COUNT(DISTINCT source_file) as total_files,
-                       COUNT(DISTINCT property_city) as cities,
-                       COUNT(DISTINCT uploaded_by_name) as contributors,
-                       MAX(created_at) as last_upload
-                FROM adam_project_data WHERE org_id = $1
-            `, [req.session.org?.id]);
-            res.json({ success: true, stats: result.rows[0] });
-        } catch (err) {
-            res.json({ success: true, stats: { total_records: 0, total_files: 0 } });
-        }
-    });
-
-
-    console.log('[INTEL AI] Research Assistant v3 routes registered (files + Adam Project + Excel export)');
+    console.log('[INTEL AI] Research Assistant v3 (Phase 2: Market Intelligence) routes registered');
 }
 
 module.exports = { registerIntelAIRoutes };

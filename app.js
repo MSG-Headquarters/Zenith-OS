@@ -18,6 +18,7 @@ const huddlePortalApi = require('./routes/huddle-portal-api');
 const sundayMailRoutes = require('./routes/sunday-mail-routes');
 const intelApi = require('./routes/intel-api');
 const { registerIntelAIRoutes } = require('./routes/intel-ai-chat');
+const hawkRoutes = require('./routes/hawk-routes');
 const marketingApi = require('./routes/marketing-api');
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -316,6 +317,7 @@ app.use((req, res, next) => {
 app.use('/system', adminRoutes(pool));
 app.use('/api/danimal', danimalApi);
 app.use('/api/intel', intelApi(pool));
+app.use('/hawk', hawkRoutes);
 app.use('/api/marketing', marketingApi(pool));
 app.get('/marketing/files/:tenantId/:filename', (req, res) => {
   const filePath = require('path').join(__dirname, 'marketing-output', req.params.tenantId, req.params.filename);
