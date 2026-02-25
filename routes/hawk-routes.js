@@ -21,6 +21,13 @@
 
 const express = require('express');
 const router = express.Router();
+const { Pool } = require('pg');
+require('dotenv').config();
+
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+});
 
 // ═══════════════════════════════════════════════════════════════
 // MIDDLEWARE — Auth check
@@ -51,7 +58,6 @@ router.get('/', requireAuth, (req, res) => {
 
 router.get('/api/overview', requireAuth, async (req, res) => {
     try {
-        const pool = req.app.locals.pool;
 
         const [migrationStats, sbaStats, countyBreakdown] = await Promise.all([
             // Migration totals
@@ -145,7 +151,6 @@ router.get('/api/overview', requireAuth, async (req, res) => {
 
 router.get('/api/migration/summary', requireAuth, async (req, res) => {
     try {
-        const pool = req.app.locals.pool;
         const { county, year } = req.query;
 
         let whereClause = 'WHERE 1=1';
@@ -214,7 +219,6 @@ router.get('/api/migration/summary', requireAuth, async (req, res) => {
 
 router.get('/api/migration/inflows', requireAuth, async (req, res) => {
     try {
-        const pool = req.app.locals.pool;
         const { county, year, limit = 20 } = req.query;
 
         let whereClause = "WHERE direction = 'inflow'";
@@ -277,7 +281,6 @@ router.get('/api/migration/inflows', requireAuth, async (req, res) => {
 
 router.get('/api/migration/outflows', requireAuth, async (req, res) => {
     try {
-        const pool = req.app.locals.pool;
         const { county, year, limit = 20 } = req.query;
 
         let whereClause = "WHERE direction = 'outflow'";
@@ -340,7 +343,6 @@ router.get('/api/migration/outflows', requireAuth, async (req, res) => {
 
 router.get('/api/sba/summary', requireAuth, async (req, res) => {
     try {
-        const pool = req.app.locals.pool;
         const { county } = req.query;
 
         let whereClause = '';
@@ -422,7 +424,6 @@ router.get('/api/sba/summary', requireAuth, async (req, res) => {
 
 router.get('/api/sba/loans', requireAuth, async (req, res) => {
     try {
-        const pool = req.app.locals.pool;
         const { county, search, naics, program, page = 1, limit = 50, sort = 'approval_amount', order = 'DESC' } = req.query;
 
         let whereClause = 'WHERE 1=1';
@@ -491,7 +492,6 @@ router.get('/api/sba/loans', requireAuth, async (req, res) => {
 
 router.get('/api/sba/sectors', requireAuth, async (req, res) => {
     try {
-        const pool = req.app.locals.pool;
         const { county } = req.query;
 
         let whereClause = '';

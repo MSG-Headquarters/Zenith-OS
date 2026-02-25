@@ -308,7 +308,7 @@ app.use((req, res, next) => {
     res.locals.features = req.session.features || {
         crm: true, intel: true, marketing: true, huddle: true,
         vault: true, cfo: true, danimal: true, inventory: true,
-        mailer: true, pm: true, command: true
+        mailer: true, pm: true, command: true, hawk: true
     };
     next();
 });
