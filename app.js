@@ -15,6 +15,7 @@ const adminRoutes = require('./routes/admin');
 const danimalApi = require('./routes/danimal-api');
 const huddleApi = require('./routes/huddle-api');
 const huddlePortalApi = require('./routes/huddle-portal-api');
+const tenantPortalRoutes = require('./routes/tenant-portal');
 const sundayMailRoutes = require('./routes/sunday-mail-routes');
 const intelApi = require('./routes/intel-api');
 const { registerIntelAIRoutes } = require('./routes/intel-ai-chat');
@@ -234,6 +235,7 @@ pool.query(`CREATE TABLE IF NOT EXISTS listings (
 
 app.use('/api/huddle', huddleApi);
 app.use('/api/portal', huddlePortalApi);
+app.use('/tenant-portal', tenantPortalRoutes);
 app.use('/api', (req, res, next) => { req.pool = pool; next(); }, sundayMailRoutes);
 // Trust proxy for AWS ELB
 app.set('trust proxy', 1);

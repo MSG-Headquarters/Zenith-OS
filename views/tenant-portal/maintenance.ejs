@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance | Tenant Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: #0f172a; --bg-card: #1e293b; --border: rgba(255,255,255,0.08);
+            --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+            --accent-blue: #3b82f6; --accent-green: #10b981; --accent-amber: #f59e0b; --accent-red: #ef4444;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-primary); color: var(--text-primary); }
+
+        .topbar { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .topbar-left { display: flex; align-items: center; gap: 12px; }
+        .topbar-logo { width: 36px; height: 36px; background: linear-gradient(135deg, #3b82f6, #06b6d4); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+        .topbar-logo i { color: white; font-size: 18px; }
+        .topbar-title { font-size: 16px; font-weight: 700; }
+        .topbar-subtitle { font-size: 12px; color: var(--text-muted); }
+        .topbar-right { display: flex; align-items: center; gap: 16px; }
+        .btn-logout { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); padding: 6px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; text-decoration: none; }
+        .btn-logout:hover { color: var(--text-primary); }
+
+        .portal-nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; gap: 0; overflow-x: auto; }
+        .nav-tab { padding: 14px 20px; color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.2s; }
+        .nav-tab:hover { color: var(--text-secondary); }
+        .nav-tab.active { color: var(--accent-blue); border-bottom-color: var(--accent-blue); }
+        .nav-tab i { margin-right: 6px; }
+
+        .content { padding: 24px; max-width: 900px; margin: 0 auto; }
+        .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        .page-header h2 { font-size: 22px; }
+
+        /* ─── New Request Form ─── */
+        .form-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            margin-bottom: 24px; overflow: hidden; display: none;
+        }
+        .form-card.visible { display: block; }
+        .form-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .form-header h3 { font-size: 16px; font-weight: 600; }
+        .form-body { padding: 20px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+        .form-group { margin-bottom: 16px; }
+        .form-group.full { grid-column: 1 / -1; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 10px 14px; background: rgba(15,23,42,0.8);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+            color: var(--text-primary); font-size: 14px; font-family: inherit;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+        }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .form-group select { cursor: pointer; }
+        .form-group select option { background: #1e293b; }
+        .form-actions { display: flex; gap: 12px; justify-content: flex-end; padding-top: 8px; }
+        .btn { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+        .btn-submit { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(16,185,129,0.3); }
+        .btn-cancel { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); }
+        .btn-cancel:hover { color: var(--text-primary); }
+        .btn-new { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .btn-new:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(16,185,129,0.3); }
+
+        /* ─── Request List ─── */
+        .request-list { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+        .list-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 600; }
+        .request-row {
+            display: flex; align-items: center; gap: 14px; padding: 14px 20px;
+            border-bottom: 1px solid var(--border); transition: background 0.2s;
+        }
+        .request-row:last-child { border-bottom: none; }
+        .request-row:hover { background: rgba(255,255,255,0.02); }
+        .req-status { padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; flex-shrink: 0; }
+        .status-new { background: rgba(59,130,246,0.15); color: #93c5fd; }
+        .status-assigned { background: rgba(139,92,246,0.15); color: #c4b5fd; }
+        .status-in-progress { background: rgba(245,158,11,0.15); color: #fcd34d; }
+        .status-completed { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+        .status-closed { background: rgba(148,163,184,0.15); color: var(--text-muted); }
+        .req-info { flex: 1; min-width: 0; }
+        .req-type { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+        .req-desc { font-size: 13px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .req-location { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .req-meta { text-align: right; flex-shrink: 0; }
+        .req-id { font-size: 11px; color: var(--text-muted); font-family: monospace; }
+        .req-date { font-size: 12px; color: var(--text-muted); }
+        .req-priority { font-size: 11px; font-weight: 600; margin-top: 2px; }
+        .req-priority.high { color: var(--accent-amber); }
+        .req-priority.urgent, .req-priority.emergency { color: var(--accent-red); }
+        .empty-state { text-align: center; padding: 40px; color: var(--text-muted); }
+        .empty-state i { font-size: 36px; display: block; margin-bottom: 8px; opacity: 0.4; }
+
+        .success-toast {
+            position: fixed; top: 80px; right: 24px;
+            background: rgba(16,185,129,0.95); color: white;
+            padding: 12px 20px; border-radius: 10px;
+            font-size: 14px; font-weight: 600;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            z-index: 1000; display: none;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <div class="topbar-left">
+            <div class="topbar-logo"><i class="bi bi-building"></i></div>
+            <div>
+                <div class="topbar-title"><%= tenant.propertyName %></div>
+                <div class="topbar-subtitle">Tenant Portal</div>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <a href="/tenant-portal/logout" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+        </div>
+    </div>
+    <nav class="portal-nav">
+        <a href="/tenant-portal" class="nav-tab"><i class="bi bi-house"></i> Dashboard</a>
+        <a href="/tenant-portal/maintenance" class="nav-tab active"><i class="bi bi-wrench"></i> Maintenance</a>
+        <a href="/tenant-portal/mitch-minutes" class="nav-tab"><i class="bi bi-camera-video"></i> Mitch Minutes</a>
+        <a href="/tenant-portal/updates" class="nav-tab"><i class="bi bi-bell"></i> Updates</a>
+    </nav>
+
+    <div class="success-toast" id="successToast"><i class="bi bi-check-circle"></i> Request submitted successfully!</div>
+
+    <div class="content">
+        <div class="page-header">
+            <h2><i class="bi bi-wrench"></i> Maintenance Requests</h2>
+            <button class="btn-new" onclick="toggleForm()"><i class="bi bi-plus-circle"></i> New Request</button>
+        </div>
+
+        <!-- New Request Form -->
+        <div class="form-card" id="requestForm">
+            <div class="form-header">
+                <h3><i class="bi bi-plus-circle" style="color: var(--accent-green)"></i> Submit New Request</h3>
+            </div>
+            <div class="form-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Request Type *</label>
+                        <select id="requestType" required>
+                            <option value="">Select type...</option>
+                            <option>Plumbing</option>
+                            <option>Electrical</option>
+                            <option>HVAC</option>
+                            <option>Structural</option>
+                            <option>Pest Control</option>
+                            <option>Cleaning</option>
+                            <option>Landscaping</option>
+                            <option>Parking Lot</option>
+                            <option>Signage</option>
+                            <option>General Maintenance</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <select id="requestPriority">
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                            <option value="Emergency">Emergency</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Location in Building</label>
+                        <input type="text" id="requestLocation" placeholder="e.g., Front entrance, Suite restroom, Roof">
+                    </div>
+                    <div class="form-group">
+                        <label>Preferred Service Date</label>
+                        <input type="date" id="requestDate">
+                    </div>
+                    <div class="form-group full">
+                        <label>Description *</label>
+                        <textarea id="requestDescription" placeholder="Please describe the issue in detail..."></textarea>
+                    </div>
+                    <div class="form-group full">
+                        <label>Access Instructions</label>
+                        <input type="text" id="requestAccess" placeholder="Any special instructions for accessing the area?">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-cancel" onclick="toggleForm()">Cancel</button>
+                    <button class="btn btn-submit" onclick="submitRequest()" id="submitBtn">
+                        <i class="bi bi-send"></i> Submit Request
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Request List -->
+        <div class="request-list">
+            <div class="list-header">
+                <i class="bi bi-list-task"></i> Your Requests (<%= requests.length %>)
+            </div>
+            <% if (requests.length === 0) { %>
+                <div class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <p>No maintenance requests yet.<br>Click "New Request" to submit one.</p>
+                </div>
+            <% } else { %>
+                <% requests.forEach(r => { 
+                    const statusClass = r.status === 'New' ? 'status-new' : 
+                        (r.status === 'Assigned' ? 'status-assigned' :
+                        (r.status === 'In Progress' ? 'status-in-progress' :
+                        (r.status === 'Completed' ? 'status-completed' : 'status-closed')));
+                    const priorityClass = (r.priority || '').toLowerCase();
+                %>
+                    <div class="request-row">
+                        <span class="req-status <%= statusClass %>"><%= r.status %></span>
+                        <div class="req-info">
+                            <div class="req-type"><%= r.request_type %></div>
+                            <div class="req-desc"><%= r.description %></div>
+                            <% if (r.location_in_building) { %>
+                                <div class="req-location"><i class="bi bi-geo-alt"></i> <%= r.location_in_building %></div>
+                            <% } %>
+                            <% if (r.resolution_notes) { %>
+                                <div style="font-size: 12px; color: #6ee7b7; margin-top: 4px;">
+                                    <i class="bi bi-check2-circle"></i> <%= r.resolution_notes %>
+                                </div>
+                            <% } %>
+                        </div>
+                        <div class="req-meta">
+                            <div class="req-id"><%= r.request_id %></div>
+                            <div class="req-date"><%= new Date(r.submitted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></div>
+                            <% if (priorityClass === 'high' || priorityClass === 'urgent' || priorityClass === 'emergency') { %>
+                                <div class="req-priority <%= priorityClass %>"><%= r.priority %></div>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        function toggleForm() {
+            const form = document.getElementById('requestForm');
+            form.classList.toggle('visible');
+            if (form.classList.contains('visible')) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        async function submitRequest() {
+            const type = document.getElementById('requestType').value;
+            const desc = document.getElementById('requestDescription').value;
+            if (!type) return alert('Please select a request type.');
+            if (!desc.trim()) return alert('Please describe the issue.');
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Submitting...';
+
+            try {
+                const res = await fetch('/tenant-portal/api/maintenance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        request_type: type,
+                        priority: document.getElementById('requestPriority').value,
+                        location_in_building: document.getElementById('requestLocation').value,
+                        description: desc,
+                        preferred_date: document.getElementById('requestDate').value || null,
+                        access_instructions: document.getElementById('requestAccess').value
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('successToast').style.display = 'block';
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    alert(data.error || 'Failed to submit request.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-send"></i> Submit Request';
+                }
+            } catch (err) {
+                alert('Network error. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-send"></i> Submit Request';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Your Account | Tenant Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .setup-container { width: 100%; max-width: 420px; }
+        .setup-card {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 40px 36px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+        .brand-header { text-align: center; margin-bottom: 32px; }
+        .brand-icon {
+            width: 56px; height: 56px;
+            background: linear-gradient(135deg, #10b981, #06b6d4);
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .brand-icon i { font-size: 28px; color: white; }
+        .brand-header h1 { font-size: 22px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px; }
+        .brand-header p { font-size: 14px; color: #94a3b8; }
+        .tenant-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .tenant-info .name { color: #93c5fd; font-weight: 600; font-size: 15px; }
+        .tenant-info .prop { color: #64748b; font-size: 13px; margin-top: 2px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block; font-size: 13px; font-weight: 600;
+            color: #94a3b8; margin-bottom: 6px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .form-group input {
+            width: 100%; padding: 12px 14px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px; color: #f1f5f9; font-size: 15px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus {
+            outline: none; border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+        .form-group input::placeholder { color: #475569; }
+        .form-group .hint { font-size: 12px; color: #64748b; margin-top: 4px; }
+        .btn-setup {
+            width: 100%; padding: 13px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none; border-radius: 10px;
+            color: white; font-size: 15px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; margin-top: 4px;
+        }
+        .btn-setup:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(16,185,129,0.3); }
+        .error-msg {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5; padding: 10px 14px;
+            border-radius: 8px; font-size: 13px; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .expired-msg { text-align: center; padding: 40px 20px; }
+        .expired-msg i { font-size: 48px; color: #ef4444; margin-bottom: 16px; display: block; }
+        .expired-msg h2 { color: #f1f5f9; margin-bottom: 8px; }
+        .expired-msg p { color: #94a3b8; font-size: 14px; }
+        .expired-msg a { color: #3b82f6; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <div class="setup-card">
+            <% if (!tenant && !error) { %>
+                <div class="expired-msg">
+                    <i class="bi bi-link-45deg"></i>
+                    <h2>Invalid Link</h2>
+                    <p>This invite link is invalid or has expired.<br>Contact your property manager for a new link.</p>
+                </div>
+            <% } else if (!tenant && error) { %>
+                <div class="expired-msg">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <h2>Setup Error</h2>
+                    <p><%= error %></p>
+                </div>
+            <% } else { %>
+                <div class="brand-header">
+                    <div class="brand-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h1>Set Up Your Account</h1>
+                    <p>Create a password to access your tenant portal</p>
+                </div>
+
+                <div class="tenant-info">
+                    <div class="name"><%= tenant.dba_name || tenant.tenant_name %></div>
+                    <div class="prop">Unit <%= tenant.unit_number %> &bull; <%= tenant.property_name %></div>
+                </div>
+
+                <% if (error) { %>
+                    <div class="error-msg">
+                        <i class="bi bi-exclamation-circle"></i>
+                        <%= error %>
+                    </div>
+                <% } %>
+
+                <form method="POST" action="/tenant-portal/setup">
+                    <input type="hidden" name="token" value="<%= token %>">
+                    <div class="form-group">
+                        <label>Create Password</label>
+                        <input type="password" name="password" placeholder="Choose a strong password" required minlength="8">
+                        <div class="hint">Minimum 8 characters</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <input type="password" name="confirmPassword" placeholder="Re-enter your password" required>
+                    </div>
+                    <button type="submit" class="btn-setup">
+                        <i class="bi bi-check-circle"></i> Create Account
+                    </button>
+                </form>
+            <% } %>
+        </div>
+    </div>
+</body>
+</html>
