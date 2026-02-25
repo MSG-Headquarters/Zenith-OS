@@ -39,7 +39,9 @@ router.get('/', requireAuth, (req, res) => {
     res.render('hawk', {
         title: 'HAWK — Deal Velocity Engine',
         user: req.session.user,
-        activePage: 'hawk'
+        activePage: 'hawk',
+        theme: req.session.user ? req.session.user.theme : 'light',
+        org: req.session.org || null
     });
 });
 
