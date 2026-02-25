@@ -88,15 +88,25 @@ router.get('/api/overview', requireAuth, async (req, res) => {
             `),
             // County breakdown for migration
             pool.query(`
-                SELECT 
-                    dest_county_name as county,
-                    SUM(CASE WHEN direction = 'inflow' THEN returns ELSE 0 END) as inflows,
-                    SUM(CASE WHEN direction = 'outflow' THEN returns ELSE 0 END) as outflows,
-                    SUM(CASE WHEN direction = 'inflow' THEN agi ELSE 0 END) as inflow_agi,
-                    SUM(CASE WHEN direction = 'outflow' THEN agi ELSE 0 END) as outflow_agi
-                FROM hawk_migration_data
-                WHERE dest_county_name IS NOT NULL
-                GROUP BY dest_county_name
+                SELECT county, 
+                    SUM(inflows) as inflows, SUM(outflows) as outflows,
+                    SUM(inflow_agi) as inflow_agi, SUM(outflow_agi) as outflow_agi
+                FROM (
+                    SELECT dest_county_name as county,
+                        SUM(returns) as inflows, 0 as outflows,
+                        SUM(agi) as inflow_agi, 0 as outflow_agi
+                    FROM hawk_migration_data
+                    WHERE direction = 'inflow' AND dest_county_name IS NOT NULL
+                    GROUP BY dest_county_name
+                    UNION ALL
+                    SELECT origin_county_name as county,
+                        0 as inflows, SUM(returns) as outflows,
+                        0 as inflow_agi, SUM(agi) as outflow_agi
+                    FROM hawk_migration_data
+                    WHERE direction = 'outflow' AND origin_county_name IS NOT NULL
+                    GROUP BY origin_county_name
+                ) combined
+                GROUP BY county
                 ORDER BY inflows DESC
                 LIMIT 12
             `)
