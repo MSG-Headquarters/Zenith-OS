@@ -173,6 +173,11 @@
                     <span class="nav-icon"><i class="bi bi-safe"></i></span> The Vault
                 </a>
                 <% } %>
+                <% if (features.hawk !== false) { %>
+                <a href="/hawk" class="nav-item">
+                    <span class="nav-icon"><i class="bi bi-crosshair"></i></span> HAWK
+                </a>
+                <% } %>
             </div>
 
             <% if (['Admin', 'Principal'].includes(user.role)) { %>
