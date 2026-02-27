@@ -148,6 +148,8 @@
                 <div class="tab" onclick="switchTab('units', this)"><i class="bi bi-grid"></i> Available Units</div>
                 <div class="tab" onclick="switchTab('marketing', this)"><i class="bi bi-megaphone"></i> Marketing</div>
                 <div class="tab" onclick="switchTab('signs', this)"><i class="bi bi-signpost"></i> Sign Order</div>
+                <div class="tab" onclick="switchTab('showings', this)"><i class="bi bi-people"></i> Showings</div>
+                <div class="tab" onclick="switchTab('closings', this)"><i class="bi bi-trophy"></i> Closings</div>
                 <div class="tab" onclick="switchTab('activity', this)"><i class="bi bi-clock-history"></i> Activity</div>
             </div>
 
@@ -272,6 +274,64 @@
                 </div>
             </div>
 
+            <!-- SHOWINGS TAB -->
+            <div class="tab-content" id="tab-showings">
+                <div class="form-section">
+                    <h3><i class="bi bi-people"></i> Showing Activity <button class="btn" style="margin-left:auto;font-size:12px;" onclick="showAddShowing()"><i class="bi bi-plus"></i> Log Showing</button></h3>
+                    <table class="units-table">
+                        <thead><tr><th>Date</th><th>Contact</th><th>Company</th><th>Type</th><th>Interest</th><th>Feedback</th><th>Follow Up</th><th>Actions</th></tr></thead>
+                        <tbody id="showingsBody"><tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-secondary);">No showings logged yet</td></tr></tbody>
+                    </table>
+                </div>
+                <div class="form-section" id="addShowingForm" style="display:none;">
+                    <h3><i class="bi bi-plus-circle"></i> Log New Showing</h3>
+                    <div class="form-grid-4">
+                        <div class="form-group"><label>Contact Name</label><input id="sh_name" type="text"></div>
+                        <div class="form-group"><label>Company</label><input id="sh_company" type="text"></div>
+                        <div class="form-group"><label>Phone</label><input id="sh_phone" type="tel"></div>
+                        <div class="form-group"><label>Email</label><input id="sh_email" type="email"></div>
+                        <div class="form-group"><label>Showing Date</label><input id="sh_date" type="datetime-local"></div>
+                        <div class="form-group"><label>Type</label><select id="sh_type"><option value="in_person">In Person</option><option value="virtual">Virtual</option><option value="drive_by">Drive By</option></select></div>
+                        <div class="form-group"><label>Interest Level</label><select id="sh_interest"><option value="hot">Hot</option><option value="warm">Warm</option><option value="cold">Cold</option><option value="not_interested">Not Interested</option></select></div>
+                        <div class="form-group"><label>Follow Up Date</label><input id="sh_followup" type="date"></div>
+                        <div class="form-group full"><label>Feedback / Notes</label><textarea id="sh_feedback" rows="2"></textarea></div>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn btn-primary" onclick="addShowing()"><i class="bi bi-plus"></i> Save Showing</button>
+                        <button class="btn" onclick="document.getElementById('addShowingForm').style.display='none'">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CLOSINGS TAB -->
+            <div class="tab-content" id="tab-closings">
+                <div class="form-section">
+                    <h3><i class="bi bi-trophy"></i> Deal Closings <button class="btn" style="margin-left:auto;font-size:12px;" onclick="showAddClosing()"><i class="bi bi-plus"></i> New Closing</button></h3>
+                    <div id="closingsBody"><div style="text-align:center;padding:24px;color:var(--text-secondary);">No closings recorded yet</div></div>
+                </div>
+                <div class="form-section" id="addClosingForm" style="display:none;">
+                    <h3><i class="bi bi-plus-circle"></i> Record Closing</h3>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Transaction Type</label><select id="cl_type"><option value="lease">Lease</option><option value="sale">Sale</option><option value="sublease">Sublease</option></select></div>
+                        <div class="form-group"><label>Closing Date</label><input id="cl_date" type="date"></div>
+                        <div class="form-group"><label>Landlord/Seller Name</label><input id="cl_landlord" type="text"></div>
+                        <div class="form-group"><label>Tenant/Buyer Name</label><input id="cl_tenant" type="text"></div>
+                        <div class="form-group"><label>Tenant/Buyer Company</label><input id="cl_tenant_co" type="text"></div>
+                        <div class="form-group"><label>Tenant Phone</label><input id="cl_phone" type="tel"></div>
+                        <div class="form-group"><label>Lease SF</label><input id="cl_sf" type="number"></div>
+                        <div class="form-group"><label>Lease Type</label><select id="cl_lease_type"><option>NNN</option><option>Gross</option><option>Modified Gross</option></select></div>
+                        <div class="form-group"><label>Annual Rent/PSF</label><input id="cl_rent_psf" type="number" step="0.01"></div>
+                        <div class="form-group"><label>Sale Price</label><input id="cl_sale_price" type="number" step="0.01"></div>
+                        <div class="form-group"><label>Total Consideration</label><input id="cl_total" type="number" step="0.01"></div>
+                        <div class="form-group"><label>CAM/PSF</label><input id="cl_cam" type="number" step="0.01"></div>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn btn-primary" onclick="addClosing()"><i class="bi bi-plus"></i> Save Closing</button>
+                        <button class="btn" onclick="document.getElementById('addClosingForm').style.display='none'">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- ACTIVITY TAB -->
             <div class="tab-content" id="tab-activity">
                 <div class="form-section">
@@ -328,6 +388,8 @@
                 populateForm();
                 renderUnits();
                 renderActivity(data.activity || []);
+                renderShowings(data.showings || []);
+                renderClosings();
             } catch(e) { console.error('Failed to load listing:', e); }
         }
 
@@ -458,6 +520,130 @@
             const addr = currentListing.property_address + ', ' + currentListing.city + ', ' + currentListing.state + ' ' + currentListing.zip;
             const encoded = encodeURIComponent(addr);
             document.getElementById('signMap').innerHTML = `<iframe src="https://www.google.com/maps?q=${encoded}&output=embed" width="100%" height="300" style="border:0;" allowfullscreen loading="lazy"></iframe>`;
+        }
+
+
+        let currentShowings = [];
+        let currentClosings = [];
+
+        function showAddShowing() { document.getElementById('addShowingForm').style.display = 'block'; document.getElementById('sh_date').value = new Date().toISOString().slice(0,16); }
+        function showAddClosing() { document.getElementById('addClosingForm').style.display = 'block'; }
+
+        async function addShowing() {
+            if (!currentListing) return;
+            const body = {
+                contact_name: document.getElementById('sh_name').value,
+                contact_company: document.getElementById('sh_company').value,
+                contact_phone: document.getElementById('sh_phone').value,
+                contact_email: document.getElementById('sh_email').value,
+                showing_date: document.getElementById('sh_date').value,
+                showing_type: document.getElementById('sh_type').value,
+                interest_level: document.getElementById('sh_interest').value,
+                feedback: document.getElementById('sh_feedback').value,
+                follow_up_date: document.getElementById('sh_followup').value || null,
+            };
+            try {
+                const res = await fetch('/api/tms/listings/' + currentListing.id + '/showings', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+                });
+                if ((await res.json()).success) { document.getElementById('addShowingForm').style.display = 'none'; selectListing(currentListing.id); }
+            } catch(e) { alert('Failed: ' + e.message); }
+        }
+
+        function renderShowings(showings) {
+            currentShowings = showings || [];
+            const tbody = document.getElementById('showingsBody');
+            if (currentShowings.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-secondary);">No showings logged. Click "+ Log Showing" to record prospect activity.</td></tr>';
+                return;
+            }
+            const interestColors = { hot:'var(--accent-red)', warm:'var(--accent-amber)', cold:'var(--accent-blue)', not_interested:'var(--text-secondary)' };
+            tbody.innerHTML = currentShowings.map(s => {
+                const dt = s.showing_date ? new Date(s.showing_date).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) : '-';
+                const fu = s.follow_up_date ? new Date(s.follow_up_date).toLocaleDateString('en-US', {month:'short',day:'numeric'}) : '-';
+                return '<tr>' +
+                    '<td>' + dt + '</td>' +
+                    '<td><strong>' + (s.contact_name||'-') + '</strong></td>' +
+                    '<td>' + (s.contact_company||'-') + '</td>' +
+                    '<td>' + (s.showing_type||'-') + '</td>' +
+                    '<td><span style="color:' + (interestColors[s.interest_level]||'inherit') + ';font-weight:600;">' + (s.interest_level||'-') + '</span></td>' +
+                    '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">' + (s.feedback||'-') + '</td>' +
+                    '<td>' + fu + '</td>' +
+                    '<td><button class="btn" style="font-size:11px;padding:4px 8px;" onclick="pushToCRM(' + s.id + ')" title="Send to CRM"><i class="bi bi-funnel"></i></button> <button class="btn btn-danger" style="font-size:11px;padding:4px 8px;" onclick="deleteShowing(' + s.id + ')"><i class="bi bi-trash"></i></button></td>' +
+                '</tr>';
+            }).join('');
+        }
+
+        async function deleteShowing(id) {
+            if (!confirm('Delete this showing?')) return;
+            try { await fetch('/api/tms/showings/' + id, { method: 'DELETE' }); selectListing(currentListing.id); } catch(e) { alert('Failed'); }
+        }
+
+        async function pushToCRM(showingId) {
+            if (!confirm('Create a CRM lead from this showing contact?')) return;
+            try {
+                const res = await fetch('/api/tms/showings/' + showingId + '/to-crm', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) alert('Contact added to CRM as "Contacted" lead!');
+                else alert('Error: ' + (data.error||'Unknown'));
+            } catch(e) { alert('Failed: ' + e.message); }
+        }
+
+        async function addClosing() {
+            if (!currentListing) return;
+            const body = {
+                transaction_type: document.getElementById('cl_type').value,
+                closing_date: document.getElementById('cl_date').value,
+                landlord_seller_name: document.getElementById('cl_landlord').value,
+                tenant_buyer_name: document.getElementById('cl_tenant').value,
+                tenant_buyer_company: document.getElementById('cl_tenant_co').value,
+                tenant_buyer_phone: document.getElementById('cl_phone').value,
+                lease_sf: document.getElementById('cl_sf').value || null,
+                lease_type: document.getElementById('cl_lease_type').value,
+                annual_rent_psf: document.getElementById('cl_rent_psf').value || null,
+                sale_price: document.getElementById('cl_sale_price').value || null,
+                total_consideration: document.getElementById('cl_total').value || null,
+                cam_psf: document.getElementById('cl_cam').value || null,
+            };
+            try {
+                const res = await fetch('/api/tms/listings/' + currentListing.id + '/closings', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+                });
+                if ((await res.json()).success) { document.getElementById('addClosingForm').style.display = 'none'; selectListing(currentListing.id); }
+            } catch(e) { alert('Failed: ' + e.message); }
+        }
+
+        async function renderClosings() {
+            if (!currentListing) return;
+            try {
+                const res = await fetch('/api/tms/listings/' + currentListing.id + '/closings');
+                const data = await res.json();
+                currentClosings = data.closings || [];
+                const container = document.getElementById('closingsBody');
+                if (currentClosings.length === 0) {
+                    container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-secondary);">No closings recorded. Click "+ New Closing" when a deal closes.</div>';
+                    return;
+                }
+                container.innerHTML = currentClosings.map(c => {
+                    const dt = c.closing_date ? new Date(c.closing_date).toLocaleDateString() : 'Pending';
+                    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px;border:1px solid var(--border-color);border-radius:8px;margin-bottom:8px;">' +
+                        '<div><strong>' + (c.tenant_buyer_company||c.tenant_buyer_name||'Unknown') + '</strong><br><span style="font-size:12px;color:var(--text-secondary);">' + c.transaction_type + ' | ' + dt + ' | ' + (c.lease_sf ? Number(c.lease_sf).toLocaleString()+' SF' : (c.sale_price ? '$'+Number(c.sale_price).toLocaleString() : '-')) + '</span></div>' +
+                        '<div style="display:flex;gap:8px;"><button class="btn btn-primary" style="font-size:11px;" onclick="downloadVoucher(' + c.id + ')"><i class="bi bi-download"></i> Commission Voucher</button></div>' +
+                    '</div>';
+                }).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        async function downloadVoucher(closingId) {
+            try {
+                const res = await fetch('/api/tms/closings/' + closingId + '/voucher', { method: 'POST' });
+                if (!res.ok) throw new Error('Failed');
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = 'Commission_Voucher.xlsx'; a.click();
+                URL.revokeObjectURL(url);
+            } catch(e) { alert('Failed to generate voucher: ' + e.message); }
         }
 
         loadListings();
