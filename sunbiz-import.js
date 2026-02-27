@@ -1,4 +1,4 @@
-﻿/**
+/**
  * SUNBIZ ? DANIMAL LEADS IMPORT
  * 
  * Reads from local SQLite sunbiz.db and imports to PostgreSQL danimal_leads

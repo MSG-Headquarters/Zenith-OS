@@ -1,459 +1,557 @@
 <!-- ============================================
-     CRE OS — Marketing Suite Dashboard
+     ZENITH OS - Marketing Suite (Broker View)
      views/marketing.ejs
+     PM Dashboard Pattern: Broker -> Listings -> Projects
      ============================================ -->
 <!DOCTYPE html>
 <html lang="en" data-theme="<%= typeof theme !== 'undefined' ? theme : 'light' %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marketing Suite - CRE OS</title>
+    <title>Marketing Suite - Zenith OS</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/css/theme.css">
     <script src="/js/theme.js"></script>
     <style>
-        :root {
-            --bg-dark: var(--bg-surface);
-            --bg-sidebar: var(--sidebar-bg);
-            --bg-main: var(--bg-page);
-            --bg-white: var(--bg-surface);
-            --bg-light: var(--bg-page);
-            --text-primary: var(--text-primary);
-            --text-muted: #6c757d;
-            --text-light: #adb5bd;
-            --border: #e2e8f0;
-            --accent-green: #1B6B3A;
-            --accent-green-light: #2A8B4A;
-            --accent-red: #C41E3A;
-            --accent-blue: #3b82f6;
-            --accent-amber: #f59e0b;
-            --accent-emerald: #10b981;
-            --accent-purple: #8b5cf6;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-            --radius: 12px;
-        }
-
+        :root { --accent-green: #1B6B3A; --accent-emerald: #10b981; --accent-blue: #3b82f6; --accent-amber: #f59e0b; --accent-red: #ef4444; --accent-purple: #6366f1; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', -apple-system, sans-serif; background: var(--bg-main); color: var(--text-primary); }
-
-        .layout { display: flex; min-height: 100vh; }
-
-        /* Sidebar — matches existing CRE OS */
-        .sidebar { width: 260px; background: var(--bg-surface); border-right: 1px solid var(--border); padding: 12px 8px; flex-shrink: 0; }
-        .sidebar-brand { margin-bottom: 8px; border-bottom: 1px solid var(--border); }
-        .sidebar-brand span { color: var(--accent-emerald); }
-        .sidebar-nav a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; color: var(--text-secondary); text-decoration: none; border-radius: 8px; font-size: 14px; margin-bottom: 2px; transition: all 0.15s ease; }
-        .sidebar-nav a:hover { background: var(--bg-gray, #f1f5f9); color: var(--text-primary); }
-        .sidebar-nav a.active { background: rgba(16, 185, 129, 0.1); color: var(--accent-emerald); }
-        .sidebar-nav a i { width: 20px; font-size: 16px; flex-shrink: 0; }
-        .sidebar-section { font-size: 10px; text-transform: uppercase; color: var(--text-muted); padding: 16px 12px 8px; letter-spacing: 1.5px; font-weight: 700; }
-
-        /* Main content */
-        .main { flex: 1; overflow-y: auto; }
-        .top-bar { background: var(--bg-white); border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
-        .top-bar h1 { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-        .top-bar h1 i { color: var(--accent-green); }
-        .content { padding: 28px 32px; }
-
-        /* Stats Grid */
-        .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 28px; }
-        .stat-card { background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow-sm); }
-        .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 6px; }
-        .stat-value { font-size: 26px; font-weight: 700; line-height: 1; }
-        .stat-value.green { color: var(--accent-emerald); }
-        .stat-value.blue { color: var(--accent-blue); }
-        .stat-value.amber { color: var(--accent-amber); }
-        .stat-value.purple { color: var(--accent-purple); }
-        .stat-value.red { color: var(--accent-red); }
-        .stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
-
-        /* Filter bar */
-        .filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-        .filter-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: 20px; background: var(--bg-white); font-size: 13px; cursor: pointer; color: var(--text-muted); transition: all 0.2s; }
-        .filter-btn:hover { border-color: var(--accent-green); color: var(--accent-green); }
-        .filter-btn.active { background: var(--accent-green); color: white; border-color: var(--accent-green); }
-        .filter-count { background: rgba(0,0,0,0.1); padding: 1px 7px; border-radius: 10px; font-size: 11px; margin-left: 4px; }
-        .filter-btn.active .filter-count { background: rgba(255,255,255,0.25); }
-
-        /* Drafts Table */
-        .drafts-table-wrap { background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
-        .drafts-table { width: 100%; border-collapse: collapse; }
-        .drafts-table th { padding: 12px 16px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px; color: var(--text-muted); border-bottom: 1px solid var(--border); background: var(--bg-light); }
-        .drafts-table td { padding: 14px 16px; border-bottom: 1px solid #f0f0f0; font-size: 14px; vertical-align: middle; }
-        .drafts-table tr:last-child td { border-bottom: none; }
-        .drafts-table tr:hover { background: #fafbfc; }
-
-        .draft-property { font-weight: 600; color: var(--text-primary); }
-        .draft-address { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-
-        /* Status badges */
-        .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
-        .badge-pending { background: #fef3c7; color: #92400e; }
-        .badge-ready { background: #dbeafe; color: #1e40af; }
-        .badge-generating { background: #ede9fe; color: #5b21b6; }
-        .badge-review { background: #fce7f3; color: #9d174d; }
-        .badge-revision { background: #fde68a; color: #78350f; }
-        .badge-approval { background: #fed7aa; color: #9a3412; }
-        .badge-approved { background: #d1fae5; color: #065f46; }
-        .badge-distributed { background: #a7f3d0; color: #064e3b; }
-        .badge-failed { background: #fee2e2; color: #991b1b; }
-        .badge i { font-size: 10px; }
-
-        /* Quality score */
-        .quality-bar { width: 60px; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 6px; }
-        .quality-fill { height: 100%; border-radius: 3px; }
-        .quality-high { background: var(--accent-emerald); }
-        .quality-medium { background: var(--accent-amber); }
-        .quality-low { background: var(--accent-red); }
-
-        /* Action buttons */
-        .btn { padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px; }
-        .btn-primary { background: var(--accent-green); color: white; }
-        .btn-primary:hover { background: var(--accent-green-light); }
-        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-primary); }
-        .btn-outline:hover { border-color: var(--accent-green); color: var(--accent-green); }
-        .btn-sm { padding: 4px 10px; font-size: 12px; }
-        .btn-danger { background: #fee2e2; color: #991b1b; }
-        .btn-danger:hover { background: #fecaca; }
-
-        /* Empty state */
-        .empty-state { text-align: center; padding: 60px 20px; }
-        .empty-state i { font-size: 48px; color: var(--text-light); margin-bottom: 16px; }
-        .empty-state h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
-        .empty-state p { font-size: 14px; color: var(--text-muted); max-width: 400px; margin: 0 auto; }
-
-        /* Toast notification */
-        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; }
-        .toast { padding: 12px 20px; border-radius: 10px; color: white; font-size: 14px; margin-bottom: 8px; box-shadow: var(--shadow-md); animation: slideIn 0.3s ease; }
-        .toast-success { background: var(--accent-emerald); }
-        .toast-error { background: var(--accent-red); }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-        /* Responsive */
-        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .content { padding: 16px; }
-        }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-page); color: var(--text-primary); display: flex; min-height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar { width: 240px; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 10; }
+        .sidebar-logo { padding: 20px; border-bottom: 1px solid var(--border-color); }
+        .sidebar-logo h2 { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+        .sidebar-logo p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+        .nav-section { padding: 16px 12px 8px; }
+        .nav-section-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); padding: 0 8px; margin-bottom: 4px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; color: var(--text-secondary); text-decoration: none; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+        .nav-item:hover { background: var(--bg-surface-hover); color: var(--text-primary); }
+        .nav-item.active { background: var(--accent-emerald); color: white; }
+        .nav-item .nav-icon { width: 20px; text-align: center; font-size: 14px; }
+        .nav-badge { margin-left: auto; background: var(--accent-emerald); color: white; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 10px; }
+        
+        /* Main Content */
+        .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; border-bottom: 1px solid var(--border-color); background: var(--bg-surface); }
+        .topbar h1 { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .topbar-actions { display: flex; gap: 8px; }
+        .content { padding: 24px 32px; flex: 1; overflow-y: auto; }
+        
+        /* KPI Cards */
+        .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
+        .kpi-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px 20px; border-left: 4px solid transparent; }
+        .kpi-card.in-production { border-left-color: var(--accent-blue); }
+        .kpi-card.awaiting-review { border-left-color: var(--accent-amber); }
+        .kpi-card.pending-approval { border-left-color: var(--accent-purple); }
+        .kpi-card.approved { border-left-color: var(--accent-emerald); }
+        .kpi-card.distributed { border-left-color: #06b6d4; }
+        .kpi-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); }
+        .kpi-value { font-size: 28px; font-weight: 700; margin: 4px 0; }
+        .kpi-sub { font-size: 12px; color: var(--text-secondary); }
+        
+        /* Broker Selector (like PM property dropdown) */
+        .broker-selector { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; border-left: 4px solid var(--accent-emerald); }
+        .broker-selector select { padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background: var(--bg-surface); color: var(--text-primary); min-width: 220px; }
+        .broker-selector .broker-name { font-size: 18px; font-weight: 700; }
+        .broker-selector .broker-sub { font-size: 12px; color: var(--text-secondary); }
+        
+        /* Projects List */
+        .projects-section { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
+        .projects-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border-color); }
+        .projects-header h3 { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .projects-table { width: 100%; border-collapse: collapse; }
+        .projects-table th { text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); padding: 10px 16px; border-bottom: 1px solid var(--border-color); }
+        .projects-table td { padding: 14px 16px; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+        .projects-table tr:hover { background: var(--bg-surface-hover); cursor: pointer; }
+        .projects-table tr:last-child td { border-bottom: none; }
+        .project-name { font-weight: 600; }
+        .project-address { font-size: 12px; color: var(--text-secondary); }
+        .project-type-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .type-flyer { background: rgba(99,102,241,0.1); color: #6366f1; }
+        .type-bov { background: rgba(59,130,246,0.1); color: #3b82f6; }
+        .type-offering { background: rgba(245,158,11,0.1); color: #f59e0b; }
+        .type-brochure { background: rgba(16,185,129,0.1); color: #10b981; }
+        
+        /* Status Badges */
+        .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .status-pending { background: rgba(107,114,128,0.1); color: #6b7280; }
+        .status-ready, .status-generating { background: rgba(59,130,246,0.1); color: #3b82f6; }
+        .status-review { background: rgba(245,158,11,0.1); color: #f59e0b; }
+        .status-approval { background: rgba(139,92,246,0.1); color: #8b5cf6; }
+        .status-approved { background: rgba(16,185,129,0.1); color: #10b981; }
+        .status-distributed { background: rgba(6,182,212,0.1); color: #06b6d4; }
+        .status-failed { background: rgba(239,68,68,0.1); color: #ef4444; }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; }
+        .status-pending .status-dot { background: #6b7280; }
+        .status-ready .status-dot, .status-generating .status-dot { background: #3b82f6; }
+        .status-review .status-dot { background: #f59e0b; }
+        .status-approval .status-dot { background: #8b5cf6; }
+        .status-approved .status-dot { background: #10b981; }
+        .status-distributed .status-dot { background: #06b6d4; }
+        .status-failed .status-dot { background: #ef4444; }
+        
+        /* Progress Bar */
+        .progress-track { width: 100px; height: 6px; background: var(--border-color); border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+        
+        /* Detail Slide-in Panel */
+        .detail-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 100; }
+        .detail-overlay.active { display: block; }
+        .detail-panel { position: fixed; top: 0; right: -600px; width: 600px; height: 100vh; background: var(--bg-surface); border-left: 1px solid var(--border-color); z-index: 101; transition: right 0.3s ease; display: flex; flex-direction: column; }
+        .detail-panel.active { right: 0; }
+        .detail-header { padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
+        .detail-header h2 { font-size: 18px; font-weight: 700; }
+        .detail-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-secondary); padding: 4px; }
+        .detail-body { flex: 1; overflow-y: auto; }
+        
+        /* Preview Section */
+        .preview-section { padding: 20px 24px; border-bottom: 1px solid var(--border-color); }
+        .preview-section h4 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 12px; }
+        .preview-frame { width: 100%; height: 400px; border: 1px solid var(--border-color); border-radius: 8px; background: #f8fafc; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .preview-frame img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .preview-placeholder { text-align: center; color: var(--text-secondary); }
+        .preview-placeholder i { font-size: 48px; margin-bottom: 8px; display: block; }
+        
+        /* Approval Actions */
+        .approval-actions { padding: 16px 24px; display: flex; gap: 8px; border-bottom: 1px solid var(--border-color); }
+        .btn-approve { background: var(--accent-emerald); color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .btn-approve:hover { background: #059669; }
+        .btn-revise { background: rgba(245,158,11,0.1); color: #f59e0b; border: 1px solid #f59e0b; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .btn-revise:hover { background: rgba(245,158,11,0.2); }
+        
+        /* Chat Section */
+        .chat-section { padding: 16px 24px; display: flex; flex-direction: column; flex: 1; min-height: 250px; }
+        .chat-section h4 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 12px; }
+        .chat-messages { flex: 1; overflow-y: auto; max-height: 300px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; padding: 8px; background: var(--bg-page); border-radius: 8px; border: 1px solid var(--border-color); }
+        .chat-msg { padding: 8px 12px; border-radius: 8px; font-size: 13px; max-width: 85%; }
+        .chat-msg.broker { background: rgba(99,102,241,0.1); align-self: flex-end; border-bottom-right-radius: 2px; }
+        .chat-msg.marketing { background: var(--bg-surface); border: 1px solid var(--border-color); align-self: flex-start; border-bottom-left-radius: 2px; }
+        .chat-msg .msg-meta { font-size: 10px; color: var(--text-secondary); margin-top: 4px; }
+        .chat-input-row { display: flex; gap: 8px; }
+        .chat-input-row input { flex: 1; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px; background: var(--bg-surface); color: var(--text-primary); }
+        .chat-input-row button { padding: 8px 16px; background: var(--accent-emerald); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; }
+        
+        /* Status Timeline */
+        .timeline { padding: 16px 24px; border-bottom: 1px solid var(--border-color); }
+        .timeline h4 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 12px; }
+        .timeline-items { display: flex; flex-direction: column; gap: 0; }
+        .timeline-item { display: flex; gap: 12px; padding: 8px 0; }
+        .timeline-dot-line { display: flex; flex-direction: column; align-items: center; width: 20px; }
+        .timeline-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--border-color); background: var(--bg-surface); flex-shrink: 0; }
+        .timeline-dot.active { background: var(--accent-emerald); border-color: var(--accent-emerald); }
+        .timeline-dot.current { background: var(--accent-amber); border-color: var(--accent-amber); }
+        .timeline-line { width: 2px; flex: 1; background: var(--border-color); min-height: 16px; }
+        .timeline-content { font-size: 12px; }
+        .timeline-content .step-name { font-weight: 600; color: var(--text-primary); }
+        .timeline-content .step-date { color: var(--text-secondary); }
+        
+        /* Buttons */
+        .btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+        .btn:hover { background: var(--bg-surface-hover); }
+        .btn-primary { background: var(--accent-emerald); color: white; border-color: var(--accent-emerald); }
+        .btn-primary:hover { opacity: 0.9; }
+        
+        /* Empty State */
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+        .empty-state i { font-size: 48px; margin-bottom: 12px; display: block; opacity: 0.5; }
+        .empty-state h3 { font-size: 16px; margin-bottom: 4px; color: var(--text-primary); }
+        
+        /* Filter Tabs */
+        .filter-tabs { display: flex; gap: 4px; margin-bottom: 20px; }
+        .filter-tab { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); cursor: pointer; }
+        .filter-tab.active { background: var(--accent-emerald); color: white; border-color: var(--accent-emerald); }
     </style>
-<%- include("partials/security") %>
 </head>
 <body>
-<div class="layout">
-    <!-- Sidebar -->
-    <aside class="sidebar" style="width:260px;background:var(--bg-surface);border-right:1px solid var(--border);padding:12px 8px;flex-shrink:0;">
-        <div style="display:flex;align-items:center;gap:10px;padding:16px 12px 20px;margin-bottom:8px;border-bottom:1px solid var(--border);">
-            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#10B981,#059669);display:flex;align-items:center;justify-content:center;">
-                <i class="bi bi-megaphone" style="color:#fff;font-size:16px;"></i>
-            </div>
-            <div>
-                <div style="font-size:15px;font-weight:700;color:var(--text-primary);">Marketing Suite</div>
-                <div style="font-size:11px;color:var(--text-muted);">Content & Distribution</div>
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <h2><i class="bi bi-megaphone"></i> Marketing Suite</h2>
+            <p>Content & Distribution</p>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-section-label">My Listings</div>
+            <a class="nav-item active" onclick="filterAll()"><span class="nav-icon"><i class="bi bi-grid-3x3-gap"></i></span> All Projects <span class="nav-badge" id="badgeAll">0</span></a>
+            <a class="nav-item" onclick="filterStatus('in-production')"><span class="nav-icon"><i class="bi bi-gear"></i></span> In Production</a>
+            <a class="nav-item" onclick="filterStatus('awaiting-approval')"><span class="nav-icon"><i class="bi bi-eye"></i></span> Awaiting Approval <span class="nav-badge" id="badgeApproval" style="background:var(--accent-purple)">0</span></a>
+            <a class="nav-item" onclick="filterStatus('approved')"><span class="nav-icon"><i class="bi bi-check-circle"></i></span> Approved</a>
+            <a class="nav-item" onclick="filterStatus('distributed')"><span class="nav-icon"><i class="bi bi-send"></i></span> Distributed</a>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-section-label">Navigate</div>
+            <a href="/dashboard" class="nav-item"><span class="nav-icon"><i class="bi bi-house"></i></span> CRE Home</a>
+            <a href="/crm" class="nav-item"><span class="nav-icon"><i class="bi bi-funnel"></i></span> CRM</a>
+            <a href="/intel" class="nav-item"><span class="nav-icon"><i class="bi bi-broadcast"></i></span> INTEL</a>
+            <a href="/huddle" class="nav-item"><span class="nav-icon"><i class="bi bi-chat-dots"></i></span> Huddle</a>
+            <a href="/vault" class="nav-item"><span class="nav-icon"><i class="bi bi-shield-lock"></i></span> Vault</a>
+        </div>
+        
+        <div style="margin-top:auto; padding:16px; border-top:1px solid var(--border-color);">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:32px;height:32px;border-radius:50%;background:var(--accent-emerald);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:13px;">
+                    <%= user?.name?.charAt(0) || 'U' %>
+                </div>
+                <div>
+                    <div style="font-size:13px;font-weight:600;"><%= user?.name || 'User' %></div>
+                    <div style="font-size:11px;color:var(--text-secondary);"><%= user?.role || 'Agent' %></div>
+                </div>
             </div>
         </div>
-        <nav style="flex:1;padding:4px;overflow-y:auto;">
-            <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1.5px;padding:8px 12px;">Listing Packages</div>
-            <a href="/marketing" class="active" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--accent-emerald);background:rgba(16,185,129,0.1);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-collection" style="width:20px;"></i> All Packages</a>
-            <a href="#" onclick="filterDrafts('pending', this)" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-clock" style="width:20px;"></i> In Production</a>
-            <a href="#" onclick="filterDrafts('review', this)" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-eye" style="width:20px;"></i> Awaiting Review</a>
-            <a href="#" onclick="filterDrafts('approval', this)" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-send-check" style="width:20px;"></i> Sent to Broker</a>
-            <a href="#" onclick="filterDrafts('approved', this)" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-check2-all" style="width:20px;"></i> Approved / Live</a>
-            <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1.5px;padding:16px 12px 8px;">Promotional</div>
-            <a href="#" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-file-earmark-bar-graph" style="width:20px;"></i> BOVs</a>
-            <a href="#" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-journal-richtext" style="width:20px;"></i> Offering Memos</a>
-            <a href="#" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-bar-chart-line" style="width:20px;"></i> Market Reports</a>
-            <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1.5px;padding:16px 12px 8px;">Navigate</div>
-            <a href="/dashboard" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-house" style="width:20px;"></i> CRE Home</a>
-            <% if (features.crm !== false) { %>
-            <a href="/crm" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-funnel" style="width:20px;"></i> CRM</a>
-            <% } %>
-            <% if (features.intel !== false) { %>
-            <a href="/intel" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-broadcast" style="width:20px;"></i> INTEL</a>
-            <% } %>
-            <% if (features.huddle !== false) { %>
-            <a href="/huddle" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-chat-dots" style="width:20px;"></i> Huddle</a>
-            <% } %>
-            <% if (features.vault !== false) { %>
-            <a href="/vault" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:14px;margin-bottom:2px;"><i class="bi bi-lock" style="width:20px;"></i> Vault</a>
-            <% } %>
-        </nav>
-    </aside>
-
-    <!-- Main Content -->
+    </div>
+    
+    <!-- MAIN CONTENT -->
     <div class="main">
-        <div class="top-bar">
-            <h1><i class="bi bi-megaphone"></i> Marketing Suite</h1>
-            <div style="display:flex;gap:8px;">
-                <button class="btn btn-outline" onclick="refreshDrafts()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
-                <button class="btn btn-primary" onclick="window.location.href='/crm'"><i class="bi bi-plus-lg"></i> New from CRM</button>
+        <div class="topbar">
+            <h1><i class="bi bi-megaphone"></i> Marketing Pipeline</h1>
+            <div class="topbar-actions">
+                <button class="btn" onclick="loadProjects()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
             </div>
         </div>
-
+        
         <div class="content">
-            <!-- Stats -->
-            <div class="stats-grid" id="statsGrid">
-                <div class="stat-card">
-                    <div class="stat-label">Total Drafts</div>
-                    <div class="stat-value" id="statTotal">-</div>
-                    <div class="stat-sub">All marketing packages</div>
+            <!-- KPI Cards -->
+            <div class="kpi-row">
+                <div class="kpi-card in-production">
+                    <div class="kpi-label">In Production</div>
+                    <div class="kpi-value" id="kpiProduction">0</div>
+                    <div class="kpi-sub">Being created by marketing</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-label">Awaiting Review</div>
-                    <div class="stat-value amber" id="statReview">-</div>
-                    <div class="stat-sub">Needs marketing team action</div>
+                <div class="kpi-card awaiting-review">
+                    <div class="kpi-label">In Review</div>
+                    <div class="kpi-value" id="kpiReview">0</div>
+                    <div class="kpi-sub">Marketing team reviewing</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-label">Pending Approval</div>
-                    <div class="stat-value purple" id="statApproval">-</div>
-                    <div class="stat-sub">Waiting on broker sign-off</div>
+                <div class="kpi-card pending-approval">
+                    <div class="kpi-label">Awaiting Your Approval</div>
+                    <div class="kpi-value" id="kpiApproval">0</div>
+                    <div class="kpi-sub">Ready for your sign-off</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-label">Approved</div>
-                    <div class="stat-value green" id="statApproved">-</div>
-                    <div class="stat-sub">Ready for distribution</div>
+                <div class="kpi-card approved">
+                    <div class="kpi-label">Approved</div>
+                    <div class="kpi-value" id="kpiApproved">0</div>
+                    <div class="kpi-sub">Ready for distribution</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-label">Distributed</div>
-                    <div class="stat-value blue" id="statDistributed">-</div>
-                    <div class="stat-sub">Live on channels</div>
+                <div class="kpi-card distributed">
+                    <div class="kpi-label">Live</div>
+                    <div class="kpi-value" id="kpiDistributed">0</div>
+                    <div class="kpi-sub">Published on platforms</div>
                 </div>
             </div>
-
-            <!-- Filter Bar -->
-            <div class="filter-bar">
-                <button class="filter-btn active" data-filter="all" onclick="filterDrafts('all', this)">All</button>
-                <button class="filter-btn" data-filter="pending" onclick="filterDrafts('pending', this)">Pending</button>
-                <button class="filter-btn" data-filter="ready" onclick="filterDrafts('ready', this)">Ready</button>
-                <button class="filter-btn" data-filter="generating" onclick="filterDrafts('generating', this)">Generating</button>
-                <button class="filter-btn" data-filter="review" onclick="filterDrafts('review', this)">In Review</button>
-                <button class="filter-btn" data-filter="approval" onclick="filterDrafts('approval', this)">Approval</button>
-                <button class="filter-btn" data-filter="approved" onclick="filterDrafts('approved', this)">Approved</button>
-                <button class="filter-btn" data-filter="distributed" onclick="filterDrafts('distributed', this)">Distributed</button>
-                <button class="filter-btn" data-filter="failed" onclick="filterDrafts('failed', this)">Failed</button>
-            </div>
-
-            <!-- Drafts Table -->
-            <div class="drafts-table-wrap">
-                <table class="drafts-table">
+            
+            <!-- Projects Table -->
+            <div class="projects-section">
+                <div class="projects-header">
+                    <h3><i class="bi bi-collection"></i> Marketing Projects</h3>
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" onclick="setFilter('all', this)">All</button>
+                        <button class="filter-tab" onclick="setFilter('in-production', this)">In Production</button>
+                        <button class="filter-tab" onclick="setFilter('awaiting-approval', this)">Needs Approval</button>
+                        <button class="filter-tab" onclick="setFilter('approved', this)">Approved</button>
+                        <button class="filter-tab" onclick="setFilter('distributed', this)">Live</button>
+                    </div>
+                </div>
+                <table class="projects-table">
                     <thead>
                         <tr>
-                            <th>Property</th>
+                            <th>Listing</th>
+                            <th>Type</th>
                             <th>Status</th>
-                            <th>Quality</th>
-                            <th>AI Model</th>
-                            <th>Pages</th>
-                            <th>Created</th>
+                            <th>Progress</th>
+                            <th>Updated</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="draftsBody">
-                        <tr>
-                            <td colspan="7">
-                                <div class="empty-state">
-                                    <i class="bi bi-megaphone"></i>
-                                    <h3>No marketing drafts yet</h3>
-                                    <p>When CRM deals move to "Closed Won," marketing packages are auto-generated here. You can also create drafts from the CRM.</p>
-                                </div>
-                            </td>
-                        </tr>
+                    <tbody id="projectsBody">
+                        <tr><td colspan="6" class="empty-state"><i class="bi bi-megaphone"></i><h3>Loading projects...</h3></td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-</div>
-
-<div class="toast-container" id="toastContainer"></div>
-
-<script>
-    let allDrafts = [];
-    let currentFilter = 'all';
-
-    // ── Load Drafts ─────────────────────────────────────────────
-    async function loadDrafts() {
-        try {
-            const res = await fetch('/api/marketing/drafts?limit=100');
-            const data = await res.json();
-            allDrafts = data.drafts || [];
-            updateStats();
-            renderDrafts();
-        } catch (err) {
-            console.error('Failed to load drafts:', err);
-        }
-    }
-
-    function updateStats() {
-        const counts = { total: allDrafts.length, review: 0, approval: 0, approved: 0, distributed: 0 };
-        allDrafts.forEach(d => {
-            if (d.status === 'review' || d.status === 'revision') counts.review++;
-            if (d.status === 'approval') counts.approval++;
-            if (d.status === 'approved') counts.approved++;
-            if (d.status === 'distributed') counts.distributed++;
-        });
-        document.getElementById('statTotal').textContent = counts.total;
-        document.getElementById('statReview').textContent = counts.review;
-        document.getElementById('statApproval').textContent = counts.approval;
-        document.getElementById('statApproved').textContent = counts.approved;
-        document.getElementById('statDistributed').textContent = counts.distributed;
-    }
-
-    function filterDrafts(filter, btn) {
-        currentFilter = filter;
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        if (btn) btn.classList.add('active');
-        renderDrafts();
-    }
-
-    function renderDrafts() {
-        const filtered = currentFilter === 'all' ? allDrafts : allDrafts.filter(d => d.status === currentFilter);
-        const tbody = document.getElementById('draftsBody');
-
-        if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7">
-                <div class="empty-state">
-                    <i class="bi bi-megaphone"></i>
-                    <h3>${currentFilter === 'all' ? 'No marketing drafts yet' : 'No drafts with status "' + currentFilter + '"'}</h3>
-                    <p>When CRM deals move to "Closed Won," marketing packages are auto-generated here.</p>
-                </div></td></tr>`;
-            return;
-        }
-
-        tbody.innerHTML = filtered.map(d => {
-            const created = new Date(d.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            const pages = (d.template_sequence || []).length;
-            const qs = d.quality_score;
-            const qClass = qs >= 70 ? 'quality-high' : qs >= 40 ? 'quality-medium' : 'quality-low';
-
-            return `<tr>
-                <td>
-                    <div class="draft-property">${d.property_address || d.lead_company || d.lead_name || "Listing #" + d.listing_id}</div>
-                    <div style="font-size:12px;color:var(--text-muted);">${d.property_city || ""}</div>
-                    <div class="draft-address">${d.id.slice(0, 8)}...</div>
-                </td>
-                <td>${statusBadge(d.status)}</td>
-                <td>${qs !== null ? `<span class="quality-bar"><span class="quality-fill ${qClass}" style="width:${qs}%"></span></span>${qs}%` : '<span style="color:var(--text-light)">—</span>'}</td>
-                <td style="font-size:12px;color:var(--text-muted)">${d.ai_model || '—'}</td>
-                <td>${pages > 0 ? pages + 'p' : '—'}</td>
-                <td style="font-size:13px;color:var(--text-muted)">${created}</td>
-                <td>${actionButtons(d)}</td>
-            </tr>`;
-        }).join('');
-    }
-
-    function statusBadge(status) {
-        const icons = {
-            pending: 'bi-hourglass-split', ready: 'bi-check-circle', generating: 'bi-cpu',
-            review: 'bi-eye', revision: 'bi-pencil', approval: 'bi-person-check',
-            approved: 'bi-check2-all', distributed: 'bi-broadcast', failed: 'bi-exclamation-triangle'
+    
+    <!-- DETAIL PANEL (slide-in like CRM lead detail) -->
+    <div class="detail-overlay" id="detailOverlay" onclick="closeDetail()"></div>
+    <div class="detail-panel" id="detailPanel">
+        <div class="detail-header">
+            <div>
+                <h2 id="detailTitle">Project Details</h2>
+                <div id="detailSubtitle" style="font-size:12px;color:var(--text-secondary);margin-top:2px;"></div>
+            </div>
+            <button class="detail-close" onclick="closeDetail()"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="detail-body">
+            <!-- Status Timeline -->
+            <div class="timeline">
+                <h4>Pipeline Status</h4>
+                <div class="timeline-items" id="timelineItems"></div>
+            </div>
+            
+            <!-- Preview -->
+            <div class="preview-section">
+                <h4>Preview</h4>
+                <div class="preview-frame" id="previewFrame">
+                    <div class="preview-placeholder">
+                        <i class="bi bi-image"></i>
+                        <p>Preview will appear when draft is ready</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Approval Actions (only visible at approval stage) -->
+            <div class="approval-actions" id="approvalActions" style="display:none;">
+                <button class="btn-approve" onclick="approveProject()"><i class="bi bi-check-lg"></i> Approve & Distribute</button>
+                <button class="btn-revise" onclick="requestRevision()"><i class="bi bi-pencil"></i> Request Changes</button>
+            </div>
+            
+            <!-- Chat with Marketing -->
+            <div class="chat-section">
+                <h4>Communication with Marketing</h4>
+                <div class="chat-messages" id="chatMessages">
+                    <div style="text-align:center;color:var(--text-secondary);font-size:12px;padding:20px;">No messages yet</div>
+                </div>
+                <div class="chat-input-row">
+                    <input type="text" id="chatInput" placeholder="Type a message to marketing team..." onkeydown="if(event.key==='Enter')sendChat()">
+                    <button onclick="sendChat()"><i class="bi bi-send"></i> Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let allProjects = [];
+        let currentFilter = 'all';
+        let currentProject = null;
+        
+        const STATUS_MAP = {
+            'pending': { label: 'Submitted', group: 'in-production', color: 'pending' },
+            'ready': { label: 'Queued', group: 'in-production', color: 'ready' },
+            'generating': { label: 'Generating', group: 'in-production', color: 'generating' },
+            'review': { label: 'In Review', group: 'in-production', color: 'review' },
+            'approval': { label: 'Awaiting Your Approval', group: 'awaiting-approval', color: 'approval' },
+            'approved': { label: 'Approved', group: 'approved', color: 'approved' },
+            'distributed': { label: 'Live on Platforms', group: 'distributed', color: 'distributed' },
+            'failed': { label: 'Issue', group: 'in-production', color: 'failed' },
         };
-        return `<span class="badge badge-${status}"><i class="bi ${icons[status] || 'bi-circle'}"></i> ${status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
-    }
-
-    function actionButtons(draft) {
-        const btns = [];
-        switch (draft.status) {
-            case 'pending':
-            case 'ready':
-                btns.push(`<button class="btn btn-primary btn-sm" onclick="generateDraft('${draft.id}')"><i class="bi bi-cpu"></i> Generate</button>`);
-                break;
-            case 'review':
-                btns.push(`<button class="btn btn-primary btn-sm" onclick="transitionDraft('${draft.id}', 'submit_for_approval')"><i class="bi bi-send"></i> Send to Broker</button>`);
-                if (draft.pdf_url) btns.push(`<a class="btn btn-outline btn-sm" href="${draft.pdf_url}" target="_blank"><i class="bi bi-file-pdf"></i> PDF</a>`);
-                break;
-            case 'approval':
-                btns.push(`<button class="btn btn-primary btn-sm" onclick="transitionDraft('${draft.id}', 'approve')"><i class="bi bi-check-lg"></i> Approve</button>`);
-                btns.push(`<button class="btn btn-outline btn-sm" onclick="requestRevisions('${draft.id}')"><i class="bi bi-pencil"></i> Revise</button>`);
-                break;
-            case 'approved':
-                btns.push(`<button class="btn btn-primary btn-sm" onclick="transitionDraft('${draft.id}', 'distribute')"><i class="bi bi-broadcast"></i> Distribute</button>`);
-                break;
-            case 'failed':
-                btns.push(`<button class="btn btn-danger btn-sm" onclick="transitionDraft('${draft.id}', 'retry')"><i class="bi bi-arrow-clockwise"></i> Retry</button>`);
-                break;
-            case 'distributed':
-                if (draft.pdf_url) btns.push(`<a class="btn btn-outline btn-sm" href="${draft.pdf_url}" target="_blank"><i class="bi bi-file-pdf"></i> PDF</a>`);
-                break;
+        
+        const PIPELINE_STEPS = ['Submitted', 'In Production', 'In Review', 'Awaiting Approval', 'Approved', 'Distributed'];
+        
+        function statusToStep(status) {
+            const map = { 'pending':0, 'ready':1, 'generating':1, 'review':2, 'approval':3, 'approved':4, 'distributed':5, 'failed':1 };
+            return map[status] || 0;
         }
-        return btns.join(' ');
-    }
+        
+        function progressPct(status) {
+            const step = statusToStep(status);
+            return Math.round(((step + 1) / PIPELINE_STEPS.length) * 100);
+        }
+        
+        function progressColor(status) {
+            if (['approved','distributed'].includes(status)) return 'var(--accent-emerald)';
+            if (status === 'approval') return 'var(--accent-purple)';
+            if (status === 'failed') return 'var(--accent-red)';
+            return 'var(--accent-blue)';
+        }
 
-    // ── Workflow Actions ────────────────────────────────────────
-    async function generateDraft(id) {
-        try {
-            // First validate if pending
-            const draft = allDrafts.find(d => d.id === id);
-            if (draft && draft.status === 'pending') {
-                await fetch(`/api/marketing/drafts/${id}/transition`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ transition: 'validate', listing: { address: 'From CRM', listing_type: 'for_sale', broker: 'CRE Consultants', photo_count: 1 } })
-                });
-            }
-            const res = await fetch(`/api/marketing/drafts/${id}/generate`, { method: 'POST' });
-            const data = await res.json();
-            if (data.success) {
-                showToast('Generation started — AI pipeline running...', 'success');
-                startGenerationPolling();
-            } else {
-                showToast(data.error || 'Generation failed', 'error');
-            }
-        } catch (err) { showToast('Error: ' + err.message, 'error'); }
-    }
-
-    async function transitionDraft(id, transition, params = {}) {
-        try {
-            const res = await fetch(`/api/marketing/drafts/${id}/transition`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ transition, ...params })
+        async function loadProjects() {
+            try {
+                const res = await fetch('/api/marketing/drafts');
+                const data = await res.json();
+                allProjects = data.drafts || [];
+                updateKPIs();
+                renderProjects();
+            } catch(e) { console.error('Failed to load projects:', e); }
+        }
+        
+        function updateKPIs() {
+            const counts = { 'in-production': 0, 'awaiting-approval': 0, 'approved': 0, 'distributed': 0 };
+            allProjects.forEach(p => {
+                const group = STATUS_MAP[p.status]?.group || 'in-production';
+                counts[group] = (counts[group] || 0) + 1;
             });
-            const data = await res.json();
-            if (data.success) {
-                showToast(`Draft moved to "${data.draft.status}"`, 'success');
-                loadDrafts();
-            } else {
-                showToast(data.error || 'Transition failed', 'error');
-            }
-        } catch (err) { showToast('Error: ' + err.message, 'error'); }
-    }
-
-    async function requestRevisions(id) {
-        const comments = prompt('Enter revision comments for the marketing team:');
-        if (comments && comments.trim()) {
-            transitionDraft(id, 'request_revisions', { comments });
+            document.getElementById('kpiProduction').textContent = counts['in-production'];
+            document.getElementById('kpiReview').textContent = allProjects.filter(p => p.status === 'review').length;
+            document.getElementById('kpiApproval').textContent = counts['awaiting-approval'];
+            document.getElementById('kpiApproved').textContent = counts['approved'];
+            document.getElementById('kpiDistributed').textContent = counts['distributed'];
+            document.getElementById('badgeAll').textContent = allProjects.length;
+            document.getElementById('badgeApproval').textContent = counts['awaiting-approval'];
         }
-    }
-
-    function refreshDrafts() { loadDrafts(); showToast('Refreshed', 'success'); }
-
-    function showToast(msg, type) {
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.textContent = msg;
-        document.getElementById('toastContainer').appendChild(toast);
-        setTimeout(() => toast.remove(), 4000);
-    }
-
-// Auto-poll while any draft is generating
-    let pollingInterval = null;
-    function startGenerationPolling() {
-        if (pollingInterval) return;
-        pollingInterval = setInterval(async () => {
-            await loadDrafts();
-            const stillGenerating = allDrafts.some(d => d.status === 'generating');
-            if (!stillGenerating) {
-                clearInterval(pollingInterval);
-                pollingInterval = null;
-                const reviewDraft = allDrafts.find(d => d.status === 'review');
-                if (reviewDraft) showToast('Flyer generated — ready for review!', 'success');
+        
+        function renderProjects() {
+            const tbody = document.getElementById('projectsBody');
+            let filtered = allProjects;
+            if (currentFilter !== 'all') {
+                filtered = allProjects.filter(p => STATUS_MAP[p.status]?.group === currentFilter);
             }
-        }, 3000);
-    }
-
-    // Load on page ready
-    loadDrafts().then(() => {
-        if (allDrafts.some(d => d.status === 'generating')) startGenerationPolling();
-    });
-</script>
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="bi bi-inbox"></i><h3>No projects in this category</h3><p>Projects will appear here when listings move through the pipeline</p></div></td></tr>';
+                return;
+            }
+            tbody.innerHTML = filtered.map(p => {
+                const sm = STATUS_MAP[p.status] || { label: p.status, color: 'pending' };
+                const pct = progressPct(p.status);
+                const updated = p.updated_at ? new Date(p.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-';
+                const name = p.property_address || p.lead_company || p.lead_name || 'Untitled';
+                const city = p.property_city || '';
+                return `<tr onclick="openDetail('${p.id}')">
+                    <td><div class="project-name">${name}</div><div class="project-address">${city}</div></td>
+                    <td><span class="project-type-badge type-flyer">Flyer</span></td>
+                    <td><span class="status-badge status-${sm.color}"><span class="status-dot"></span> ${sm.label}</span></td>
+                    <td><div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${progressColor(p.status)}"></div></div></td>
+                    <td>${updated}</td>
+                    <td>${p.status === 'approval' ? '<button class="btn btn-primary" onclick="event.stopPropagation();openDetail(\'' + p.id + '\')"><i class="bi bi-eye"></i> Review</button>' : ''}</td>
+                </tr>`;
+            }).join('');
+        }
+        
+        function setFilter(filter, el) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            if (el) el.classList.add('active');
+            renderProjects();
+        }
+        
+        function filterAll() {
+            setFilter('all');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.nav-item')[0]?.classList.add('active');
+        }
+        
+        function filterStatus(group) {
+            setFilter(group);
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            event.target.closest('.nav-item')?.classList.add('active');
+        }
+        
+        async function openDetail(id) {
+            try {
+                const res = await fetch('/api/marketing/drafts/' + id);
+                const data = await res.json();
+                if (!data || data.error) return;
+                currentProject = data.draft || data;
+                
+                const name = currentProject.property_address || currentProject.lead_company || 'Project';
+                document.getElementById('detailTitle').textContent = name;
+                document.getElementById('detailSubtitle').textContent = STATUS_MAP[currentProject.status]?.label || currentProject.status;
+                
+                // Timeline
+                const currentStep = statusToStep(currentProject.status);
+                document.getElementById('timelineItems').innerHTML = PIPELINE_STEPS.map((step, i) => {
+                    const dotClass = i < currentStep ? 'active' : i === currentStep ? 'current' : '';
+                    const isLast = i === PIPELINE_STEPS.length - 1;
+                    return `<div class="timeline-item">
+                        <div class="timeline-dot-line">
+                            <div class="timeline-dot ${dotClass}"></div>
+                            ${!isLast ? '<div class="timeline-line"></div>' : ''}
+                        </div>
+                        <div class="timeline-content">
+                            <div class="step-name">${step}</div>
+                        </div>
+                    </div>`;
+                }).join('');
+                
+                // Preview
+                const frame = document.getElementById('previewFrame');
+                if (currentProject.preview_url) {
+                    frame.innerHTML = `<img src="${currentProject.preview_url}" alt="Preview">`;
+                } else if (['approval','approved','distributed'].includes(currentProject.status)) {
+                    frame.innerHTML = `<div class="preview-placeholder"><i class="bi bi-file-earmark-check"></i><p>Final draft ready for review</p></div>`;
+                } else {
+                    frame.innerHTML = `<div class="preview-placeholder"><i class="bi bi-gear"></i><p>Content is being produced by marketing</p></div>`;
+                }
+                
+                // Approval buttons
+                document.getElementById('approvalActions').style.display = currentProject.status === 'approval' ? 'flex' : 'none';
+                
+                // Load chat
+                loadChat(id);
+                
+                document.getElementById('detailOverlay').classList.add('active');
+                document.getElementById('detailPanel').classList.add('active');
+            } catch(e) { console.error('Failed to load project:', e); }
+        }
+        
+        function closeDetail() {
+            document.getElementById('detailOverlay').classList.remove('active');
+            document.getElementById('detailPanel').classList.remove('active');
+            currentProject = null;
+        }
+        
+        async function loadChat(draftId) {
+            const container = document.getElementById('chatMessages');
+            try {
+                const res = await fetch('/api/marketing/drafts/' + draftId);
+                const data = await res.json();
+                const history = data.history || [];
+                if (history.length === 0) {
+                    container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);font-size:12px;padding:20px;">No messages yet. Send a message to the marketing team.</div>';
+                    return;
+                }
+                container.innerHTML = history.filter(h => h.comments).map(h => {
+                    const isBroker = h.actor_role === 'broker';
+                    const time = new Date(h.created_at).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+                    return `<div class="chat-msg ${isBroker ? 'broker' : 'marketing'}">
+                        <div>${h.comments}</div>
+                        <div class="msg-meta">${h.actor_role || 'System'} &middot; ${time}</div>
+                    </div>`;
+                }).join('');
+                container.scrollTop = container.scrollHeight;
+            } catch(e) { container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);font-size:12px;padding:20px;">Could not load messages</div>'; }
+        }
+        
+        async function sendChat() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if (!msg || !currentProject) return;
+            input.value = '';
+            // Add message to chat immediately
+            const container = document.getElementById('chatMessages');
+            const now = new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+            container.innerHTML += `<div class="chat-msg broker"><div>${msg}</div><div class="msg-meta">You &middot; ${now}</div></div>`;
+            container.scrollTop = container.scrollHeight;
+            try {
+                await fetch('/api/marketing/drafts/' + currentProject.id + '/comment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comments: msg })
+                });
+            } catch(e) { console.error('Failed to send message:', e); }
+        }
+        
+        async function approveProject() {
+            if (!currentProject) return;
+            if (!confirm('Approve this project? It will be sent for distribution to CoStar, LoopNet, Crexi and other platforms.')) return;
+            try {
+                const res = await fetch('/api/marketing/drafts/' + currentProject.id + '/transition', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ transition: 'approve', comments: 'Approved by broker' })
+                });
+                const data = await res.json();
+                if (data.error) { alert('Error: ' + data.error); return; }
+                closeDetail();
+                loadProjects();
+            } catch(e) { console.error('Approve error:', e); alert('Failed to approve'); }
+        }
+        
+        async function requestRevision() {
+            const reason = prompt('What changes would you like? (This message will go to the marketing team)');
+            if (!reason) return;
+            try {
+                await fetch('/api/marketing/drafts/' + currentProject.id + '/transition', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ transition: 'request_revision', comments: reason })
+                });
+                closeDetail();
+                loadProjects();
+            } catch(e) { console.error('Revision error:', e); alert('Failed to request revision'); }
+        }
+        
+        // Init
+        loadProjects();
+    </script>
 </body>
 </html>

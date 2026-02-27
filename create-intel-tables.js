@@ -1,4 +1,4 @@
-﻿const {Pool} = require('pg');
+const {Pool} = require('pg');
 const pool = new Pool({
     connectionString: 'postgresql://zenith_admin:ZenithDB2026secure@zenith-db.cnqawc0wy3sg.us-east-2.rds.amazonaws.com:5432/zenith_db',
     ssl: { rejectUnauthorized: false }

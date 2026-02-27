@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="<%= typeof theme !== 'undefined' ? theme : 'light' %>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Management - Zenith OS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/theme.css">
+    <script src="/js/theme.js"></script>
+    <style>
+        :root { --accent-green: #1B6B3A; --accent-emerald: #10b981; --accent-blue: #3b82f6; --accent-amber: #f59e0b; --accent-red: #ef4444; --accent-purple: #6366f1; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-page); color: var(--text-primary); display: flex; min-height: 100vh; }
+
+        .sidebar { width: 240px; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 10; }
+        .sidebar-logo { padding: 20px; border-bottom: 1px solid var(--border-color); }
+        .sidebar-logo h2 { font-size: 16px; font-weight: 700; }
+        .sidebar-logo p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+        .nav-section { padding: 16px 12px 8px; }
+        .nav-section-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); padding: 0 8px; margin-bottom: 4px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; color: var(--text-secondary); text-decoration: none; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+        .nav-item:hover { background: var(--bg-surface-hover); color: var(--text-primary); }
+        .nav-item.active { background: var(--accent-emerald); color: white; }
+        .nav-icon { width: 20px; text-align: center; font-size: 14px; }
+        .nav-badge { margin-left: auto; background: var(--accent-emerald); color: white; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 10px; }
+
+        .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; border-bottom: 1px solid var(--border-color); background: var(--bg-surface); }
+        .topbar h1 { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .content { padding: 24px 32px; flex: 1; overflow-y: auto; }
+
+        .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
+        .kpi-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px 20px; }
+        .kpi-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); }
+        .kpi-value { font-size: 28px; font-weight: 700; margin: 4px 0; }
+        .kpi-sub { font-size: 12px; color: var(--text-secondary); }
+
+        .listing-selector { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; border-left: 4px solid var(--accent-emerald); }
+        .listing-selector select { padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; font-weight: 600; background: var(--bg-surface); color: var(--text-primary); min-width: 300px; }
+        .listing-meta { font-size: 12px; color: var(--text-secondary); }
+
+        .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border-color); margin-bottom: 20px; }
+        .tab { padding: 10px 20px; font-size: 13px; font-weight: 600; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; }
+        .tab:hover { color: var(--text-primary); }
+        .tab.active { color: var(--accent-emerald); border-bottom-color: var(--accent-emerald); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .form-section { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px 24px; margin-bottom: 20px; }
+        .form-section h3 { font-size: 14px; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px; }
+        .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .form-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .form-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group.full { grid-column: 1 / -1; }
+        .form-group label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); }
+        .form-group input, .form-group select, .form-group textarea { padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; background: var(--bg-surface); color: var(--text-primary); }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+
+        .btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+        .btn:hover { background: var(--bg-surface-hover); }
+        .btn-primary { background: var(--accent-emerald); color: white; border-color: var(--accent-emerald); }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-danger { background: rgba(239,68,68,0.1); color: var(--accent-red); border-color: var(--accent-red); }
+        .btn-row { display: flex; gap: 8px; margin-top: 16px; }
+
+        .units-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        .units-table th { text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); padding: 8px 12px; border-bottom: 2px solid var(--border-color); }
+        .units-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+        .units-table tr:hover { background: var(--bg-surface-hover); }
+
+        .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .status-active { background: rgba(16,185,129,0.1); color: #10b981; }
+        .status-pending { background: rgba(245,158,11,0.1); color: #f59e0b; }
+        .status-closed { background: rgba(107,114,128,0.1); color: #6b7280; }
+
+        .activity-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
+        .activity-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-blue); margin-top: 5px; flex-shrink: 0; }
+        .activity-text { font-size: 13px; }
+        .activity-date { font-size: 11px; color: var(--text-secondary); }
+
+        .map-frame { width: 100%; height: 300px; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+        .empty-state i { font-size: 48px; display: block; margin-bottom: 12px; opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <h2><i class="bi bi-briefcase"></i> TMS</h2>
+            <p>Transaction Management</p>
+        </div>
+        <div class="nav-section">
+            <div class="nav-section-label">Listings</div>
+            <a class="nav-item active" onclick="filterListings('all')"><span class="nav-icon"><i class="bi bi-grid-3x3-gap"></i></span> All Listings <span class="nav-badge" id="badgeAll">0</span></a>
+            <a class="nav-item" onclick="filterListings('active')"><span class="nav-icon"><i class="bi bi-check-circle"></i></span> Active</a>
+            <a class="nav-item" onclick="filterListings('under_contract')"><span class="nav-icon"><i class="bi bi-file-earmark-text"></i></span> Under Contract</a>
+            <a class="nav-item" onclick="filterListings('closed')"><span class="nav-icon"><i class="bi bi-trophy"></i></span> Closed</a>
+        </div>
+        <div class="nav-section">
+            <div class="nav-section-label">Navigate</div>
+            <a href="/dashboard" class="nav-item"><span class="nav-icon"><i class="bi bi-house"></i></span> CRE Home</a>
+            <a href="/crm" class="nav-item"><span class="nav-icon"><i class="bi bi-funnel"></i></span> CRM</a>
+            <a href="/intel" class="nav-item"><span class="nav-icon"><i class="bi bi-broadcast"></i></span> INTEL</a>
+            <a href="/marketing" class="nav-item"><span class="nav-icon"><i class="bi bi-megaphone"></i></span> Marketing</a>
+            <a href="/huddle" class="nav-item"><span class="nav-icon"><i class="bi bi-chat-dots"></i></span> Huddle</a>
+        </div>
+        <div style="margin-top:auto;padding:16px;border-top:1px solid var(--border-color);">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:32px;height:32px;border-radius:50%;background:var(--accent-emerald);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:13px;"><%= user?.name?.charAt(0) || 'U' %></div>
+                <div><div style="font-size:13px;font-weight:600;"><%= user?.name || 'User' %></div><div style="font-size:11px;color:var(--text-secondary);"><%= user?.role || 'Agent' %></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="topbar">
+            <h1><i class="bi bi-briefcase"></i> Transaction Management</h1>
+            <div style="display:flex;gap:8px;">
+                <button class="btn" onclick="loadListings()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+            </div>
+        </div>
+        <div class="content">
+            <div class="kpi-row">
+                <div class="kpi-card" style="border-left:4px solid var(--accent-emerald)"><div class="kpi-label">Active Listings</div><div class="kpi-value" id="kpiActive">0</div><div class="kpi-sub">Currently on market</div></div>
+                <div class="kpi-card" style="border-left:4px solid var(--accent-amber)"><div class="kpi-label">Under Contract</div><div class="kpi-value" id="kpiContract">0</div><div class="kpi-sub">Deals in progress</div></div>
+                <div class="kpi-card" style="border-left:4px solid var(--accent-blue)"><div class="kpi-label">Total Showings</div><div class="kpi-value" id="kpiShowings">0</div><div class="kpi-sub">Across all listings</div></div>
+                <div class="kpi-card" style="border-left:4px solid var(--accent-purple)"><div class="kpi-label">Pipeline Value</div><div class="kpi-value" id="kpiValue">$0</div><div class="kpi-sub">Total listing value</div></div>
+                <div class="kpi-card" style="border-left:4px solid #06b6d4"><div class="kpi-label">Closed YTD</div><div class="kpi-value" id="kpiClosed">0</div><div class="kpi-sub">Deals closed this year</div></div>
+            </div>
+
+            <!-- Listing Selector -->
+            <div class="listing-selector">
+                <div>
+                    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);">Listing</div>
+                    <select id="listingSelect" onchange="selectListing(this.value)" style="margin-top:4px;">
+                        <option value="">Select a listing...</option>
+                    </select>
+                </div>
+                <div class="listing-meta" id="listingMeta"></div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs" id="tabsContainer" style="display:none;">
+                <div class="tab active" onclick="switchTab('property', this)"><i class="bi bi-building"></i> Property Info</div>
+                <div class="tab" onclick="switchTab('owner', this)"><i class="bi bi-person"></i> Owner</div>
+                <div class="tab" onclick="switchTab('units', this)"><i class="bi bi-grid"></i> Available Units</div>
+                <div class="tab" onclick="switchTab('marketing', this)"><i class="bi bi-megaphone"></i> Marketing</div>
+                <div class="tab" onclick="switchTab('signs', this)"><i class="bi bi-signpost"></i> Sign Order</div>
+                <div class="tab" onclick="switchTab('activity', this)"><i class="bi bi-clock-history"></i> Activity</div>
+            </div>
+
+            <!-- PROPERTY INFO TAB -->
+            <div class="tab-content active" id="tab-property">
+                <div class="form-section">
+                    <h3><i class="bi bi-building"></i> Property Information</h3>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Property Name</label><input id="f_property_name" type="text"></div>
+                        <div class="form-group"><label>Property Type</label>
+                            <select id="f_property_type"><option value="">Select...</option><option>Office</option><option>Retail</option><option>Industrial</option><option>Land</option><option>Multi-Family</option><option>Special Purpose</option></select>
+                        </div>
+                        <div class="form-group"><label>Deal Type</label>
+                            <select id="f_deal_type"><option value="">Select...</option><option>Lease</option><option>Sale</option><option>Sub-Lease</option></select>
+                        </div>
+                        <div class="form-group"><label>Property Address</label><input id="f_property_address" type="text"></div>
+                        <div class="form-group"><label>Suite/Unit</label><input id="f_suite_unit" type="text"></div>
+                        <div class="form-group"><label>City</label><input id="f_city" type="text"></div>
+                        <div class="form-group"><label>State</label><input id="f_state" type="text" value="FL"></div>
+                        <div class="form-group"><label>Zip</label><input id="f_zip" type="text"></div>
+                        <div class="form-group"><label>County</label><input id="f_county" type="text"></div>
+                        <div class="form-group"><label>Total Building SF</label><input id="f_total_building_sf" type="number"></div>
+                        <div class="form-group"><label>Year Built</label><input id="f_year_built" type="number"></div>
+                        <div class="form-group"><label>Zoning</label><input id="f_zoning" type="text"></div>
+                        <div class="form-group"><label>Parcel ID(s)</label><input id="f_parcel_ids" type="text"></div>
+                        <div class="form-group"><label>Listing Date</label><input id="f_listing_date" type="date"></div>
+                        <div class="form-group"><label>Expiration Date</label><input id="f_expiration_date" type="date"></div>
+                    </div>
+                    <div class="form-grid" style="margin-top:12px;">
+                        <div class="form-group"><label>Commission %</label><input id="f_agent_commission_pct" type="number" step="0.001" placeholder="e.g. 0.060 for 6%"></div>
+                        <div class="form-group"><label>Status</label>
+                            <select id="f_status"><option value="active">Active</option><option value="pending">Pending</option><option value="under_contract">Under Contract</option><option value="closed">Closed</option><option value="expired">Expired</option><option value="withdrawn">Withdrawn</option></select>
+                        </div>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn btn-primary" onclick="saveListing()"><i class="bi bi-check-lg"></i> Save Changes</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OWNER TAB -->
+            <div class="tab-content" id="tab-owner">
+                <div class="form-section">
+                    <h3><i class="bi bi-person"></i> Owner Information</h3>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Owner Name</label><input id="f_owner_name" type="text"></div>
+                        <div class="form-group"><label>Company</label><input id="f_owner_company" type="text"></div>
+                        <div class="form-group"><label>Email</label><input id="f_owner_email" type="email"></div>
+                        <div class="form-group"><label>Phone</label><input id="f_owner_phone" type="tel"></div>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn btn-primary" onclick="saveListing()"><i class="bi bi-check-lg"></i> Save Changes</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UNITS TAB -->
+            <div class="tab-content" id="tab-units">
+                <div class="form-section">
+                    <h3><i class="bi bi-grid"></i> Available Suites / Spaces <button class="btn" style="margin-left:auto;font-size:12px;" onclick="showAddUnit()"><i class="bi bi-plus"></i> Add Unit</button></h3>
+                    <table class="units-table">
+                        <thead><tr><th>Suite</th><th>SF</th><th>Rent/PSF</th><th>CAM/PSF</th><th>Lease Type</th><th>Availability</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody id="unitsBody"><tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-secondary);">Select a listing to view units</td></tr></tbody>
+                    </table>
+                </div>
+                <!-- Add Unit Form (hidden by default) -->
+                <div class="form-section" id="addUnitForm" style="display:none;">
+                    <h3><i class="bi bi-plus-circle"></i> Add New Unit</h3>
+                    <div class="form-grid-4">
+                        <div class="form-group"><label>Suite #</label><input id="u_suite" type="text"></div>
+                        <div class="form-group"><label>Square Feet</label><input id="u_sf" type="number"></div>
+                        <div class="form-group"><label>Rent/PSF</label><input id="u_rent" type="number" step="0.01"></div>
+                        <div class="form-group"><label>CAM/PSF</label><input id="u_cam" type="number" step="0.01"></div>
+                        <div class="form-group"><label>Lease Type</label><select id="u_lease_type"><option>NNN</option><option>Gross</option><option>Modified Gross</option></select></div>
+                        <div class="form-group"><label>Lease Term</label><input id="u_term" type="text" placeholder="e.g. 5 years"></div>
+                        <div class="form-group"><label>Availability</label><select id="u_avail"><option>Immediate</option><option>Within 30 days</option><option>Specific date</option></select></div>
+                        <div class="form-group"><label>Sale Price</label><input id="u_sale_price" type="number" step="0.01"></div>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn btn-primary" onclick="addUnit()"><i class="bi bi-plus"></i> Add Unit</button>
+                        <button class="btn" onclick="document.getElementById('addUnitForm').style.display='none'">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MARKETING TAB -->
+            <div class="tab-content" id="tab-marketing">
+                <div class="form-section">
+                    <h3><i class="bi bi-megaphone"></i> Marketing Information</h3>
+                    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;">This content will be used for flyers, brochures, and listing platforms. Fill in exactly as you want it to appear.</p>
+                    <div class="form-grid-2">
+                        <div class="form-group"><label>Flyer Heading</label><input id="f_flyer_heading" type="text" placeholder="e.g. PRIME RETAIL SPACE FOR LEASE"></div>
+                        <div class="form-group"><label>Sub Headline</label><input id="f_flyer_subheadline" type="text" placeholder="e.g. Daniels Parkway Corridor"></div>
+                        <div class="form-group full"><label>Property Description (for front of flyer)</label><textarea id="f_flyer_description" placeholder="Compelling description of the property..."></textarea></div>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn btn-primary" onclick="saveListing()"><i class="bi bi-check-lg"></i> Save Marketing Info</button>
+                        <button class="btn" onclick="submitToMarketing()"><i class="bi bi-send"></i> Submit to Marketing Dept</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SIGN ORDER TAB -->
+            <div class="tab-content" id="tab-signs">
+                <div class="form-section">
+                    <h3><i class="bi bi-signpost"></i> Sign Location</h3>
+                    <div class="form-grid-2">
+                        <div>
+                            <div class="form-group"><label>Cross Street</label><input id="s_cross_street" type="text" placeholder="Nearest cross street"></div>
+                            <div class="form-group" style="margin-top:8px;"><label>Placement Notes</label><textarea id="s_notes" placeholder="Describe where the sign should be placed..."></textarea></div>
+                        </div>
+                        <div>
+                            <div class="map-frame" id="signMap">
+                                <div style="text-align:center;padding:40px;color:var(--text-secondary);">
+                                    <i class="bi bi-geo-alt" style="font-size:48px;display:block;margin-bottom:8px;opacity:0.5;"></i>
+                                    <p>Enter address above and click "Locate" to pin sign location</p>
+                                    <button class="btn" style="margin-top:12px;" onclick="locateSign()"><i class="bi bi-geo-alt"></i> Locate on Map</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACTIVITY TAB -->
+            <div class="tab-content" id="tab-activity">
+                <div class="form-section">
+                    <h3><i class="bi bi-clock-history"></i> Activity Log</h3>
+                    <div id="activityList"><div style="text-align:center;padding:24px;color:var(--text-secondary);">Select a listing to view activity</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allListings = [];
+        let currentListing = null;
+        let currentUnits = [];
+
+        const FIELDS = ['property_name','property_address','suite_unit','city','state','zip','county','property_type','deal_type','total_building_sf','year_built','zoning','parcel_ids','listing_date','expiration_date','agent_commission_pct','status','owner_name','owner_company','owner_email','owner_phone','flyer_heading','flyer_subheadline','flyer_description'];
+
+        async function loadListings() {
+            try {
+                const res = await fetch('/api/tms/listings');
+                const data = await res.json();
+                allListings = data.listings || [];
+                renderListingSelector();
+                updateKPIs();
+            } catch(e) { console.error('Failed to load listings:', e); }
+        }
+
+        function updateKPIs() {
+            document.getElementById('kpiActive').textContent = allListings.filter(l => l.status === 'active').length;
+            document.getElementById('kpiContract').textContent = allListings.filter(l => l.status === 'under_contract').length;
+            document.getElementById('kpiClosed').textContent = allListings.filter(l => l.status === 'closed').length;
+            document.getElementById('badgeAll').textContent = allListings.length;
+        }
+
+        function renderListingSelector() {
+            const sel = document.getElementById('listingSelect');
+            sel.innerHTML = '<option value="">Select a listing...</option>' + allListings.map(l =>
+                `<option value="${l.id}">${l.property_name || l.property_address || 'Listing #' + l.id} - ${l.city || ''} (${l.status})</option>`
+            ).join('');
+            if (currentListing) sel.value = currentListing.id;
+        }
+
+        async function selectListing(id) {
+            if (!id) { currentListing = null; document.getElementById('tabsContainer').style.display = 'none'; return; }
+            try {
+                const res = await fetch('/api/tms/listings/' + id);
+                const data = await res.json();
+                currentListing = data.listing;
+                currentUnits = data.units || [];
+                document.getElementById('tabsContainer').style.display = 'flex';
+                document.getElementById('listingMeta').innerHTML =
+                    `<span class="status-badge status-${currentListing.status === 'active' ? 'active' : currentListing.status === 'under_contract' ? 'pending' : 'closed'}">${currentListing.status}</span>` +
+                    `&nbsp;&nbsp;Agent: ${currentListing.listing_agent_name || '-'}&nbsp;&nbsp;|&nbsp;&nbsp;Created: ${new Date(currentListing.created_at).toLocaleDateString()}`;
+                populateForm();
+                renderUnits();
+                renderActivity(data.activity || []);
+            } catch(e) { console.error('Failed to load listing:', e); }
+        }
+
+        function populateForm() {
+            if (!currentListing) return;
+            FIELDS.forEach(f => {
+                const el = document.getElementById('f_' + f);
+                if (!el) return;
+                let val = currentListing[f];
+                if (val && (f.includes('date')) && el.type === 'date') val = val.substring(0, 10);
+                if (val !== null && val !== undefined) el.value = val;
+                else el.value = '';
+            });
+        }
+
+        async function saveListing() {
+            if (!currentListing) return alert('Select a listing first');
+            const body = {};
+            FIELDS.forEach(f => {
+                const el = document.getElementById('f_' + f);
+                if (el && el.value) body[f] = el.value;
+            });
+            try {
+                const res = await fetch('/api/tms/listings/' + currentListing.id, {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (data.success) { alert('Listing saved!'); loadListings(); selectListing(currentListing.id); }
+                else alert('Error: ' + (data.error || 'Unknown'));
+            } catch(e) { alert('Save failed: ' + e.message); }
+        }
+
+        function renderUnits() {
+            const tbody = document.getElementById('unitsBody');
+            if (currentUnits.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-secondary);">No units added yet. Click "+ Add Unit" to add available spaces.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = currentUnits.map(u => `<tr>
+                <td><strong>${u.suite_number || '-'}</strong></td>
+                <td>${u.square_feet ? Number(u.square_feet).toLocaleString() : '-'}</td>
+                <td>${u.rent_psf ? '$' + Number(u.rent_psf).toFixed(2) : '-'}</td>
+                <td>${u.cam_psf ? '$' + Number(u.cam_psf).toFixed(2) : '-'}</td>
+                <td>${u.lease_type || '-'}</td>
+                <td>${u.availability_status || '-'}</td>
+                <td>${u.currently_occupied ? '<span class="status-badge status-pending">Occupied</span>' : '<span class="status-badge status-active">Available</span>'}</td>
+                <td><button class="btn btn-danger" style="font-size:11px;padding:4px 8px;" onclick="deleteUnit(${u.id})"><i class="bi bi-trash"></i></button></td>
+            </tr>`).join('');
+        }
+
+        function showAddUnit() { document.getElementById('addUnitForm').style.display = 'block'; }
+
+        async function addUnit() {
+            if (!currentListing) return;
+            const body = {
+                suite_number: document.getElementById('u_suite').value,
+                square_feet: document.getElementById('u_sf').value || null,
+                rent_psf: document.getElementById('u_rent').value || null,
+                cam_psf: document.getElementById('u_cam').value || null,
+                lease_type: document.getElementById('u_lease_type').value,
+                lease_term: document.getElementById('u_term').value,
+                availability_status: document.getElementById('u_avail').value,
+                sale_price: document.getElementById('u_sale_price').value || null,
+            };
+            try {
+                const res = await fetch('/api/tms/listings/' + currentListing.id + '/units', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (data.success) { document.getElementById('addUnitForm').style.display = 'none'; selectListing(currentListing.id); }
+            } catch(e) { alert('Failed to add unit: ' + e.message); }
+        }
+
+        async function deleteUnit(unitId) {
+            if (!confirm('Delete this unit?')) return;
+            try {
+                await fetch('/api/tms/units/' + unitId, { method: 'DELETE' });
+                selectListing(currentListing.id);
+            } catch(e) { alert('Failed to delete unit'); }
+        }
+
+        function renderActivity(activity) {
+            const container = document.getElementById('activityList');
+            if (activity.length === 0) {
+                container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-secondary);">No activity recorded yet</div>';
+                return;
+            }
+            container.innerHTML = activity.map(a => `<div class="activity-item">
+                <div class="activity-dot"></div>
+                <div><div class="activity-text">${a.description || a.activity_type}</div><div class="activity-date">${new Date(a.created_at).toLocaleString()}</div></div>
+            </div>`).join('');
+        }
+
+        function switchTab(tab, el) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+        }
+
+        function filterListings(status) {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            event?.target?.closest('.nav-item')?.classList.add('active');
+            const sel = document.getElementById('listingSelect');
+            sel.innerHTML = '<option value="">Select a listing...</option>';
+            const filtered = status === 'all' ? allListings : allListings.filter(l => l.status === status);
+            sel.innerHTML += filtered.map(l =>
+                `<option value="${l.id}">${l.property_name || l.property_address || 'Listing #' + l.id} - ${l.city || ''} (${l.status})</option>`
+            ).join('');
+        }
+
+        async function submitToMarketing() {
+            if (!currentListing) return;
+            await saveListing();
+            try {
+                const res = await fetch('/api/marketing/from-crm', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ leadId: currentListing.crm_lead_id })
+                });
+                const data = await res.json();
+                if (data.success || data.draft_id) alert('Submitted to Marketing Department! They will begin producing your materials.');
+                else alert('Error: ' + (data.error || 'Unknown'));
+            } catch(e) { alert('Failed to submit: ' + e.message); }
+        }
+
+        function locateSign() {
+            if (!currentListing) return;
+            const addr = currentListing.property_address + ', ' + currentListing.city + ', ' + currentListing.state + ' ' + currentListing.zip;
+            const encoded = encodeURIComponent(addr);
+            document.getElementById('signMap').innerHTML = `<iframe src="https://www.google.com/maps?q=${encoded}&output=embed" width="100%" height="300" style="border:0;" allowfullscreen loading="lazy"></iframe>`;
+        }
+
+        loadListings();
+    </script>
+</body>
+</html>

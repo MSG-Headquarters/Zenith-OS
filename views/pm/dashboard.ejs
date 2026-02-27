@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Property Management — CRE OS</title>
+    <title>Property Management - CRE OS</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/theme.css">
@@ -105,6 +105,8 @@
             <a href="#" class="nav-item active" onclick="switchTab('properties', this)"><i class="bi bi-buildings"></i> Properties</a>
             <a href="#" class="nav-item" onclick="switchTab('tenants', this)"><i class="bi bi-people"></i> Tenants</a>
             <a href="#" class="nav-item" onclick="switchTab('leases', this)"><i class="bi bi-file-earmark-text"></i> Leases</a>
+            <a href="#" class="nav-item" onclick="switchTab('units', this)"><i class="bi bi-grid-3x3-gap"></i> Units</a>
+            <a href="#" class="nav-item" onclick="switchTab('portal', this)"><i class="bi bi-globe"></i> Tenant Portal</a>
             <a href="#" class="nav-item" onclick="switchTab('maintenance', this)"><i class="bi bi-wrench"></i> Maintenance <span class="nav-badge" id="maintBadge" style="display:none;">0</span></a>
             <div class="nav-section-label">Navigate</div>
             <a href="/dashboard" class="nav-item"><i class="bi bi-house"></i> CRE Home</a>
@@ -127,17 +129,17 @@
             <h1><i class="bi bi-building"></i> Property Management</h1>
             <div style="display:flex;gap:8px;">
                 <button class="btn btn-outline" onclick="refreshData()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
-                <a href="/maintenance" target="_blank" class="btn btn-outline"><i class="bi bi-box-arrow-up-right"></i> Tenant Portal</a>
+                <a href="/tenant-portal/login" target="_blank" class="btn btn-outline"><i class="bi bi-box-arrow-up-right"></i> Tenant Portal</a>
                 <button class="btn btn-primary" onclick="showAddProperty()"><i class="bi bi-plus-lg"></i> Add Property</button>
             </div>
         </div>
         <div class="content">
             <div class="stats-grid">
-                <div class="stat-card properties"><div class="stat-value" id="statProperties">—</div><div class="stat-label">Managed Properties</div></div>
-                <div class="stat-card tenants"><div class="stat-value" id="statTenants">—</div><div class="stat-label">Active Tenants</div></div>
-                <div class="stat-card occupancy"><div class="stat-value" id="statOccupancy">—</div><div class="stat-label">Avg Occupancy</div></div>
-                <div class="stat-card expiring"><div class="stat-value" id="statExpiring">—</div><div class="stat-label">Leases Expiring (90d)</div></div>
-                <div class="stat-card maintenance"><div class="stat-value" id="statMaint">—</div><div class="stat-label">Open Requests</div></div>
+                <div class="stat-card properties"><div class="stat-value" id="statProperties">-</div><div class="stat-label">Managed Properties</div></div>
+                <div class="stat-card tenants" style="cursor:pointer;" onclick="document.querySelectorAll('.sidebar-nav .nav-item')[1].click();"><div class="stat-value" id="statTenants">-</div><div class="stat-label">Active Tenants</div></div>
+                <div class="stat-card occupancy" style="cursor:pointer;" onclick="document.querySelectorAll('.sidebar-nav .nav-item')[0].click();"><div class="stat-value" id="statOccupancy">-</div><div class="stat-label">Avg Occupancy</div></div>
+                <div class="stat-card expiring" style="cursor:pointer;" onclick="document.querySelectorAll('.sidebar-nav .nav-item')[2].click(); setTimeout(function(){ document.getElementById('leaseFilter').value='expiring90'; filterLeases(); }, 100);"><div class="stat-value" id="statExpiring">-</div><div class="stat-label">Leases Expiring (90d)</div></div>
+                <div class="stat-card maintenance" style="cursor:pointer;" onclick="document.querySelectorAll('.sidebar-nav .nav-item')[4].click();"><div class="stat-value" id="statMaint">-</div><div class="stat-label">Open Requests</div></div>
             </div>
             <div id="panelProperties" class="tab-panel active">
                 <div class="table-card">
@@ -156,10 +158,11 @@
                         <div class="table-title"><i class="bi bi-people"></i> All Tenants</div>
                         <div class="table-actions">
                             <div class="search-box"><i class="bi bi-search"></i><input type="text" placeholder="Search tenants..." id="searchTenants" oninput="filterTenants()"></div>
+                            <button class="btn btn-primary btn-sm" onclick="showAddTenant()"><i class="bi bi-plus-lg"></i> Add Tenant</button>
                             <select class="btn btn-outline" id="tenantStatusFilter" onchange="filterTenants()" style="font-size:13px;"><option value="all">All Status</option><option value="Current">Current</option><option value="MTM">Month-to-Month</option><option value="Expiring">Expiring Soon</option></select>
                         </div>
                     </div>
-                    <table><thead><tr><th>Tenant</th><th>Property</th><th>Unit</th><th>Phone</th><th>Email</th><th>Status</th><th>Lease End</th></tr></thead><tbody id="tenantsBody"></tbody></table>
+                    <table><thead><tr><th>Tenant</th><th>Property</th><th>Unit</th><th>Phone</th><th>Email</th><th>Status</th><th>Lease End</th><th>Actions</th></tr></thead><tbody id="tenantsBody"></tbody></table>
                 </div>
             </div>
             <div id="panelLeases" class="tab-panel">
@@ -184,6 +187,63 @@
                     <table><thead><tr><th>ID</th><th>Property</th><th>Type</th><th>Priority</th><th>Contact</th><th>Status</th><th>Submitted</th><th>Actions</th></tr></thead><tbody id="maintBody"></tbody></table>
                 </div>
             </div>
+        
+            <div id="panelUnits" class="tab-panel">
+                <div class="table-card">
+                    <div class="table-header">
+                        <div class="table-title" id="unitsTitle"><i class="bi bi-grid-3x3-gap"></i> Unit Breakdown</div>
+                        <div class="table-actions">
+                            <div id="unitsSummary" style="font-size:12px;color:var(--text-muted);margin-right:12px;"></div>
+                            <select class="btn btn-outline" id="unitFilter" onchange="filterUnits()" style="font-size:13px;">
+                                <option value="all">All Units</option>
+                                <option value="Occupied">Occupied</option>
+                                <option value="Vacant">Vacant</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" id="addUnitBtn" onclick="showAddUnit()" style="display:none;"><i class="bi bi-plus-lg"></i> Add Unit</button>
+                        </div>
+                    </div>
+                    <div id="unitsOccBar" style="padding:12px 20px;display:none;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                            <span id="occLabel" style="font-size:13px;font-weight:600;"></span>
+                            <span id="occPct" style="font-size:13px;font-weight:700;"></span>
+                        </div>
+                        <div style="height:10px;background:var(--bg-surface-alt,#E2E8F0);border-radius:5px;overflow:hidden;">
+                            <div id="occFill" style="height:100%;border-radius:5px;transition:width 0.5s;"></div>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--text-muted);">
+                            <span id="occSfLabel"></span>
+                            <span id="vacSfLabel"></span>
+                        </div>
+                    </div>
+                    <table><thead><tr><th>Unit</th><th>SqFt</th><th>Type</th><th>Status</th><th>Tenant</th><th>Lease End</th><th>Asking Rent</th><th>Actions</th></tr></thead><tbody id="unitsBody"></tbody></table>
+                </div>
+                <div id="unitPropertySelect" style="display:none;padding:20px;">
+                    <div class="empty-state"><i class="bi bi-buildings"></i><h3>Select a Property</h3><p>Go to Properties tab and click a property to view its unit breakdown.</p></div>
+                </div>
+            </div>
+            <div id="panelPortal" class="tab-panel">
+                <div class="table-card">
+                    <div class="table-header">
+                        <div class="table-title"><i class="bi bi-globe"></i> Tenant Portal Management</div>
+                        <div class="table-actions">
+                            <button class="btn btn-primary btn-sm" onclick="showAddMitchMinutes()"><i class="bi bi-camera-video"></i> Add Mitch Minutes</button>
+                            <button class="btn btn-primary btn-sm" onclick="showAddUpdate()"><i class="bi bi-bell"></i> New Update</button>
+                        </div>
+                    </div>
+                    <div style="padding:16px 20px;">
+                        <h4 style="font-size:14px;font-weight:600;margin-bottom:12px;"><i class="bi bi-people"></i> Portal Access</h4>
+                    </div>
+                    <table><thead><tr><th>Tenant</th><th>Property</th><th>Unit</th><th>Email</th><th>Portal Status</th><th>Last Login</th><th>Actions</th></tr></thead><tbody id="portalBody"></tbody></table>
+                </div>
+                <div class="table-card" style="margin-top:20px;">
+                    <div class="table-header"><div class="table-title"><i class="bi bi-camera-video"></i> Mitch Minutes Videos</div></div>
+                    <table><thead><tr><th>Property</th><th>Title</th><th>Published</th><th>URL</th><th>Actions</th></tr></thead><tbody id="mitchBody"></tbody></table>
+                </div>
+                <div class="table-card" style="margin-top:20px;">
+                    <div class="table-header"><div class="table-title"><i class="bi bi-bell"></i> Property Updates</div></div>
+                    <table><thead><tr><th>Property</th><th>Title</th><th>Category</th><th>Priority</th><th>Created</th><th>Actions</th></tr></thead><tbody id="updatesBody"></tbody></table>
+                </div>
+            </div>
         </div>
     </div>
     <div class="toast" id="toast"></div>
@@ -191,12 +251,18 @@
         let allProperties = [];
         let allTenants = [];
         let allLeases = [];
+        let currentPropertyId = null;
+        let currentPropertyName = '';
         document.addEventListener('DOMContentLoaded', () => { loadProperties(); loadTenants(); loadMaintenance(); });
 
         function switchTab(tab, el) {
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.sidebar-nav .nav-item').forEach(a => { if(a.getAttribute('onclick')) a.classList.remove('active'); });
             document.getElementById('panel' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+            if (tab === 'units') { loadUnits(currentPropertyId); }
+            if (tab === 'portal') { currentPropertyId = null; currentPropertyName = ''; loadProperties(); loadPortalStatus(); loadMitchMinutes(); loadPropertyUpdates(); }
+            if (tab === 'tenants' && !currentPropertyId) { document.querySelector('#panelTenants .table-title').innerHTML = '<i class="bi bi-people"></i> All Tenants'; }
+            if (tab === 'properties') { currentPropertyId = null; currentPropertyName = ''; loadProperties(); loadTenants(); }
             if (el) el.classList.add('active');
         }
 
@@ -215,13 +281,13 @@
                 const occ = p.total_units > 0 ? Math.round((p.tenant_count / p.total_units) * 100) : 0;
                 const occColor = occ >= 80 ? '#10B981' : occ >= 50 ? '#F59E0B' : '#EF4444';
                 return '<tr>' +
-                    '<td><div class="prop-name">' + (p.short_name || p.property_name) + '</div><div class="prop-address">' + p.property_address + ', ' + p.city + '</div></td>' +
-                    '<td>' + (p.property_type || '—') + '</td>' +
+                    '<td style="cursor:pointer;" onclick="viewProperty(' + p.id + ')"><div class="prop-name" style="color:#6366F1;">' + (p.short_name || p.property_name) + '</div><div class="prop-address">' + p.property_address + ', ' + p.city + '</div></td>' +
+                    '<td>' + (p.property_type || '-') + '</td>' +
                     '<td>' + p.city + ', ' + p.state + '</td>' +
                     '<td>' + (p.total_units || 0) + '</td>' +
                     '<td>' + (p.tenant_count || 0) + '</td>' +
                     '<td><div class="occupancy-bar"><div class="occupancy-fill" style="width:' + occ + '%;background:' + occColor + ';"></div></div><span style="font-size:12px;font-weight:600;">' + occ + '%</span></td>' +
-                    '<td><button class="btn btn-sm btn-outline" onclick="viewProperty(' + p.id + ')"><i class="bi bi-eye"></i></button></td></tr>';
+                    '<td><button class="btn btn-sm btn-primary" onclick="viewProperty(' + p.id + ')"><i class="bi bi-eye"></i> View</button></td></tr>';
             }).join('');
         }
 
@@ -235,17 +301,18 @@
 
         function renderTenants(tenants) {
             const tbody = document.getElementById('tenantsBody');
-            if (!tenants.length) { tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="bi bi-people"></i><h3>No tenants found</h3></div></td></tr>'; return; }
+            if (!tenants.length) { tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="bi bi-people"></i><h3>No tenants found</h3></div></td></tr>'; return; }
             tbody.innerHTML = tenants.map(t => {
                 const sc = t.tenant_status === 'MTM' ? 'mtm' : t.is_expiring ? 'expiring' : 'current';
                 return '<tr>' +
                     '<td><div style="font-weight:600;">' + t.tenant_name + '</div>' + (t.dba_name ? '<div style="font-size:11px;color:var(--text-muted);">DBA: ' + t.dba_name + '</div>' : '') + '</td>' +
-                    '<td>' + (t.property_name || '—') + '</td>' +
-                    '<td>' + (t.unit_number || '—') + '</td>' +
-                    '<td>' + (t.contact_phone || '<span style="color:var(--text-muted);">—</span>') + '</td>' +
-                    '<td>' + (t.contact_email ? '<a href="mailto:' + t.contact_email + '" style="color:#6366F1;text-decoration:none;font-size:12px;">' + t.contact_email + '</a>' : '<span style="color:var(--text-muted);">—</span>') + '</td>' +
+                    '<td>' + (t.property_name || '-') + '</td>' +
+                    '<td>' + (t.unit_number || '-') + '</td>' +
+                    '<td>' + (t.contact_phone || '<span style="color:var(--text-muted);">-</span>') + '</td>' +
+                    '<td>' + (t.contact_email ? '<a href="mailto:' + t.contact_email + '" style="color:#6366F1;text-decoration:none;font-size:12px;">' + t.contact_email + '</a>' : '<span style="color:var(--text-muted);">-</span>') + '</td>' +
                     '<td><span class="badge badge-' + sc + '">' + t.tenant_status + '</span></td>' +
-                    '<td><span class="lease-dates">' + (t.lease_end ? formatDate(t.lease_end) : 'No end date') + '</span></td></tr>';
+                    '<td><span class="lease-dates">' + (t.lease_end ? formatDate(t.lease_end) : 'No end date') + '</span></td>' +
+                    '<td><button class="btn btn-sm btn-outline" onclick="editTenant(' + t.id + ')" title="Edit"><i class="bi bi-pencil"></i></button> <button class="btn btn-sm btn-outline" onclick="deleteTenant(' + t.id + ', \'' + (t.dba_name || t.tenant_name).replace(/'/g,'') + '\')" title="Delete" style="color:#EF4444;"><i class="bi bi-trash"></i></button></td></tr>';
             }).join('');
         }
 
@@ -254,7 +321,7 @@
             if (!leases.length) { tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="bi bi-file-earmark-text"></i><h3>No leases found</h3></div></td></tr>'; return; }
             const now = new Date();
             tbody.innerHTML = leases.map(t => {
-                let remaining = '—', rc = 'ok';
+                let remaining = '-', rc = 'ok';
                 if (t.lease_end) {
                     const end = new Date(t.lease_end);
                     const days = Math.ceil((end - now) / 86400000);
@@ -267,10 +334,10 @@
                 const sb = t.tenant_status === 'MTM' ? 'mtm' : rc === 'danger' ? 'expiring' : 'current';
                 return '<tr>' +
                     '<td style="font-weight:600;">' + t.tenant_name + '</td>' +
-                    '<td>' + (t.property_name || '—') + '</td>' +
-                    '<td>' + (t.unit_number || '—') + '</td>' +
-                    '<td class="lease-dates">' + (t.lease_start ? formatDate(t.lease_start) : '—') + '</td>' +
-                    '<td class="lease-dates">' + (t.lease_end ? formatDate(t.lease_end) : '—') + '</td>' +
+                    '<td>' + (t.property_name || '-') + '</td>' +
+                    '<td>' + (t.unit_number || '-') + '</td>' +
+                    '<td class="lease-dates">' + (t.lease_start ? formatDate(t.lease_start) : '-') + '</td>' +
+                    '<td class="lease-dates">' + (t.lease_end ? formatDate(t.lease_end) : '-') + '</td>' +
                     '<td><span class="lease-remaining ' + rc + '">' + remaining + '</span></td>' +
                     '<td><span class="badge badge-' + sb + '">' + t.tenant_status + '</span></td></tr>';
             }).join('');
@@ -288,12 +355,12 @@
                 }
                 tbody.innerHTML = data.requests.map(r =>
                     '<tr><td style="font-weight:600;color:#6366F1;">' + r.request_id + '</td>' +
-                    '<td>' + (r.short_name || r.property_name || '—') + '</td>' +
-                    '<td>' + (r.request_type || '—') + '</td>' +
+                    '<td>' + (r.short_name || r.property_name || '-') + '</td>' +
+                    '<td>' + (r.request_type || '-') + '</td>' +
                     '<td><span class="badge badge-' + (r.priority||'medium').toLowerCase() + '">' + r.priority + '</span></td>' +
-                    '<td>' + (r.contact_name || '—') + '</td>' +
+                    '<td>' + (r.contact_name || '-') + '</td>' +
                     '<td><span class="badge badge-' + (r.status==='New'?'new':r.status==='In Progress'?'progress':'complete') + '">' + r.status + '</span></td>' +
-                    '<td>' + (r.submitted_at ? formatDate(r.submitted_at) : '—') + '</td>' +
+                    '<td>' + (r.submitted_at ? formatDate(r.submitted_at) : '-') + '</td>' +
                     '<td><button class="btn btn-sm btn-outline" onclick="updateRequest(\'' + r.request_id + '\')"><i class="bi bi-pencil"></i></button></td></tr>'
                 ).join('');
                 if (data.requests.length > 0) {
@@ -347,18 +414,371 @@
             renderLeases(f);
         }
 
-        function formatDate(d) { if (!d) return '—'; return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+        function formatDate(d) { if (!d) return '-'; return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
         function viewProperty(id) {
             const prop = allProperties.find(p => p.id === id);
             if (!prop) return;
-            renderTenants(allTenants.filter(t => t.property_id === id));
+            currentPropertyId = id;
+            currentPropertyName = prop.short_name || prop.property_name;
+            var propTenants = allTenants.filter(function(t) { return t.property_id === id; });
+            renderTenants(propTenants);
             switchTab('tenants', document.querySelectorAll('.sidebar-nav .nav-item')[1]);
-            showToast('Showing tenants for ' + prop.short_name);
+            document.querySelector('#panelTenants .table-title').innerHTML = '<i class="bi bi-people"></i> ' + currentPropertyName + ' - Tenants';
+            document.getElementById('statProperties').innerHTML = '<span style="font-size:14px;color:var(--text-muted);">Property</span><br><select id="propQuickSwitch" onchange="viewProperty(parseInt(this.value))" style="background:transparent;border:none;font-size:22px;font-weight:700;color:var(--text-primary);cursor:pointer;max-width:100%;padding:0;font-family:inherit;">' + allProperties.map(function(p) { return '<option value="' + p.id + '"' + (p.id === id ? ' selected' : '') + '>' + (p.short_name || p.property_name) + '</option>'; }).join('') + '</select>';
+            document.getElementById('statProperties').closest('.stat-card').querySelector('.stat-label').textContent = (prop.property_address || '') + ', ' + (prop.city || '');
+            document.getElementById('statTenants').textContent = propTenants.length;
+            document.getElementById('statTenants').closest('.stat-card').querySelector('.stat-label').textContent = 'Tenants in ' + currentPropertyName;
+            var occ = (prop.total_units || 0) > 0 ? Math.round((propTenants.length / prop.total_units) * 100) : 0;
+            document.getElementById('statOccupancy').textContent = occ + '%';
+            document.getElementById('statOccupancy').closest('.stat-card').querySelector('.stat-label').textContent = propTenants.length + ' of ' + (prop.total_units || 0) + ' units';
+            var now = new Date();
+            var expCount = propTenants.filter(function(t) { if (!t.lease_end) return false; var d = Math.ceil((new Date(t.lease_end)-now)/86400000); return d >= 0 && d <= 90; }).length;
+            document.getElementById('statExpiring').textContent = expCount;
+            document.getElementById('statExpiring').closest('.stat-card').querySelector('.stat-label').textContent = 'Expiring in ' + currentPropertyName;
+            document.getElementById('statMaint').textContent = '-';
+            document.getElementById('statMaint').closest('.stat-card').querySelector('.stat-label').textContent = 'Open Requests';
+            showToast('Viewing ' + currentPropertyName);
+            if (document.getElementById('panelUnits').classList.contains('active')) loadUnits(id);
         }
-        function showAddProperty() { showToast('Property import from Danimal Data coming soon!'); }
-        function updateRequest(rid) { showToast('Request management coming soon!'); }
+        function showAddProperty() { document.getElementById('addPropertyModal').style.display = 'flex'; }
+        function updateRequest(rid) {
+            const req = document.querySelector('tr td[style*="color:#6366F1"]');
+            document.getElementById('updateReqId').value = rid;
+            document.getElementById('updateReqModal').style.display = 'flex';
+        }
         function refreshData() { loadProperties(); loadTenants(); loadMaintenance(); showToast('Data refreshed!'); }
         function showToast(msg, type) { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast ' + (type||'success'); t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
+
+        // ??? Add Property ???
+        async function submitProperty() {
+            const body = { property_name: document.getElementById('propName').value, short_name: document.getElementById('propShort').value, account_number: document.getElementById('propAcct').value, property_address: document.getElementById('propAddr').value, city: document.getElementById('propCity').value, state: document.getElementById('propState').value, zip: document.getElementById('propZip').value, property_type: document.getElementById('propType').value, total_units: parseInt(document.getElementById('propUnits').value) || 0, square_feet: parseInt(document.getElementById('propSqft').value) || 0 };
+            if (!body.property_name) return alert('Property name is required.');
+            try {
+                const res = await fetch('/api/pm/properties', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                const data = await res.json();
+                if (data.success) { document.getElementById('addPropertyModal').style.display = 'none'; loadProperties(); showToast('Property added!'); } else alert(data.error);
+            } catch(e) { alert('Error: ' + e.message); }
+        }
+
+        // ??? Add Tenant ???
+        function showAddTenant() {
+            document.querySelector('#addTenantModal h3').innerHTML = '<i class="bi bi-person-plus" style="color:#10B981;"></i> Add Tenant';
+            delete document.getElementById('addTenantModal').dataset.editId;
+            document.getElementById('tenName').value = ''; document.getElementById('tenDba').value = ''; document.getElementById('tenUnit').value = ''; document.getElementById('tenPhone').value = ''; document.getElementById('tenEmail').value = ''; document.getElementById('tenStart').value = ''; document.getElementById('tenEnd').value = ''; document.getElementById('tenSqft').value = ''; document.getElementById('tenStatus').value = 'Current';
+            var sel = document.getElementById('tenProp');
+            var propLabel = document.getElementById('tenPropLabel');
+            if (currentPropertyId) {
+                sel.style.display = 'none';
+                sel.innerHTML = '<option value="' + currentPropertyId + '" selected>' + currentPropertyName + '</option>';
+                if (!propLabel) {
+                    var lbl = document.createElement('div');
+                    lbl.id = 'tenPropLabel';
+                    lbl.style.cssText = 'padding:10px 14px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:8px;font-size:14px;font-weight:600;color:#6366F1;';
+                    sel.parentNode.insertBefore(lbl, sel);
+                }
+                document.getElementById('tenPropLabel').textContent = currentPropertyName;
+                document.getElementById('tenPropLabel').style.display = 'block';
+            } else {
+                sel.style.display = '';
+                if (propLabel) propLabel.style.display = 'none';
+                sel.innerHTML = allProperties.map(function(p) { return '<option value="' + p.id + '">' + p.short_name + ' - ' + p.property_name + '</option>'; }).join('');
+            }
+            document.getElementById('addTenantModal').style.display = 'flex';
+        }
+        async function submitTenant() {
+            var body = { property_id: document.getElementById('tenProp').value, tenant_name: document.getElementById('tenName').value, dba_name: document.getElementById('tenDba').value, unit_number: document.getElementById('tenUnit').value, contact_phone: document.getElementById('tenPhone').value, contact_email: document.getElementById('tenEmail').value, lease_start: document.getElementById('tenStart').value || null, lease_end: document.getElementById('tenEnd').value || null, unit_sqft: parseInt(document.getElementById('tenSqft').value) || null, tenant_status: document.getElementById('tenStatus').value };
+            if (!body.tenant_name) return alert('Tenant name is required.');
+            var editId = document.getElementById('addTenantModal').dataset.editId;
+            try {
+                var url = editId ? '/api/pm/tenants/' + editId : '/api/pm/tenants';
+                var method = editId ? 'PUT' : 'POST';
+                var res = await fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                var data = await res.json();
+                if (data.success) { document.getElementById('addTenantModal').style.display = 'none'; delete document.getElementById('addTenantModal').dataset.editId; loadTenants(); if (currentPropertyId) { setTimeout(function() { viewProperty(currentPropertyId); }, 500); } showToast(editId ? 'Tenant updated!' : 'Tenant added!'); } else alert(data.error);
+            } catch(e) { alert('Error: ' + e.message); }
+        }
+
+        // ??? Update Maintenance Request ???
+        async function submitUpdateRequest() {
+            const rid = document.getElementById('updateReqId').value;
+            const body = { status: document.getElementById('updateReqStatus').value, assigned_to: document.getElementById('updateReqAssign').value, resolution_notes: document.getElementById('updateReqNotes').value };
+            try {
+                const res = await fetch('/api/pm/requests/' + rid, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                const data = await res.json();
+                if (data.success) { document.getElementById('updateReqModal').style.display = 'none'; loadMaintenance(); showToast('Request updated!'); } else alert(data.error);
+            } catch(e) { alert('Error: ' + e.message); }
+        }
+
+        // ??? Portal Management ???
+        async function loadPortalStatus() {
+            try {
+                const res = await fetch('/tenant-portal/admin/portal-status');
+                const data = await res.json();
+                if (!data.success) return;
+                const tbody = document.getElementById('portalBody');
+                tbody.innerHTML = data.tenants.map(t => '<tr>' +
+                    '<td style="font-weight:600;">' + t.tenant_name + (t.dba_name ? '<div style="font-size:11px;color:var(--text-muted);">' + t.dba_name + '</div>' : '') + '</td>' +
+                    '<td>' + t.property_name + '</td><td>' + (t.unit_number || '-') + '</td>' +
+                    '<td style="font-size:12px;">' + (t.portal_email || t.contact_email || '-') + '</td>' +
+                    '<td>' + (t.portal_enabled && t.has_password ? '<span class="badge badge-current">Active</span>' : t.portal_enabled ? '<span class="badge badge-mtm">Invited</span>' : '<span class="badge badge-vacant">Disabled</span>') + '</td>' +
+                    '<td style="font-size:12px;">' + (t.portal_last_login ? formatDate(t.portal_last_login) : '-') + '</td>' +
+                    '<td>' + (!t.portal_enabled ? '<button class="btn btn-sm btn-primary" onclick="enablePortal(' + t.id + ')"><i class="bi bi-globe"></i> Enable</button>' : '<button class="btn btn-sm btn-outline" onclick="disablePortal(' + t.id + ')"><i class="bi bi-x-circle"></i> Disable</button>') + '</td></tr>'
+                ).join('');
+            } catch(e) { console.error('Portal status error:', e); }
+        }
+        async function enablePortal(id) {
+            try {
+                const res = await fetch('/tenant-portal/admin/enable-portal/' + id, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) { showToast('Portal enabled! Setup URL: ' + data.setupUrl); prompt('Send this URL to the tenant:', data.setupUrl); loadPortalStatus(); } else alert(data.error);
+            } catch(e) { alert('Error: ' + e.message); }
+        }
+        async function disablePortal(id) {
+            if (!confirm('Disable portal access for this tenant?')) return;
+            try {
+                const res = await fetch('/tenant-portal/admin/disable-portal/' + id, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) { loadPortalStatus(); showToast('Portal disabled.'); }
+            } catch(e) { alert('Error: ' + e.message); }
+        }
+
+        // ??? Mitch Minutes ???
+        function showAddMitchMinutes() {
+            const sel = document.getElementById('mitchProp');
+            sel.innerHTML = allProperties.map(p => '<option value="' + p.id + '">' + p.short_name + '</option>').join('');
+            document.getElementById('mitchModal').style.display = 'flex';
+        }
+        async function submitMitchMinutes() {
+            const body = { property_id: document.getElementById('mitchProp').value, title: document.getElementById('mitchTitle').value, video_url: document.getElementById('mitchUrl').value, description: document.getElementById('mitchDesc').value };
+            if (!body.title || !body.video_url) return alert('Title and video URL are required.');
+            try {
+                const res = await fetch('/tenant-portal/admin/mitch-minutes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                const data = await res.json();
+                if (data.success) { document.getElementById('mitchModal').style.display = 'none'; loadMitchMinutes(); showToast('Mitch Minutes published!'); } else alert(data.error);
+            } catch(e) { alert('Error: ' + e.message); }
+        }
+        async function loadMitchMinutes() {
+            try {
+                const res = await fetch('/tenant-portal/admin/mitch-minutes');
+                const data = await res.json();
+                const tbody = document.getElementById('mitchBody');
+                if (!data.videos || !data.videos.length) { tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><i class="bi bi-camera-video-off"></i><p>No videos yet</p></div></td></tr>'; return; }
+                tbody.innerHTML = data.videos.map(v => '<tr><td>' + v.property_name + '</td><td style="font-weight:600;">' + v.title + '</td><td>' + formatDate(v.published_at) + '</td><td><a href="' + v.video_url + '" target="_blank" style="color:#6366F1;font-size:12px;">View</a></td><td><button class="btn btn-sm btn-outline" onclick="deleteMitch(' + v.id + ')"><i class="bi bi-trash"></i></button></td></tr>').join('');
+            } catch(e) { console.error('Mitch minutes error:', e); }
+        }
+        async function deleteMitch(id) { if (!confirm('Delete this video?')) return; await fetch('/tenant-portal/admin/mitch-minutes/' + id, { method: 'DELETE' }); loadMitchMinutes(); showToast('Video removed.'); }
+
+        // ??? Property Updates ???
+        function showAddUpdate() {
+            const sel = document.getElementById('notifProp');
+            sel.innerHTML = '<option value="">All Properties</option>' + allProperties.map(p => '<option value="' + p.id + '">' + p.short_name + '</option>').join('');
+            document.getElementById('updateModal').style.display = 'flex';
+        }
+        async function submitPropertyUpdate() {
+            const body = { property_id: document.getElementById('notifProp').value || null, title: document.getElementById('notifTitle').value, body: document.getElementById('notifBody').value, category: document.getElementById('notifCat').value, priority: document.getElementById('notifPri').value, starts_at: document.getElementById('notifStart').value || null, ends_at: document.getElementById('notifEnd').value || null };
+            if (!body.title || !body.body) return alert('Title and body are required.');
+            try {
+                const res = await fetch('/tenant-portal/admin/property-updates', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                const data = await res.json();
+                if (data.success) { document.getElementById('updateModal').style.display = 'none'; loadPropertyUpdates(); showToast('Update published!'); } else alert(data.error);
+            } catch(e) { alert('Error: ' + e.message); }
+        }
+        async function loadPropertyUpdates() {
+            try {
+                const res = await fetch('/tenant-portal/admin/property-updates');
+                const data = await res.json();
+                const tbody = document.getElementById('updatesBody');
+                if (!data.updates || !data.updates.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="bi bi-bell-slash"></i><p>No updates yet</p></div></td></tr>'; return; }
+                tbody.innerHTML = data.updates.map(u => '<tr><td>' + (u.property_name || 'All') + '</td><td style="font-weight:600;">' + u.title + '</td><td><span class="badge badge-' + (u.category==='safety'?'emergency':u.category==='construction'?'high':'current') + '">' + u.category + '</span></td><td><span class="badge badge-' + (u.priority==='urgent'?'emergency':u.priority==='high'?'high':'current') + '">' + u.priority + '</span></td><td>' + formatDate(u.created_at) + '</td><td><button class="btn btn-sm btn-outline" onclick="deleteUpdate(' + u.id + ')"><i class="bi bi-trash"></i></button></td></tr>').join('');
+            } catch(e) { console.error('Updates error:', e); }
+        }
+        async function deleteUpdate(id) { if (!confirm('Delete this update?')) return; await fetch('/tenant-portal/admin/property-updates/' + id, { method: 'DELETE' }); loadPropertyUpdates(); showToast('Update removed.'); }
+
+
+        // --- Edit Tenant ---
+        function editTenant(id) {
+            var t = allTenants.find(function(x) { return x.id === id; });
+            if (!t) return;
+            var sel = document.getElementById('tenProp');
+            var propLabel = document.getElementById('tenPropLabel');
+            sel.innerHTML = allProperties.map(function(p) { return '<option value="' + p.id + '"' + (p.id === t.property_id ? ' selected' : '') + '>' + p.short_name + ' - ' + p.property_name + '</option>'; }).join('');
+            sel.style.display = '';
+            if (propLabel) propLabel.style.display = 'none';
+            document.getElementById('tenName').value = t.tenant_name || '';
+            document.getElementById('tenDba').value = t.dba_name || '';
+            document.getElementById('tenUnit').value = t.unit_number || '';
+            document.getElementById('tenPhone').value = t.contact_phone || '';
+            document.getElementById('tenEmail').value = t.contact_email || '';
+            document.getElementById('tenStart').value = t.lease_start ? t.lease_start.substring(0,10) : '';
+            document.getElementById('tenEnd').value = t.lease_end ? t.lease_end.substring(0,10) : '';
+            document.getElementById('tenSqft').value = t.unit_sqft || '';
+            document.getElementById('tenStatus').value = t.tenant_status || 'Current';
+            document.getElementById('addTenantModal').dataset.editId = id;
+            document.querySelector('#addTenantModal h3').innerHTML = '<i class="bi bi-pencil" style="color:#6366F1;"></i> Edit Tenant';
+            document.getElementById('addTenantModal').style.display = 'flex';
+        }
+
+        // --- Delete Tenant ---
+        async function deleteTenant(id, name) {
+            if (!confirm('Delete tenant "' + name + '"? This cannot be undone.')) return;
+            try {
+                var res = await fetch('/api/pm/tenants/' + id, { method: 'DELETE' });
+                var data = await res.json();
+                if (data.success) { loadTenants(); if (currentPropertyId) { setTimeout(function() { viewProperty(currentPropertyId); }, 500); } showToast('Tenant deleted.'); }
+                else alert(data.error || 'Failed to delete.');
+            } catch(e) { alert('Error: ' + e.message); }
+        }
+
+
+        // --- Units ---
+        var allUnits = [];
+        var unitSummary = {};
+        async function loadUnits(propId) {
+            if (!propId) { document.getElementById('unitsBody').innerHTML = ''; document.getElementById('unitPropertySelect').style.display = 'block'; document.getElementById('unitsOccBar').style.display = 'none'; document.getElementById('addUnitBtn').style.display = 'none'; return; }
+            document.getElementById('unitPropertySelect').style.display = 'none';
+            document.getElementById('addUnitBtn').style.display = '';
+            try {
+                var res = await fetch('/api/pm/properties/' + propId + '/units');
+                var data = await res.json();
+                if (data.success) {
+                    allUnits = data.units;
+                    unitSummary = data.summary;
+                    document.getElementById('unitsTitle').innerHTML = '<i class="bi bi-grid-3x3-gap"></i> ' + currentPropertyName + ' - Units';
+                    renderUnits(allUnits);
+                    renderOccupancyBar();
+                }
+            } catch(e) { console.error('Load units error:', e); }
+        }
+        function renderUnits(units) {
+            var tbody = document.getElementById('unitsBody');
+            if (!units.length) { tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="bi bi-grid-3x3-gap"></i><h3>No units configured</h3><p>Click Add Unit to set up the unit breakdown.</p></div></td></tr>'; return; }
+            tbody.innerHTML = units.map(function(u) {
+                var statusBadge = u.status === 'Occupied' ? 'badge-current' : u.status === 'Vacant' ? 'badge-expiring' : 'badge-mtm';
+                var leaseEnd = u.lease_end ? formatDate(u.lease_end) : '-';
+                var rent = u.asking_rent ? '\$' + Number(u.asking_rent).toLocaleString() + '/mo' : '-';
+                return '<tr>' +
+                    '<td style="font-weight:600;">' + (u.unit_number || '-') + '</td>' +
+                    '<td>' + (u.suite_name || '-') + '</td>' +
+                    '<td><span class="badge ' + statusBadge + '">' + (u.status || 'Unknown') + '</span></td>' +
+                    '<td>' + (u.tenant_name || '-') + '</td>' +
+                    '<td>' + (u.square_feet ? Number(u.square_feet).toLocaleString() + ' SF' : '-') + '</td>' +
+                    '<td>' + rent + '</td>' +
+                    '<td>' + leaseEnd + '</td>' +
+                    '<td><button class="btn btn-sm btn-outline" onclick="editUnit(' + u.id + ')"><i class="bi bi-pencil"></i></button></td></tr>';
+            }).join('');
+        }
     </script>
+
+    <!-- Add Property Modal -->
+    <div id="addPropertyModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:var(--bg-surface,#fff);border-radius:12px;padding:24px;width:520px;max-width:90vw;max-height:90vh;overflow-y:auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h3 style="font-size:18px;font-weight:700;"><i class="bi bi-buildings" style="color:#6366F1;"></i> Add Property</h3>
+                <button onclick="document.getElementById('addPropertyModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);">&times;</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div style="grid-column:1/-1;"><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Property Name *</label><input id="propName" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;" placeholder="e.g., Sunset Medical Plaza"></div>
+                <div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Short Name</label><input id="propShort" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;" placeholder="e.g., Sunset Med"></div>
+                <div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Account #</label><input id="propAcct" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;" placeholder="CRE-0018"></div>
+                <div style="grid-column:1/-1;"><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Address</label><input id="propAddr" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;" placeholder="123 Main St"></div>
+                <div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">City</label><input id="propCity" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;" value="Fort Myers"></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">State</label><input id="propState" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;" value="FL"></div><div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Zip</label><input id="propZip" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;"></div></div>
+                <div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Type</label><select id="propType" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;"><option>Medical Office</option><option>Office</option><option>Retail</option><option>Industrial</option><option>Mixed Use</option><option>Commercial</option></select></div>
+                <div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Total Units</label><input id="propUnits" type="number" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;" placeholder="4"></div>
+                <div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Square Feet</label><input id="propSqft" type="number" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;" placeholder="12000"></div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
+                <button class="btn btn-outline" onclick="document.getElementById('addPropertyModal').style.display='none'">Cancel</button>
+                <button class="btn btn-primary" onclick="submitProperty()"><i class="bi bi-plus-lg"></i> Add Property</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Tenant Modal -->
+    <div id="addTenantModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:var(--bg-surface,#fff);border-radius:12px;padding:24px;width:520px;max-width:90vw;max-height:90vh;overflow-y:auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h3 style="font-size:18px;font-weight:700;"><i class="bi bi-person-plus" style="color:#10B981;"></i> Add Tenant</h3>
+                <button onclick="document.getElementById('addTenantModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);">&times;</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div style="grid-column:1/-1;"><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Property *</label><select id="tenProp" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;"></select></div>
+                <div style="grid-column:1/-1;"><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Tenant / Company Name *</label><input id="tenName" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;" placeholder="e.g., Koda Holdings LLC"></div>
+                <div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">DBA Name</label><input id="tenDba" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;" placeholder="e.g., Main Street Group"></div>
+                <div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Unit #</label><input id="tenUnit" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;" placeholder="e.g., 101"></div>
+                <div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Phone</label><input id="tenPhone" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;" placeholder="(239) 555-0100"></div>
+                <div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Email</label><input id="tenEmail" type="email" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;" placeholder="tenant@email.com"></div>
+                <div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Lease Start</label><input id="tenStart" type="date" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;"></div>
+                <div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Lease End</label><input id="tenEnd" type="date" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;"></div>
+                <div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Unit SqFt</label><input id="tenSqft" type="number" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;"></div>
+                <div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Status</label><select id="tenStatus" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;"><option>Current</option><option>MTM</option><option>Vacant</option></select></div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
+                <button class="btn btn-outline" onclick="document.getElementById('addTenantModal').style.display='none'">Cancel</button>
+                <button class="btn btn-primary" onclick="submitTenant()"><i class="bi bi-plus-lg"></i> Add Tenant</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Request Modal -->
+    <div id="updateReqModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:var(--bg-surface,#fff);border-radius:12px;padding:24px;width:420px;max-width:90vw;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h3 style="font-size:18px;font-weight:700;"><i class="bi bi-wrench" style="color:#06B6D4;"></i> Update Request</h3>
+                <button onclick="document.getElementById('updateReqModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);">&times;</button>
+            </div>
+            <input type="hidden" id="updateReqId">
+            <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Status</label><select id="updateReqStatus" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;"><option>New</option><option>Assigned</option><option>In Progress</option><option>Completed</option><option>Closed</option></select></div>
+            <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Assigned To</label><input id="updateReqAssign" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;" placeholder="Tech name"></div>
+            <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Resolution Notes</label><textarea id="updateReqNotes" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;min-height:80px;font-family:inherit;" placeholder="Notes about the resolution..."></textarea></div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button class="btn btn-outline" onclick="document.getElementById('updateReqModal').style.display='none'">Cancel</button>
+                <button class="btn btn-primary" onclick="submitUpdateRequest()"><i class="bi bi-check-lg"></i> Update</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Mitch Minutes Modal -->
+    <div id="mitchModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:var(--bg-surface,#fff);border-radius:12px;padding:24px;width:480px;max-width:90vw;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h3 style="font-size:18px;font-weight:700;"><i class="bi bi-camera-video" style="color:#10B981;"></i> Add Mitch Minutes</h3>
+                <button onclick="document.getElementById('mitchModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);">&times;</button>
+            </div>
+            <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Property *</label><select id="mitchProp" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;"></select></div>
+            <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Title *</label><input id="mitchTitle" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;" placeholder="February 2026 Update"></div>
+            <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Video URL * (YouTube/Vimeo)</label><input id="mitchUrl" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;" placeholder="https://youtube.com/watch?v=..."></div>
+            <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Description</label><textarea id="mitchDesc" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;min-height:60px;font-family:inherit;" placeholder="Brief summary..."></textarea></div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button class="btn btn-outline" onclick="document.getElementById('mitchModal').style.display='none'">Cancel</button>
+                <button class="btn btn-primary" onclick="submitMitchMinutes()"><i class="bi bi-upload"></i> Publish</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Property Update Modal -->
+    <div id="updateModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:var(--bg-surface,#fff);border-radius:12px;padding:24px;width:480px;max-width:90vw;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h3 style="font-size:18px;font-weight:700;"><i class="bi bi-bell" style="color:#F59E0B;"></i> New Property Update</h3>
+                <button onclick="document.getElementById('updateModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);">&times;</button>
+            </div>
+            <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Property (blank = all properties)</label><select id="notifProp" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;"><option value="">All Properties</option></select></div>
+            <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Title *</label><input id="notifTitle" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;" placeholder="Parking Lot Resurfacing"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                <div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Category</label><select id="notifCat" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;"><option>construction</option><option>maintenance</option><option>safety</option><option>event</option><option>general</option></select></div>
+                <div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Priority</label><select id="notifPri" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;"><option>low</option><option selected>normal</option><option>high</option><option>urgent</option></select></div>
+            </div>
+            <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Body *</label><textarea id="notifBody" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;min-height:80px;font-family:inherit;" placeholder="Details about the update..."></textarea></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                <div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Starts</label><input id="notifStart" type="date" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;"></div>
+                <div><label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Ends</label><input id="notifEnd" type="date" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;"></div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button class="btn btn-outline" onclick="document.getElementById('updateModal').style.display='none'">Cancel</button>
+                <button class="btn btn-primary" onclick="submitPropertyUpdate()"><i class="bi bi-send"></i> Publish</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

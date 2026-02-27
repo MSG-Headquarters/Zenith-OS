@@ -68,12 +68,22 @@
         } catch(e){}
     }
 
-    // Debugger trap
-    (function _loop(){
-        var s = Date.now();
-        debugger;
-        if(Date.now() - s > 100){ _caught(); }
-        setTimeout(_loop, 3000);
+    
+    // Smart debugger trap - only activates when devtools detected
+    var _devtoolsOpen = false;
+    var _checkSize = function() {
+        var w = window.outerWidth - window.innerWidth > 160;
+        var h = window.outerHeight - window.innerHeight > 160;
+        _devtoolsOpen = w || h;
+    };
+    setInterval(_checkSize, 1000);
+    (function _trap() {
+        if (_devtoolsOpen) {
+            var s = Date.now();
+            debugger;
+            if (Date.now() - s > 100) { _caught(); }
+        }
+        setTimeout(_trap, 1500);
     })();
 })();
 </script>

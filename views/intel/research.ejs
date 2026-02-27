@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INTEL Research AI — Zenith OS</title>
+    <title>INTEL Research AI â€” Zenith OS</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/theme.css">
     <script src="/js/theme.js"></script>
@@ -12,7 +12,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif; background: #0b1120; color: #c8d6e5; display: flex; min-height: 100vh; }
 
-        /* ── Sidebar (matches Zenith OS) ── */
+        /* â”€â”€ Sidebar (matches Zenith OS) â”€â”€ */
         .sidebar { width: 240px; background: #0f1724; border-right: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; z-index: 50; }
         .sidebar-brand { padding: 20px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
         .sidebar-brand h2 { font-size: 1.1rem; font-weight: 700; color: #e2e8f0; letter-spacing: -0.01em; }
@@ -31,10 +31,10 @@
         .sidebar-footer a { display: flex; align-items: center; gap: 6px; color: #64748b; text-decoration: none; font-size: 0.78rem; padding: 6px 0; }
         .sidebar-footer a:hover { color: #ef4444; }
 
-        /* ── Main Content ── */
+        /* â”€â”€ Main Content â”€â”€ */
         .main-content { margin-left: 240px; flex: 1; display: flex; flex-direction: column; height: 100vh; }
 
-        /* ── Top Bar ── */
+        /* â”€â”€ Top Bar â”€â”€ */
         .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(11,17,32,0.95); backdrop-filter: blur(12px); flex-shrink: 0; }
         .top-bar h1 { font-size: 1.15rem; font-weight: 700; color: #e2e8f0; }
         .top-bar h1 .accent { color: #f59e0b; }
@@ -43,7 +43,7 @@
         .btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #64748b; }
         .btn-ghost:hover { border-color: rgba(255,255,255,0.2); color: #94a3b8; }
 
-        /* ── Intel Tabs ── */
+        /* â”€â”€ Intel Tabs â”€â”€ */
         .intel-tabs { display: flex; gap: 2px; padding: 0 28px; border-bottom: 1px solid rgba(255,255,255,0.06); background: #0f1724; flex-shrink: 0; }
         .intel-tab { padding: 10px 20px; font-size: 0.85rem; font-weight: 500; color: #64748b; text-decoration: none; display: flex; align-items: center; gap: 8px; transition: all 0.15s; position: relative; }
         .intel-tab:hover { color: #e2e8f0; }
@@ -51,19 +51,50 @@
         .intel-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #3b82f6; }
         .ai-badge { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.25); border-radius: 4px; padding: 1px 6px; font-size: 0.6rem; color: #60a5fa; font-weight: 600; letter-spacing: 0.05em; margin-left: 4px; }
 
-        /* ── Chat Area ── */
+        /* â”€â”€ Conversation Sidebar â”€â”€ */
+        .research-layout { display: flex; flex: 1; overflow: hidden; }
+        .conv-sidebar { width: 260px; background: #0f1724; border-right: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; flex-shrink: 0; height: 100%; }
+        .conv-sidebar-header { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: space-between; }
+        .conv-sidebar-header h3 { font-size: 0.82rem; font-weight: 600; color: #94a3b8; }
+        .conv-new-btn { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.25); border-radius: 6px; padding: 5px 10px; color: #60a5fa; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.15s; }
+        .conv-new-btn:hover { background: rgba(59,130,246,0.2); }
+        .conv-list { flex: 1; overflow-y: auto; padding: 8px 8px; }
+        .conv-list::-webkit-scrollbar { width: 4px; }
+        .conv-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+        .conv-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; cursor: pointer; transition: all 0.15s; margin-bottom: 2px; position: relative; }
+        .conv-item:hover { background: rgba(255,255,255,0.04); }
+        .conv-item.active { background: rgba(59,130,246,0.1); }
+        .conv-item-icon { font-size: 0.85rem; flex-shrink: 0; }
+        .conv-item-info { flex: 1; min-width: 0; }
+        .conv-item-title { font-size: 0.8rem; font-weight: 500; color: #c8d6e5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .conv-item.active .conv-item-title { color: #60a5fa; }
+        .conv-item-date { font-size: 0.65rem; color: #475569; margin-top: 1px; }
+        .conv-item-type { font-size: 0.6rem; font-weight: 600; padding: 1px 5px; border-radius: 3px; background: rgba(245,158,11,0.12); color: #f59e0b; }
+        .conv-item-delete { opacity: 0; background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.85rem; padding: 2px 4px; transition: opacity 0.15s; }
+        .conv-item:hover .conv-item-delete { opacity: 0.6; }
+        .conv-item-delete:hover { opacity: 1 !important; }
+        .conv-empty { text-align: center; padding: 40px 16px; color: #475569; font-size: 0.8rem; }
+        .conv-empty i { font-size: 1.8rem; display: block; margin-bottom: 8px; opacity: 0.4; }
+        .conv-search { padding: 8px 10px; }
+        .conv-search input { width: 100%; background: #1a2332; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 6px 10px 6px 30px; font-size: 0.78rem; color: #c8d6e5; outline: none; }
+        .conv-search input::placeholder { color: #475569; }
+        .conv-search { position: relative; }
+        .conv-search i { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 0.78rem; color: #475569; }
+        .chat-container { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+        /* â”€â”€ Chat Area â”€â”€ */
         .chat-area { flex: 1; overflow-y: auto; padding: 20px 28px; }
         .chat-area::-webkit-scrollbar { width: 5px; }
         .chat-area::-webkit-scrollbar-track { background: transparent; }
         .chat-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
 
-        /* ── Welcome State ── */
+        /* â”€â”€ Welcome State â”€â”€ */
         .welcome { text-align: center; padding: 40px 0 24px; animation: fadeUp 0.5s ease-out; }
         .welcome-icon { width: 64px; height: 64px; border-radius: 18px; margin: 0 auto 16px; background: linear-gradient(135deg, #1e3a5f, #3b82f6); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 8px 32px rgba(59,130,246,0.25); }
         .welcome h2 { font-size: 1.4rem; font-weight: 700; color: #e2e8f0; margin-bottom: 8px; }
         .welcome p { font-size: 0.88rem; color: #64748b; max-width: 540px; margin: 0 auto; line-height: 1.6; }
 
-        /* ── Report Type Pills ── */
+        /* â”€â”€ Report Type Pills â”€â”€ */
         .report-pills { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 24px 0 28px; }
         .report-pill { background: var(--pill-bg); border: 1px solid var(--pill-border); border-radius: 10px; padding: 10px 16px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
         .report-pill:hover { transform: translateY(-1px); filter: brightness(1.3); }
@@ -71,13 +102,13 @@
         .report-pill .pill-label { font-size: 0.82rem; font-weight: 600; color: var(--pill-color); }
         .report-pill .pill-desc { font-size: 0.72rem; color: #64748b; }
 
-        /* ── Sample Prompts ── */
+        /* â”€â”€ Sample Prompts â”€â”€ */
         .samples-label { font-size: 0.72rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; padding-left: 4px; }
         .sample-prompt { background: #1a2332; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 16px; cursor: pointer; text-align: left; color: #94a3b8; font-size: 0.83rem; line-height: 1.5; transition: all 0.15s; margin-bottom: 6px; display: block; width: 100%; }
         .sample-prompt:hover { border-color: rgba(59,130,246,0.25); color: #c8d6e5; }
         .sample-arrow { color: #3b82f6; margin-right: 8px; }
 
-        /* ── Messages ── */
+        /* â”€â”€ Messages â”€â”€ */
         .message { display: flex; padding: 4px 0; animation: fadeUp 0.3s ease-out; }
         .message.user { justify-content: flex-end; }
         .message.assistant { justify-content: flex-start; }
@@ -90,12 +121,12 @@
         .message.assistant .msg-bubble { background: #1a2332; border: 1px solid rgba(255,255,255,0.06); border-radius: 16px 16px 16px 4px; }
         .message.system .msg-bubble { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.15); border-radius: 10px; padding: 8px 16px; font-size: 0.8rem; color: #64748b; }
 
-        /* ── File chips ── */
+        /* â”€â”€ File chips â”€â”€ */
         .file-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
         .file-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.25); border-radius: 6px; padding: 3px 8px; font-size: 0.72rem; color: #a78bfa; }
         .report-tag { display: inline-flex; align-items: center; gap: 5px; margin-bottom: 6px; border-radius: 6px; padding: 3px 9px; font-size: 0.72rem; font-weight: 600; }
 
-        /* ── Typing Indicator ── */
+        /* â”€â”€ Typing Indicator â”€â”€ */
         .typing { display: flex; gap: 10px; padding: 4px 0; align-items: flex-start; }
         .typing-dots { display: flex; gap: 5px; align-items: center; background: #1a2332; border: 1px solid rgba(255,255,255,0.06); border-radius: 16px 16px 16px 4px; padding: 14px 20px; }
         .typing-dot { width: 7px; height: 7px; border-radius: 50%; background: #3b82f6; animation: pulse 1.2s ease-in-out infinite; opacity: 0.5; }
@@ -103,7 +134,7 @@
         .typing-dot:nth-child(3) { animation-delay: 0.3s; }
         .typing-label { font-size: 0.8rem; color: #64748b; margin-left: 8px; }
 
-        /* ── Input Area ── */
+        /* â”€â”€ Input Area â”€â”€ */
         .input-area { padding: 12px 28px 20px; border-top: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
         .active-report-tag { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
         .active-report-badge { border-radius: 6px; padding: 3px 10px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
@@ -128,7 +159,7 @@
         .input-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding: 0 4px; }
         .input-footer span { font-size: 0.7rem; color: #374151; }
 
-        /* ── Report Menu ── */
+        /* â”€â”€ Report Menu â”€â”€ */
         .report-menu { display: none; position: absolute; bottom: calc(100% + 8px); right: 0; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 6px; min-width: 220px; z-index: 50; box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
         .report-menu.open { display: block; }
         .report-menu-item { width: 100%; background: transparent; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; color: #c8d6e5; font-size: 0.82rem; transition: background 0.1s; text-align: left; }
@@ -136,17 +167,17 @@
         .report-menu-item .rmi-label { font-weight: 600; }
         .report-menu-item .rmi-full { font-size: 0.72rem; color: #64748b; }
 
-        /* ── Cadence Buttons ── */
+        /* â”€â”€ Cadence Buttons â”€â”€ */
         .cadence-btn { background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.2); border-radius: 6px; padding: 4px 10px; font-size: 0.72rem; color: #06b6d4; cursor: pointer; font-family: inherit; font-weight: 500; transition: all 0.15s; }
         .cadence-btn:hover { background: rgba(6,182,212,0.15); }
         .cadence-btn.active { background: rgba(6,182,212,0.25); border-color: #06b6d4; }
 
-        /* ── Enrichment Indicator ── */
+        /* â”€â”€ Enrichment Indicator â”€â”€ */
         .enrichment-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
         .enrichment-chip { display: inline-flex; align-items: center; gap: 4px; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: 5px; padding: 2px 8px; font-size: 0.68rem; color: #10b981; font-weight: 500; }
         .enrichment-chip.search { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.2); color: #60a5fa; }
 
-        /* ── Drag Overlay ── */
+        /* â”€â”€ Drag Overlay â”€â”€ */
         .drag-overlay { position: fixed; inset: 0; z-index: 999; background: rgba(11,17,32,0.92); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; border: 3px dashed rgba(59,130,246,0.5); }
         .drag-overlay.visible { display: flex; }
         .drag-overlay .drag-inner { text-align: center; }
@@ -154,11 +185,11 @@
         .drag-overlay h3 { font-size: 1.3rem; font-weight: 600; color: #e2e8f0; }
         .drag-overlay p { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
 
-        /* ── Animations ── */
+        /* â”€â”€ Animations â”€â”€ */
         @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse { 0%,100% { opacity: 0.3; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1.15); } }
 
-        /* ── Markdown-ish formatting in AI responses ── */
+        /* â”€â”€ Markdown-ish formatting in AI responses â”€â”€ */
         .msg-bubble h3 { font-size: 0.95rem; font-weight: 700; color: #e2e8f0; margin: 12px 0 6px; }
         .msg-bubble h3:first-child { margin-top: 0; }
         .msg-bubble strong { color: #e2e8f0; }
@@ -240,13 +271,30 @@
         </div>
 
         <!-- Chat Area -->
+        <div class="research-layout">
+            <!-- Conversation Sidebar -->
+            <div class="conv-sidebar">
+                <div class="conv-sidebar-header">
+                    <h3><i class="bi bi-chat-left-text"></i> Chats</h3>
+                    <button class="conv-new-btn" onclick="newConversation()"><i class="bi bi-plus-lg"></i> New</button>
+                </div>
+                <div class="conv-search">
+                    <i class="bi bi-search"></i>
+                    <input type="text" placeholder="Search chats..." oninput="filterConversations(this.value)">
+                </div>
+                <div class="conv-list" id="convList">
+                    <div class="conv-empty"><i class="bi bi-chat-left-text"></i>No conversations yet<br><small>Start a new research chat</small></div>
+                </div>
+            </div>
+            <!-- Chat Container -->
+            <div class="chat-container">
         <div class="chat-area" id="chatArea">
             <!-- Welcome State (shown when no messages) -->
             <div id="welcomeState">
                 <div class="welcome">
                     <div class="welcome-icon"><i class="bi bi-cpu"></i></div>
                     <h2>INTEL Research Assistant</h2>
-                    <p>Ask me to generate CMA, SWOT, CIM, BOV, or Offering Memorandum reports. Drop files or describe a property and area — I'll pull from Danimal Data, Census, FDOT, and property records to build institutional-quality analysis.</p>
+                    <p>Ask me to generate CMA, SWOT, CIM, BOV, or Offering Memorandum reports. Drop files or describe a property and area â€” I'll pull from Danimal Data, Census, FDOT, and property records to build institutional-quality analysis.</p>
                 </div>
 
                 <!-- Report Type Pills -->
@@ -273,30 +321,30 @@
                     </button>
                     <button class="report-pill" style="--pill-bg:rgba(6,182,212,0.08);--pill-border:rgba(6,182,212,0.2);--pill-color:#06b6d4;" onclick="selectMarketReport()">
                         <span class="pill-icon"><i class="bi bi-newspaper"></i></span>
-                        <div><div class="pill-label">Market Report</div><div class="pill-desc">Newsletter — Daily to Annual</div></div>
+                        <div><div class="pill-label">Market Report</div><div class="pill-desc">Newsletter â€” Daily to Annual</div></div>
                     </button>
                 </div>
 
                 <!-- Sample Prompts -->
                 <div>
                     <div class="samples-label">Try asking</div>
-                    <button class="sample-prompt" onclick="useSample(this.dataset.prompt)" data-prompt="Run a CMA for 2200 Main St, Fort Myers — compare against similar retail properties sold in the last 12 months within a 3-mile radius">
-                        <span class="sample-arrow">→</span> Run a CMA for 2200 Main St, Fort Myers — compare against similar retail properties sold in the last 12 months within a 3-mile radius
+                    <button class="sample-prompt" onclick="useSample(this.dataset.prompt)" data-prompt="Run a CMA for 2200 Main St, Fort Myers â€” compare against similar retail properties sold in the last 12 months within a 3-mile radius">
+                        <span class="sample-arrow">â†’</span> Run a CMA for 2200 Main St, Fort Myers â€” compare against similar retail properties sold in the last 12 months within a 3-mile radius
                     </button>
                     <button class="sample-prompt" onclick="useSample(this.dataset.prompt)" data-prompt="Generate a SWOT analysis for the Cape Coral retail corridor along Pine Island Road">
-                        <span class="sample-arrow">→</span> Generate a SWOT analysis for the Cape Coral retail corridor along Pine Island Road
+                        <span class="sample-arrow">â†’</span> Generate a SWOT analysis for the Cape Coral retail corridor along Pine Island Road
                     </button>
                     <button class="sample-prompt" onclick="useSample(this.dataset.prompt)" data-prompt="Build a BOV for a 15,000 SF multi-tenant retail center at 1500 Colonial Blvd with 92% occupancy">
-                        <span class="sample-arrow">→</span> Build a BOV for a 15,000 SF multi-tenant retail center at 1500 Colonial Blvd with 92% occupancy
+                        <span class="sample-arrow">â†’</span> Build a BOV for a 15,000 SF multi-tenant retail center at 1500 Colonial Blvd with 92% occupancy
                     </button>
                     <button class="sample-prompt" onclick="useSample(this.dataset.prompt)" data-prompt="Create a CIM for a Class A office building in downtown Naples with $1.2M NOI">
-                        <span class="sample-arrow">→</span> Create a CIM for a Class A office building in downtown Naples with $1.2M NOI
+                        <span class="sample-arrow">â†’</span> Create a CIM for a Class A office building in downtown Naples with $1.2M NOI
                     </button>
                     <button class="sample-prompt" onclick="useSample(this.dataset.prompt)" data-prompt="Draft an Offering Memorandum for a 3-acre outparcel on US-41 with 35,000 VPD traffic count">
-                        <span class="sample-arrow">→</span> Draft an Offering Memorandum for a 3-acre outparcel on US-41 with 35,000 VPD traffic count
+                        <span class="sample-arrow">â†’</span> Draft an Offering Memorandum for a 3-acre outparcel on US-41 with 35,000 VPD traffic count
                     </button>
-                    <button class="sample-prompt" onclick="useSample(this.dataset.prompt)" data-prompt="Generate a monthly market report for Southwest Florida commercial real estate — cover retail, office, and industrial sectors with current cap rates, vacancy trends, and notable transactions">
-                        <span class="sample-arrow">→</span> Generate a monthly market report for SWFL commercial real estate — retail, office, industrial with cap rates and vacancy trends
+                    <button class="sample-prompt" onclick="useSample(this.dataset.prompt)" data-prompt="Generate a monthly market report for Southwest Florida commercial real estate â€” cover retail, office, and industrial sectors with current cap rates, vacancy trends, and notable transactions">
+                        <span class="sample-arrow">â†’</span> Generate a monthly market report for SWFL commercial real estate â€” retail, office, industrial with cap rates and vacancy trends
                     </button>
                 </div>
             </div>
@@ -348,14 +396,16 @@
             </div>
 
             <div class="input-footer">
-                <span>Powered by Danimal Data · Census · FDOT · Property Records · Web Search</span>
+                <span>Powered by Danimal Data Â· Census Â· FDOT Â· Property Records Â· Web Search</span>
                 <span>Shift+Enter for new line</span>
             </div>
         </div>
     </div>
 
+        </div><!-- /chat-container -->
+        </div><!-- /research-layout -->
     <script>
-        // ── State ──
+        // â”€â”€ State â”€â”€
         let messages = [];
         let attachedFiles = [];
         let activeReport = null;
@@ -371,7 +421,7 @@
         };
         let activeCadence = null;
 
-        // ── Drag & Drop ──
+        // â”€â”€ Drag & Drop â”€â”€
         document.body.addEventListener('dragover', (e) => { e.preventDefault(); document.getElementById('dragOverlay').classList.add('visible'); });
         document.getElementById('dragOverlay').addEventListener('dragleave', () => { document.getElementById('dragOverlay').classList.remove('visible'); });
         document.getElementById('dragOverlay').addEventListener('drop', (e) => {
@@ -380,7 +430,7 @@
             handleFileSelect(e.dataTransfer.files);
         });
 
-        // ── File Handling ──
+        // â”€â”€ File Handling â”€â”€
         function handleFileSelect(fileList) {
             const arr = Array.from(fileList);
             attachedFiles = [...attachedFiles, ...arr].slice(0, 10);
@@ -404,12 +454,12 @@
                 return `<div class="attached-chip" style="background:${c}15;border:1px solid ${c}40">
                     <span class="ext" style="color:${c}">${ext}</span>
                     <span class="fname">${f.name}</span>
-                    <button class="remove-file" onclick="removeFile(${i})">×</button>
+                    <button class="remove-file" onclick="removeFile(${i})">Ã—</button>
                 </div>`;
             }).join('');
         }
 
-        // ── Report Type ──
+        // â”€â”€ Report Type â”€â”€
         function selectReportType(type, prefill) {
             activeReport = type;
             renderActiveReport();
@@ -428,7 +478,7 @@
                 toggleReportMenu();
             } else {
                 document.getElementById('cadenceOptions').style.display = 'block';
-                // Don't close menu — let them pick cadence
+                // Don't close menu â€” let them pick cadence
             }
             renderActiveReport();
             updateReportMenuBtn();
@@ -477,7 +527,7 @@
             container.style.display = 'flex';
             container.innerHTML = `<span class="active-report-badge" style="background:${r.color}18;border:1px solid ${r.color}35;color:${r.color}">
                 <i class="bi ${r.icon}"></i> ${label}
-                <button onclick="clearReport()">×</button>
+                <button onclick="clearReport()">Ã—</button>
             </span>`;
         }
 
@@ -510,7 +560,7 @@
             }
         });
 
-        // ── Input ──
+        // â”€â”€ Input â”€â”€
         function autoResize(el) {
             el.style.height = 'auto';
             el.style.height = Math.min(el.scrollHeight, 160) + 'px';
@@ -537,12 +587,12 @@
             updateSendBtn();
         }
 
-        // ── Scrolling ──
+        // â”€â”€ Scrolling â”€â”€
         function scrollToBottom() {
             document.getElementById('scrollAnchor').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // ── Rendering ──
+        // â”€â”€ Rendering â”€â”€
         function renderMessage(msg) {
             const container = document.getElementById('messagesContainer');
             const div = document.createElement('div');
@@ -646,7 +696,7 @@
             return d.innerHTML;
         }
 
-        // ── Send Message ──
+        // â”€â”€ Send Message â”€â”€
         async function sendMessage() {
             const ta = document.getElementById('chatInput');
             const content = ta.value.trim();
@@ -664,6 +714,9 @@
             };
             messages.push(userMsg);
             renderMessage(userMsg);
+            // Auto-save: create conversation if first message
+            if (!currentConvoId) { await createConversation(content); }
+            saveMessage('user', content);
 
             const currentReport = activeReport;
             const currentCadence = activeCadence;
@@ -726,6 +779,8 @@
                     const aiMsg = { role: 'assistant', content: data.response };
                     messages.push(aiMsg);
                     renderMessage(aiMsg);
+                    saveMessage('assistant', data.response);
+                    loadConversations();
                     
                     const enrichDiv = document.createElement('div');
                     enrichDiv.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;padding:2px 42px 8px;animation:fadeUp 0.3s ease-out;';
@@ -800,6 +855,145 @@
                 alert('Export error: ' + err.message);
             }
         }   
+    
+
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        // CONVERSATION PERSISTENCE
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        let currentConvoId = null;
+        let allConversations = [];
+
+        async function loadConversations() {
+            try {
+                const res = await fetch('/api/intel/conversations');
+                const data = await res.json();
+                if (data.success) {
+                    allConversations = data.conversations;
+                    renderConversationList(allConversations);
+                }
+            } catch(e) { console.error('Load convos error:', e); }
+        }
+
+        function renderConversationList(convos) {
+            const list = document.getElementById('convList');
+            if (!convos.length) {
+                list.innerHTML = '<div class="conv-empty"><i class="bi bi-chat-left-text"></i>No conversations yet<br><small>Start a new research chat</small></div>';
+                return;
+            }
+            list.innerHTML = convos.map(function(c) {
+                var isActive = c.id === currentConvoId ? ' active' : '';
+                var icon = c.report_type ? ({cma:'\ud83d\udcca',swot:'\ud83c\udfaf',cim:'\ud83d\udd12',bov:'\ud83d\udcb0',om:'\ud83d\udccb',market_report:'\ud83d\udcc8'}[c.report_type] || '\ud83d\udcac') : '\ud83d\udcac';
+                var date = new Date(c.updated_at);
+                var now = new Date();
+                var diff = now - date;
+                var timeStr = diff < 60000 ? 'Just now' : diff < 3600000 ? Math.floor(diff/60000) + 'm ago' : diff < 86400000 ? Math.floor(diff/3600000) + 'h ago' : date.toLocaleDateString();
+                var typeTag = c.report_type ? '<span class="conv-item-type">' + c.report_type.toUpperCase() + '</span>' : '';
+                return '<div class="conv-item' + isActive + '" onclick="loadConversation(' + c.id + ')">'
+                    + '<span class="conv-item-icon">' + icon + '</span>'
+                    + '<div class="conv-item-info"><div class="conv-item-title">' + (c.title || 'New Research') + '</div>'
+                    + '<div class="conv-item-date">' + timeStr + ' ' + typeTag + '</div></div>'
+                    + '<button class="conv-item-delete" onclick="event.stopPropagation();deleteConversation(' + c.id + ')" title="Delete"><i class="bi bi-trash3"></i></button>'
+                    + '</div>';
+            }).join('');
+        }
+
+        function filterConversations(query) {
+            if (!query) { renderConversationList(allConversations); return; }
+            var q = query.toLowerCase();
+            renderConversationList(allConversations.filter(function(c) { return (c.title || '').toLowerCase().includes(q); }));
+        }
+
+        async function newConversation() {
+            currentConvoId = null;
+            messages = [];
+            document.getElementById('chatArea').innerHTML = '';
+            document.getElementById('welcomeState') && (document.getElementById('chatArea').innerHTML = document.getElementById('chatArea').innerHTML);
+            // Reset welcome state
+            location.reload();
+        }
+
+        async function createConversation(firstMessage) {
+            try {
+                var title = firstMessage.length > 100 ? firstMessage.substring(0, 100) : firstMessage;
+                var res = await fetch('/api/intel/conversations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: title, report_type: activeReportType || null })
+                });
+                var data = await res.json();
+                if (data.success) {
+                    currentConvoId = data.conversation.id;
+                    loadConversations();
+                    return currentConvoId;
+                }
+            } catch(e) { console.error('Create convo error:', e); }
+            return null;
+        }
+
+        async function saveMessage(role, content) {
+            if (!currentConvoId) return;
+            try {
+                await fetch('/api/intel/conversations/' + currentConvoId + '/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ role: role, content: content, report_type: activeReportType || null })
+                });
+            } catch(e) { console.error('Save message error:', e); }
+        }
+
+        async function loadConversation(id) {
+            try {
+                var res = await fetch('/api/intel/conversations/' + id);
+                var data = await res.json();
+                if (data.success) {
+                    currentConvoId = id;
+                    messages = [];
+                    document.getElementById('chatArea').innerHTML = '';
+                    var welcome = document.getElementById('welcomeState');
+                    if (welcome) welcome.style.display = 'none';
+
+                    data.messages.forEach(function(msg) {
+                        messages.push({ role: msg.role, content: msg.content });
+                        renderMessage({ role: msg.role, content: msg.content });
+                    });
+
+                    // Update active state in sidebar
+                    renderConversationList(allConversations.map(function(c) {
+                        return Object.assign({}, c, { id: c.id });
+                    }));
+                    // Re-highlight
+                    document.querySelectorAll('.conv-item').forEach(function(el) { el.classList.remove('active'); });
+                    var items = document.querySelectorAll('.conv-item');
+                    items.forEach(function(el) {
+                        if (el.onclick && el.onclick.toString().includes(id)) el.classList.add('active');
+                    });
+                    allConversations.forEach(function(c, i) {
+                        if (c.id === id && items[i]) items[i].classList.add('active');
+                    });
+
+                    // Scroll to bottom
+                    var chatArea = document.getElementById('chatArea');
+                    chatArea.scrollTop = chatArea.scrollHeight;
+                }
+            } catch(e) { console.error('Load convo error:', e); }
+        }
+
+        async function deleteConversation(id) {
+            if (!confirm('Delete this conversation?')) return;
+            try {
+                await fetch('/api/intel/conversations/' + id, { method: 'DELETE' });
+                if (currentConvoId === id) {
+                    currentConvoId = null;
+                    messages = [];
+                    location.reload();
+                }
+                loadConversations();
+            } catch(e) { console.error('Delete convo error:', e); }
+        }
+
+        // Load conversations on page load
+        document.addEventListener('DOMContentLoaded', function() { loadConversations(); });
+
     </script>
 </body>
 </html>

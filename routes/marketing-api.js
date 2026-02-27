@@ -1,5 +1,5 @@
 // ============================================
-// ZENITH OS — Marketing Suite API Routes
+// ZENITH OS â€” Marketing Suite API Routes
 // Drop into: routes/marketing-api.js
 // Mount in app.js: app.use('/api/marketing', marketingApi(pool));
 // ============================================
@@ -79,6 +79,21 @@ module.exports = function(pool) {
   });
 
   // POST /api/marketing/drafts/:id/transition
+  // POST /drafts/:id/comment - Add comment without status change
+  router.post('/drafts/:id/comment', requireAuth, async (req, res) => {
+    try {
+      const { comments } = req.body;
+      if (!comments || !comments.trim()) return res.status(400).json({ error: 'Comment required' });
+      const draft = await pool.query('SELECT * FROM marketing_drafts WHERE id = $1 AND tenant_id = $2', [req.params.id, getTenantId(req)]);
+      if (draft.rows.length === 0) return res.status(404).json({ error: 'Draft not found' });
+      await pool.query(
+        'INSERT INTO marketing_draft_history (draft_id, from_status, to_status, actor_id, actor_role, comments, created_at) VALUES ($1, $2, $2, $3, $4, $5, NOW())',
+        [req.params.id, draft.rows[0].status, getUserId(req), getUserRole(req), comments.trim()]
+      );
+      res.json({ success: true });
+    } catch (err) { console.error('POST /comment error:', err); res.status(500).json({ error: 'Failed to add comment' }); }
+  });
+
   router.post('/drafts/:id/transition', requireAuth, async (req, res) => {
     try {
       const { transition, comments, ...params } = req.body;
@@ -105,7 +120,7 @@ module.exports = function(pool) {
     try {
       const { event, listing_id, tenant_id, data } = req.body;
       if (!event || !listing_id || !tenant_id) return res.status(400).json({ error: 'Invalid webhook payload' });
-      console.log(`[Marketing] CRM Webhook: ${event} — Listing ${listing_id}`);
+      console.log(`[Marketing] CRM Webhook: ${event} â€” Listing ${listing_id}`);
       if (event === 'listing_won' || (event === 'listing_status_changed' && data?.new_status === 'Won')) {
         const brandR = await pool.query('SELECT id FROM marketing_brands WHERE tenant_id = $1 AND is_default = TRUE LIMIT 1', [tenant_id]);
         const listing = data?.listing || {};
@@ -201,9 +216,9 @@ module.exports = function(pool) {
     }
   });
 
-// ══════════════════════════════════════════════════════════════════════
-  // PHOTOS — Upload, serve, delete
-  // ══════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // PHOTOS â€” Upload, serve, delete
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
   const multer = require('multer');
   const fs = require('fs');
@@ -227,7 +242,7 @@ module.exports = function(pool) {
     }
   });
 
-  // POST /api/marketing/drafts/:draftId/photos — Upload photos to a draft
+  // POST /api/marketing/drafts/:draftId/photos â€” Upload photos to a draft
   router.post('/drafts/:draftId/photos', requireAuth, photoUpload.array('photos', 20), async (req, res) => {
     try {
       const tenantId = getTenantId(req);
@@ -267,7 +282,7 @@ module.exports = function(pool) {
     }
   });
 
-  // GET /api/marketing/drafts/:draftId/photos — List photos for a draft
+  // GET /api/marketing/drafts/:draftId/photos â€” List photos for a draft
   router.get('/drafts/:draftId/photos', requireAuth, async (req, res) => {
     try {
       const result = await pool.query(
@@ -280,7 +295,7 @@ module.exports = function(pool) {
     }
   });
 
-  // DELETE /api/marketing/photos/:photoId — Delete a single photo
+  // DELETE /api/marketing/photos/:photoId â€” Delete a single photo
   router.delete('/photos/:photoId', requireAuth, async (req, res) => {
     try {
       const result = await pool.query(
