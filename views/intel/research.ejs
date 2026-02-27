@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INTEL Research AI â€” Zenith OS</title>
+    <title>INTEL Research AI Ã¢â‚¬â€ Zenith OS</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/theme.css">
     <script src="/js/theme.js"></script>
@@ -12,7 +12,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif; background: #0b1120; color: #c8d6e5; display: flex; min-height: 100vh; }
 
-        /* â”€â”€ Sidebar (matches Zenith OS) â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Sidebar (matches Zenith OS) Ã¢â€â‚¬Ã¢â€â‚¬ */
         .sidebar { width: 240px; background: #0f1724; border-right: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; z-index: 50; }
         .sidebar-brand { padding: 20px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
         .sidebar-brand h2 { font-size: 1.1rem; font-weight: 700; color: #e2e8f0; letter-spacing: -0.01em; }
@@ -31,10 +31,10 @@
         .sidebar-footer a { display: flex; align-items: center; gap: 6px; color: #64748b; text-decoration: none; font-size: 0.78rem; padding: 6px 0; }
         .sidebar-footer a:hover { color: #ef4444; }
 
-        /* â”€â”€ Main Content â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Main Content Ã¢â€â‚¬Ã¢â€â‚¬ */
         .main-content { margin-left: 240px; flex: 1; display: flex; flex-direction: column; height: 100vh; }
 
-        /* â”€â”€ Top Bar â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Top Bar Ã¢â€â‚¬Ã¢â€â‚¬ */
         .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(11,17,32,0.95); backdrop-filter: blur(12px); flex-shrink: 0; }
         .top-bar h1 { font-size: 1.15rem; font-weight: 700; color: #e2e8f0; }
         .top-bar h1 .accent { color: #f59e0b; }
@@ -43,7 +43,7 @@
         .btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #64748b; }
         .btn-ghost:hover { border-color: rgba(255,255,255,0.2); color: #94a3b8; }
 
-        /* â”€â”€ Intel Tabs â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Intel Tabs Ã¢â€â‚¬Ã¢â€â‚¬ */
         .intel-tabs { display: flex; gap: 2px; padding: 0 28px; border-bottom: 1px solid rgba(255,255,255,0.06); background: #0f1724; flex-shrink: 0; }
         .intel-tab { padding: 10px 20px; font-size: 0.85rem; font-weight: 500; color: #64748b; text-decoration: none; display: flex; align-items: center; gap: 8px; transition: all 0.15s; position: relative; }
         .intel-tab:hover { color: #e2e8f0; }
@@ -51,7 +51,7 @@
         .intel-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #3b82f6; }
         .ai-badge { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.25); border-radius: 4px; padding: 1px 6px; font-size: 0.6rem; color: #60a5fa; font-weight: 600; letter-spacing: 0.05em; margin-left: 4px; }
 
-        /* â”€â”€ Conversation Sidebar â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Conversation Sidebar Ã¢â€â‚¬Ã¢â€â‚¬ */
         .research-layout { display: flex; flex: 1; overflow: hidden; }
         .conv-sidebar { width: 260px; background: #0f1724; border-right: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; flex-shrink: 0; height: 100%; }
         .conv-sidebar-header { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: space-between; }
@@ -82,19 +82,19 @@
         .conv-search i { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 0.78rem; color: #475569; }
         .chat-container { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 
-        /* â”€â”€ Chat Area â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Chat Area Ã¢â€â‚¬Ã¢â€â‚¬ */
         .chat-area { flex: 1; overflow-y: auto; padding: 20px 28px; }
         .chat-area::-webkit-scrollbar { width: 5px; }
         .chat-area::-webkit-scrollbar-track { background: transparent; }
         .chat-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
 
-        /* â”€â”€ Welcome State â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Welcome State Ã¢â€â‚¬Ã¢â€â‚¬ */
         .welcome { text-align: center; padding: 40px 0 24px; animation: fadeUp 0.5s ease-out; }
         .welcome-icon { width: 64px; height: 64px; border-radius: 18px; margin: 0 auto 16px; background: linear-gradient(135deg, #1e3a5f, #3b82f6); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 8px 32px rgba(59,130,246,0.25); }
         .welcome h2 { font-size: 1.4rem; font-weight: 700; color: #e2e8f0; margin-bottom: 8px; }
         .welcome p { font-size: 0.88rem; color: #64748b; max-width: 540px; margin: 0 auto; line-height: 1.6; }
 
-        /* â”€â”€ Report Type Pills â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Report Type Pills Ã¢â€â‚¬Ã¢â€â‚¬ */
         .report-pills { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 24px 0 28px; }
         .report-pill { background: var(--pill-bg); border: 1px solid var(--pill-border); border-radius: 10px; padding: 10px 16px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
         .report-pill:hover { transform: translateY(-1px); filter: brightness(1.3); }
@@ -102,13 +102,13 @@
         .report-pill .pill-label { font-size: 0.82rem; font-weight: 600; color: var(--pill-color); }
         .report-pill .pill-desc { font-size: 0.72rem; color: #64748b; }
 
-        /* â”€â”€ Sample Prompts â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Sample Prompts Ã¢â€â‚¬Ã¢â€â‚¬ */
         .samples-label { font-size: 0.72rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; padding-left: 4px; }
         .sample-prompt { background: #1a2332; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 16px; cursor: pointer; text-align: left; color: #94a3b8; font-size: 0.83rem; line-height: 1.5; transition: all 0.15s; margin-bottom: 6px; display: block; width: 100%; }
         .sample-prompt:hover { border-color: rgba(59,130,246,0.25); color: #c8d6e5; }
         .sample-arrow { color: #3b82f6; margin-right: 8px; }
 
-        /* â”€â”€ Messages â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Messages Ã¢â€â‚¬Ã¢â€â‚¬ */
         .message { display: flex; padding: 4px 0; animation: fadeUp 0.3s ease-out; }
         .message.user { justify-content: flex-end; }
         .message.assistant { justify-content: flex-start; }
@@ -121,12 +121,12 @@
         .message.assistant .msg-bubble { background: #1a2332; border: 1px solid rgba(255,255,255,0.06); border-radius: 16px 16px 16px 4px; }
         .message.system .msg-bubble { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.15); border-radius: 10px; padding: 8px 16px; font-size: 0.8rem; color: #64748b; }
 
-        /* â”€â”€ File chips â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ File chips Ã¢â€â‚¬Ã¢â€â‚¬ */
         .file-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
         .file-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.25); border-radius: 6px; padding: 3px 8px; font-size: 0.72rem; color: #a78bfa; }
         .report-tag { display: inline-flex; align-items: center; gap: 5px; margin-bottom: 6px; border-radius: 6px; padding: 3px 9px; font-size: 0.72rem; font-weight: 600; }
 
-        /* â”€â”€ Typing Indicator â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Typing Indicator Ã¢â€â‚¬Ã¢â€â‚¬ */
         .typing { display: flex; gap: 10px; padding: 4px 0; align-items: flex-start; }
         .typing-dots { display: flex; gap: 5px; align-items: center; background: #1a2332; border: 1px solid rgba(255,255,255,0.06); border-radius: 16px 16px 16px 4px; padding: 14px 20px; }
         .typing-dot { width: 7px; height: 7px; border-radius: 50%; background: #3b82f6; animation: pulse 1.2s ease-in-out infinite; opacity: 0.5; }
@@ -134,7 +134,7 @@
         .typing-dot:nth-child(3) { animation-delay: 0.3s; }
         .typing-label { font-size: 0.8rem; color: #64748b; margin-left: 8px; }
 
-        /* â”€â”€ Input Area â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Input Area Ã¢â€â‚¬Ã¢â€â‚¬ */
         .input-area { padding: 12px 28px 20px; border-top: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
         .active-report-tag { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
         .active-report-badge { border-radius: 6px; padding: 3px 10px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
@@ -159,7 +159,7 @@
         .input-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding: 0 4px; }
         .input-footer span { font-size: 0.7rem; color: #374151; }
 
-        /* â”€â”€ Report Menu â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Report Menu Ã¢â€â‚¬Ã¢â€â‚¬ */
         .report-menu { display: none; position: absolute; bottom: calc(100% + 8px); right: 0; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 6px; min-width: 220px; z-index: 50; box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
         .report-menu.open { display: block; }
         .report-menu-item { width: 100%; background: transparent; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; color: #c8d6e5; font-size: 0.82rem; transition: background 0.1s; text-align: left; }
@@ -167,17 +167,17 @@
         .report-menu-item .rmi-label { font-weight: 600; }
         .report-menu-item .rmi-full { font-size: 0.72rem; color: #64748b; }
 
-        /* â”€â”€ Cadence Buttons â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Cadence Buttons Ã¢â€â‚¬Ã¢â€â‚¬ */
         .cadence-btn { background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.2); border-radius: 6px; padding: 4px 10px; font-size: 0.72rem; color: #06b6d4; cursor: pointer; font-family: inherit; font-weight: 500; transition: all 0.15s; }
         .cadence-btn:hover { background: rgba(6,182,212,0.15); }
         .cadence-btn.active { background: rgba(6,182,212,0.25); border-color: #06b6d4; }
 
-        /* â”€â”€ Enrichment Indicator â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Enrichment Indicator Ã¢â€â‚¬Ã¢â€â‚¬ */
         .enrichment-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
         .enrichment-chip { display: inline-flex; align-items: center; gap: 4px; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: 5px; padding: 2px 8px; font-size: 0.68rem; color: #10b981; font-weight: 500; }
         .enrichment-chip.search { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.2); color: #60a5fa; }
 
-        /* â”€â”€ Drag Overlay â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Drag Overlay Ã¢â€â‚¬Ã¢â€â‚¬ */
         .drag-overlay { position: fixed; inset: 0; z-index: 999; background: rgba(11,17,32,0.92); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; border: 3px dashed rgba(59,130,246,0.5); }
         .drag-overlay.visible { display: flex; }
         .drag-overlay .drag-inner { text-align: center; }
@@ -185,11 +185,11 @@
         .drag-overlay h3 { font-size: 1.3rem; font-weight: 600; color: #e2e8f0; }
         .drag-overlay p { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
 
-        /* â”€â”€ Animations â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Animations Ã¢â€â‚¬Ã¢â€â‚¬ */
         @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse { 0%,100% { opacity: 0.3; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1.15); } }
 
-        /* â”€â”€ Markdown-ish formatting in AI responses â”€â”€ */
+        /* Ã¢â€â‚¬Ã¢â€â‚¬ Markdown-ish formatting in AI responses Ã¢â€â‚¬Ã¢â€â‚¬ */
         .msg-bubble h3 { font-size: 0.95rem; font-weight: 700; color: #e2e8f0; margin: 12px 0 6px; }
         .msg-bubble h3:first-child { margin-top: 0; }
         .msg-bubble strong { color: #e2e8f0; }
@@ -262,6 +262,7 @@
         <!-- Top Bar -->
         <div class="top-bar">
             <div style="display:flex;align-items:center;gap:12px;">
+                <button onclick="toggleSidebar()" style="background:none;border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:6px 8px;cursor:pointer;color:#94a3b8;font-size:14px;" title="Toggle sidebar"><i class="bi bi-layout-sidebar-inset"></i></button>
                 <h1><span class="accent">INTEL</span> Research Assistant</h1>
                 <span class="ai-badge">AI POWERED</span>
             </div>
@@ -294,7 +295,7 @@
                 <div class="welcome">
                     <div class="welcome-icon"><i class="bi bi-cpu"></i></div>
                     <h2>INTEL Research Assistant</h2>
-                    <p>Ask me to generate CMA, SWOT, CIM, BOV, or Offering Memorandum reports. Drop files or describe a property and area â€” I'll pull from Danimal Data, Census, FDOT, and property records to build institutional-quality analysis.</p>
+                    <p>Ask me to generate CMA, SWOT, CIM, BOV, or Offering Memorandum reports. Drop files or describe a property and area Ã¢â‚¬â€ I'll pull from Danimal Data, Census, FDOT, and property records to build institutional-quality analysis.</p>
                 </div>
 
                 <!-- Report Type Pills -->
@@ -321,30 +322,30 @@
                     </button>
                     <button class="report-pill" style="--pill-bg:rgba(6,182,212,0.08);--pill-border:rgba(6,182,212,0.2);--pill-color:#06b6d4;" onclick="selectMarketReport()">
                         <span class="pill-icon"><i class="bi bi-newspaper"></i></span>
-                        <div><div class="pill-label">Market Report</div><div class="pill-desc">Newsletter â€” Daily to Annual</div></div>
+                        <div><div class="pill-label">Market Report</div><div class="pill-desc">Newsletter Ã¢â‚¬â€ Daily to Annual</div></div>
                     </button>
                 </div>
 
                 <!-- Sample Prompts -->
                 <div>
                     <div class="samples-label">Try asking</div>
-                    <button class="sample-prompt" onclick="useSample(this.dataset.prompt)" data-prompt="Run a CMA for 2200 Main St, Fort Myers â€” compare against similar retail properties sold in the last 12 months within a 3-mile radius">
-                        <span class="sample-arrow">â†’</span> Run a CMA for 2200 Main St, Fort Myers â€” compare against similar retail properties sold in the last 12 months within a 3-mile radius
+                    <button class="sample-prompt" onclick="useSample(this.dataset.prompt)" data-prompt="Run a CMA for 2200 Main St, Fort Myers Ã¢â‚¬â€ compare against similar retail properties sold in the last 12 months within a 3-mile radius">
+                        <span class="sample-arrow">Ã¢â€ â€™</span> Run a CMA for 2200 Main St, Fort Myers Ã¢â‚¬â€ compare against similar retail properties sold in the last 12 months within a 3-mile radius
                     </button>
                     <button class="sample-prompt" onclick="useSample(this.dataset.prompt)" data-prompt="Generate a SWOT analysis for the Cape Coral retail corridor along Pine Island Road">
-                        <span class="sample-arrow">â†’</span> Generate a SWOT analysis for the Cape Coral retail corridor along Pine Island Road
+                        <span class="sample-arrow">Ã¢â€ â€™</span> Generate a SWOT analysis for the Cape Coral retail corridor along Pine Island Road
                     </button>
                     <button class="sample-prompt" onclick="useSample(this.dataset.prompt)" data-prompt="Build a BOV for a 15,000 SF multi-tenant retail center at 1500 Colonial Blvd with 92% occupancy">
-                        <span class="sample-arrow">â†’</span> Build a BOV for a 15,000 SF multi-tenant retail center at 1500 Colonial Blvd with 92% occupancy
+                        <span class="sample-arrow">Ã¢â€ â€™</span> Build a BOV for a 15,000 SF multi-tenant retail center at 1500 Colonial Blvd with 92% occupancy
                     </button>
                     <button class="sample-prompt" onclick="useSample(this.dataset.prompt)" data-prompt="Create a CIM for a Class A office building in downtown Naples with $1.2M NOI">
-                        <span class="sample-arrow">â†’</span> Create a CIM for a Class A office building in downtown Naples with $1.2M NOI
+                        <span class="sample-arrow">Ã¢â€ â€™</span> Create a CIM for a Class A office building in downtown Naples with $1.2M NOI
                     </button>
                     <button class="sample-prompt" onclick="useSample(this.dataset.prompt)" data-prompt="Draft an Offering Memorandum for a 3-acre outparcel on US-41 with 35,000 VPD traffic count">
-                        <span class="sample-arrow">â†’</span> Draft an Offering Memorandum for a 3-acre outparcel on US-41 with 35,000 VPD traffic count
+                        <span class="sample-arrow">Ã¢â€ â€™</span> Draft an Offering Memorandum for a 3-acre outparcel on US-41 with 35,000 VPD traffic count
                     </button>
-                    <button class="sample-prompt" onclick="useSample(this.dataset.prompt)" data-prompt="Generate a monthly market report for Southwest Florida commercial real estate â€” cover retail, office, and industrial sectors with current cap rates, vacancy trends, and notable transactions">
-                        <span class="sample-arrow">â†’</span> Generate a monthly market report for SWFL commercial real estate â€” retail, office, industrial with cap rates and vacancy trends
+                    <button class="sample-prompt" onclick="useSample(this.dataset.prompt)" data-prompt="Generate a monthly market report for Southwest Florida commercial real estate Ã¢â‚¬â€ cover retail, office, and industrial sectors with current cap rates, vacancy trends, and notable transactions">
+                        <span class="sample-arrow">Ã¢â€ â€™</span> Generate a monthly market report for SWFL commercial real estate Ã¢â‚¬â€ retail, office, industrial with cap rates and vacancy trends
                     </button>
                 </div>
             </div>
@@ -396,7 +397,7 @@
             </div>
 
             <div class="input-footer">
-                <span>Powered by Danimal Data Â· Census Â· FDOT Â· Property Records Â· Web Search</span>
+                <span>Powered by Danimal Data Ã‚Â· Census Ã‚Â· FDOT Ã‚Â· Property Records Ã‚Â· Web Search</span>
                 <span>Shift+Enter for new line</span>
             </div>
         </div>
@@ -405,7 +406,7 @@
         </div><!-- /chat-container -->
         </div><!-- /research-layout -->
     <script>
-        // â”€â”€ State â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬ State Ã¢â€â‚¬Ã¢â€â‚¬
         let messages = [];
         let attachedFiles = [];
         let activeReport = null;
@@ -421,7 +422,7 @@
         };
         let activeCadence = null;
 
-        // â”€â”€ Drag & Drop â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬ Drag & Drop Ã¢â€â‚¬Ã¢â€â‚¬
         document.body.addEventListener('dragover', (e) => { e.preventDefault(); document.getElementById('dragOverlay').classList.add('visible'); });
         document.getElementById('dragOverlay').addEventListener('dragleave', () => { document.getElementById('dragOverlay').classList.remove('visible'); });
         document.getElementById('dragOverlay').addEventListener('drop', (e) => {
@@ -430,7 +431,7 @@
             handleFileSelect(e.dataTransfer.files);
         });
 
-        // â”€â”€ File Handling â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬ File Handling Ã¢â€â‚¬Ã¢â€â‚¬
         function handleFileSelect(fileList) {
             const arr = Array.from(fileList);
             attachedFiles = [...attachedFiles, ...arr].slice(0, 10);
@@ -454,12 +455,12 @@
                 return `<div class="attached-chip" style="background:${c}15;border:1px solid ${c}40">
                     <span class="ext" style="color:${c}">${ext}</span>
                     <span class="fname">${f.name}</span>
-                    <button class="remove-file" onclick="removeFile(${i})">Ã—</button>
+                    <button class="remove-file" onclick="removeFile(${i})">Ãƒâ€”</button>
                 </div>`;
             }).join('');
         }
 
-        // â”€â”€ Report Type â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬ Report Type Ã¢â€â‚¬Ã¢â€â‚¬
         function selectReportType(type, prefill) {
             activeReport = type;
             renderActiveReport();
@@ -478,7 +479,7 @@
                 toggleReportMenu();
             } else {
                 document.getElementById('cadenceOptions').style.display = 'block';
-                // Don't close menu â€” let them pick cadence
+                // Don't close menu Ã¢â‚¬â€ let them pick cadence
             }
             renderActiveReport();
             updateReportMenuBtn();
@@ -527,7 +528,7 @@
             container.style.display = 'flex';
             container.innerHTML = `<span class="active-report-badge" style="background:${r.color}18;border:1px solid ${r.color}35;color:${r.color}">
                 <i class="bi ${r.icon}"></i> ${label}
-                <button onclick="clearReport()">Ã—</button>
+                <button onclick="clearReport()">Ãƒâ€”</button>
             </span>`;
         }
 
@@ -560,7 +561,7 @@
             }
         });
 
-        // â”€â”€ Input â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬ Input Ã¢â€â‚¬Ã¢â€â‚¬
         function autoResize(el) {
             el.style.height = 'auto';
             el.style.height = Math.min(el.scrollHeight, 160) + 'px';
@@ -587,12 +588,12 @@
             updateSendBtn();
         }
 
-        // â”€â”€ Scrolling â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬ Scrolling Ã¢â€â‚¬Ã¢â€â‚¬
         function scrollToBottom() {
             document.getElementById('scrollAnchor').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // â”€â”€ Rendering â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬ Rendering Ã¢â€â‚¬Ã¢â€â‚¬
         function renderMessage(msg) {
             const container = document.getElementById('messagesContainer');
             const div = document.createElement('div');
@@ -696,7 +697,7 @@
             return d.innerHTML;
         }
 
-        // â”€â”€ Send Message â”€â”€
+        // Ã¢â€â‚¬Ã¢â€â‚¬ Send Message Ã¢â€â‚¬Ã¢â€â‚¬
         async function sendMessage() {
             const ta = document.getElementById('chatInput');
             const content = ta.value.trim();
@@ -857,9 +858,9 @@
         }   
     
 
-        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        // Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
         // CONVERSATION PERSISTENCE
-        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        // Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
         let currentConvoId = null;
         let allConversations = [];
 

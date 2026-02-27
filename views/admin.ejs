@@ -54,11 +54,11 @@
     <div class="container">
         <header class="header">
             <div class="header-left">
-                <div class="logo-icon">⚙️</div>
-                <div class="header-title"><h1>Admin Settings</h1><p><%= org.name %> • Organization Management</p></div>
+                <div class="logo-icon">âš™ï¸</div>
+                <div class="header-title"><h1>Admin Settings</h1><p><%= org.name %> â€¢ Organization Management</p></div>
             </div>
             <div>
-                <button class="btn btn-ghost" style="margin-right: 12px;">📥 Export Data</button>
+                <button class="btn btn-ghost" style="margin-right: 12px;">ðŸ“¥ Export Data</button>
                 <button class="btn btn-primary">+ Add User</button>
             </div>
         </header>
@@ -101,7 +101,7 @@
                             <td><span class="role-badge <%= u.role === 'Admin' ? 'role-admin' : 'role-user' %>"><%= u.role %></span></td>
                             <td><%= u.last_login ? new Date(u.last_login).toLocaleDateString() : 'Never' %></td>
                             <td><span class="status-badge status-active">Active</span></td>
-                            <td><button class="btn btn-ghost" style="padding: 6px 12px; font-size: 12px;">Edit</button></td>
+                            <td><button class="btn btn-ghost" style="padding: 6px 12px; font-size: 12px;" onclick="editUser(<%= u.id %>, '<%= u.name.replace(/'/g, "\\'") %>', '<%= u.email %>', '<%= u.role %>')">Edit</button></td>
                         </tr>
                         <% }); %>
                     <% } else { %>
@@ -111,7 +111,56 @@
             </table>
         </div>
 
-        <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+        <a href="/dashboard" class="back-link">â† Back to Dashboard</a>
     </div>
+<!-- Edit User Modal -->
+<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;display:none;align-items:center;justify-content:center;">
+    <div style="background:var(--bg-surface);border-radius:12px;padding:24px;width:420px;max-width:90vw;border:1px solid var(--border-color);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h3 style="font-size:16px;font-weight:700;">Edit User</h3>
+            <button onclick="closeEditModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-secondary);">&times;</button>
+        </div>
+        <input type="hidden" id="edit_id">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            <div><label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">Name</label><input id="edit_name" type="text" style="width:100%;padding:8px 12px;border:1px solid var(--border-color);border-radius:6px;font-size:13px;background:var(--bg-surface);color:var(--text-primary);"></div>
+            <div><label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">Email</label><input id="edit_email" type="email" style="width:100%;padding:8px 12px;border:1px solid var(--border-color);border-radius:6px;font-size:13px;background:var(--bg-surface);color:var(--text-primary);"></div>
+            <div><label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">Role</label><select id="edit_role" style="width:100%;padding:8px 12px;border:1px solid var(--border-color);border-radius:6px;font-size:13px;background:var(--bg-surface);color:var(--text-primary);"><option>Admin</option><option>Principal</option><option>Broker</option><option>Marketing</option><option>Agent</option></select></div>
+            <div><label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">New Password (leave blank to keep)</label><input id="edit_password" type="password" style="width:100%;padding:8px 12px;border:1px solid var(--border-color);border-radius:6px;font-size:13px;background:var(--bg-surface);color:var(--text-primary);" placeholder="Optional"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">
+            <button onclick="closeEditModal()" style="padding:8px 16px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-surface);color:var(--text-primary);font-size:13px;cursor:pointer;">Cancel</button>
+            <button onclick="saveUser()" style="padding:8px 16px;border:none;border-radius:8px;background:#1B6B3A;color:white;font-weight:600;font-size:13px;cursor:pointer;">Save Changes</button>
+        </div>
+    </div>
+</div>
+<script>
+function editUser(id, name, email, role) {
+    document.getElementById('edit_id').value = id;
+    document.getElementById('edit_name').value = name;
+    document.getElementById('edit_email').value = email;
+    document.getElementById('edit_role').value = role;
+    document.getElementById('edit_password').value = '';
+    document.getElementById('editModal').style.display = 'flex';
+}
+function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
+async function saveUser() {
+    const id = document.getElementById('edit_id').value;
+    const body = {
+        name: document.getElementById('edit_name').value,
+        email: document.getElementById('edit_email').value,
+        role: document.getElementById('edit_role').value,
+    };
+    const pw = document.getElementById('edit_password').value;
+    if (pw) body.password = pw;
+    try {
+        const res = await fetch('/api/admin/users/' + id, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (data.success) { closeEditModal(); location.reload(); }
+        else alert('Error: ' + (data.error || 'Unknown'));
+    } catch(e) { alert('Save failed: ' + e.message); }
+}
+</script>
 </body>
 </html>

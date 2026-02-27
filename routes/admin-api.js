@@ -156,6 +156,23 @@ router.post('/users/:id/license', requireAdmin, async (req, res) => {
     }
 });
 
+// PUT /api/admin/users/:id - Edit user details
+router.put('/users/:id', requireAdmin, async (req, res) => {
+    try {
+        const { name, email, role, password } = req.body;
+        const pool = req.app.locals.pool || require('../db');
+        if (password) {
+            const bcrypt = require('bcryptjs');
+            const hash = await bcrypt.hash(password, 10);
+            await pool.query('UPDATE users SET name=COALESCE($1,name), email=COALESCE($2,email), role=COALESCE($3,role), password=$4 WHERE id=$5', [name, email, role, hash, req.params.id]);
+        } else {
+            await pool.query('UPDATE users SET name=COALESCE($1,name), email=COALESCE($2,email), role=COALESCE($3,role) WHERE id=$4', [name, email, role, req.params.id]);
+        }
+        console.log('[Admin] User ' + req.params.id + ' updated by ' + req.session.user.name);
+        res.json({ success: true });
+    } catch(e) { console.error('[Admin] Edit user error:', e); res.status(500).json({ error: e.message }); }
+});
+
 // PUT /api/admin/users/:id/status - Update user status
 router.put('/users/:id/status', requireAdmin, async (req, res) => {
     try {
